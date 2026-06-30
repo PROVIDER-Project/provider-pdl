@@ -1,0 +1,7 @@
+node_modules/
+*.log
+.DS_Store
+output.ttl
+*.output.json
+CLAUDE.md
+PDL-Viewer.app/

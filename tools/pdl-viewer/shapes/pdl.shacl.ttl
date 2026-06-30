@@ -1,0 +1,419 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix pdl: <https://provider-project.org/ontology/pdl#> .
+@prefix pdlsh: <https://provider-project.org/shapes/pdl#> .
+
+# -----------------------------------------------------------------------------
+# Reusable node definitions for reference checks
+# -----------------------------------------------------------------------------
+
+pdlsh:ScenarioNode a sh:NodeShape ;
+  sh:property [
+    sh:path rdf:type ;
+    sh:hasValue pdl:Scenario ;
+    sh:message "Referenced scenario must be typed as pdl:Scenario." ;
+  ] ;
+  sh:property [
+    sh:path dcterms:identifier ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+    sh:message "Referenced scenario must define exactly one dcterms:identifier." ;
+  ] ;
+  sh:property [
+    sh:path pdl:pdlVersion ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:in ( "1.1" ) ;
+    sh:message "Scenario must declare pdl:pdlVersion \"1.1\"." ;
+  ] .
+
+pdlsh:EntityNode a sh:NodeShape ;
+  sh:property [
+    sh:path dcterms:identifier ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+    sh:message "Referenced entity must define exactly one dcterms:identifier." ;
+  ] ;
+  sh:property [
+    sh:path pdl:entityType ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+    sh:message "Referenced entity must define exactly one pdl:entityType." ;
+  ] .
+
+pdlsh:EventNode a sh:NodeShape ;
+  sh:property [
+    sh:path rdf:type ;
+    sh:hasValue pdl:Event ;
+    sh:message "Referenced event must be typed as pdl:Event." ;
+  ] ;
+  sh:property [
+    sh:path dcterms:identifier ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+    sh:message "Referenced event must define exactly one dcterms:identifier." ;
+  ] ;
+  sh:property [
+    sh:path pdl:eventType ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+    sh:message "Referenced event must define exactly one pdl:eventType." ;
+  ] .
+
+pdlsh:SubstitutionNode a sh:NodeShape ;
+  sh:property [
+    sh:path rdf:type ;
+    sh:hasValue pdl:Substitution ;
+    sh:message "Referenced substitution must be typed as pdl:Substitution." ;
+  ] ;
+  sh:property [
+    sh:path dcterms:identifier ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+    sh:message "Referenced substitution must define exactly one dcterms:identifier." ;
+  ] .
+
+pdlsh:CascadeNode a sh:NodeShape ;
+  sh:property [
+    sh:path rdf:type ;
+    sh:hasValue pdl:Cascade ;
+    sh:message "Referenced cascade must be typed as pdl:Cascade." ;
+  ] ;
+  sh:property [
+    sh:path dcterms:identifier ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+    sh:message "Referenced cascade must define exactly one dcterms:identifier." ;
+  ] .
+
+# -----------------------------------------------------------------------------
+# Core PDL constraints
+# -----------------------------------------------------------------------------
+
+pdlsh:ScenarioShape a sh:NodeShape ;
+  sh:targetClass pdl:Scenario ;
+  sh:property [
+    sh:path pdl:criticality ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:in ( pdl:Criticality_high pdl:Criticality_medium pdl:Criticality_low ) ;
+    sh:message "Scenario must have exactly one allowed pdl:criticality value." ;
+  ] ;
+  sh:property [
+    sh:path pdl:pdlVersion ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:in ( "1.1" ) ;
+    sh:message "Scenario must declare pdl:pdlVersion \"1.1\"." ;
+  ] .
+
+pdlsh:EntityShape a sh:NodeShape ;
+  sh:targetSubjectsOf pdl:entityType ;
+  sh:property [
+    sh:path pdl:partOfScenario ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:node pdlsh:ScenarioNode ;
+    sh:message "Entity must link to exactly one valid scenario via pdl:partOfScenario." ;
+  ] ;
+  sh:property [
+    sh:path pdl:vulnerability ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 0 ;
+    sh:maxInclusive 1 ;
+    sh:message "pdl:vulnerability must be in range [0, 1]." ;
+  ] ;
+  sh:property [
+    sh:path pdl:substitutionPotential ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 0 ;
+    sh:maxInclusive 1 ;
+    sh:message "pdl:substitutionPotential must be in range [0, 1]." ;
+  ] .
+
+pdlsh:SupplyChainShape a sh:NodeShape ;
+  sh:targetClass pdl:SupplyChain ;
+  sh:property [
+    sh:path pdl:partOfScenario ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:node pdlsh:ScenarioNode ;
+    sh:message "Supply chain must link to exactly one valid scenario via pdl:partOfScenario." ;
+  ] .
+
+pdlsh:DependencyShape a sh:NodeShape ;
+  sh:targetClass pdl:Dependency ;
+  sh:property [
+    sh:path pdl:fromEntity ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    sh:node pdlsh:EntityNode ;
+    sh:message "Dependency must define exactly one valid pdl:fromEntity." ;
+  ] ;
+  sh:property [
+    sh:path pdl:toEntity ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    sh:node pdlsh:EntityNode ;
+    sh:message "Dependency must define exactly one valid pdl:toEntity." ;
+  ] ;
+  sh:property [
+    sh:path pdl:dependencyType ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:in ( "energy" "input" "logistics" "data" "substitution" "demand" ) ;
+    sh:message "Dependency type must be one of: energy, input, logistics, data, substitution, demand." ;
+  ] ;
+  sh:property [
+    sh:path pdl:criticality ;
+    sh:in ( pdl:Criticality_high pdl:Criticality_medium pdl:Criticality_low ) ;
+    sh:message "Dependency criticality must be high, medium, or low." ;
+  ] ;
+  sh:property [
+    sh:path pdl:substitutionRef ;
+    sh:nodeKind sh:IRI ;
+    sh:node pdlsh:SubstitutionNode ;
+    sh:message "Dependency substitution reference must point to a valid substitution." ;
+  ] .
+
+pdlsh:EventShape a sh:NodeShape ;
+  sh:targetClass pdl:Event ;
+  sh:property [
+    sh:path pdl:partOfScenario ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:node pdlsh:ScenarioNode ;
+    sh:message "Event must link to exactly one valid scenario via pdl:partOfScenario." ;
+  ] ;
+  sh:property [
+    sh:path pdl:triggerTarget ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    sh:node pdlsh:EntityNode ;
+    sh:message "Event must define exactly one valid trigger target." ;
+  ] ;
+  sh:property [
+    sh:path pdl:triggerProbability ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 0 ;
+    sh:maxInclusive 1 ;
+    sh:message "Event trigger probability must be in range [0, 1]." ;
+  ] ;
+  sh:property [
+    sh:path pdl:impactSupply ;
+    sh:pattern "^[+-]?[0-9]+%$" ;
+    sh:message "pdl:impactSupply must be a signed percentage, e.g. -30% or +10%." ;
+  ] ;
+  sh:property [
+    sh:path pdl:impactDemand ;
+    sh:pattern "^[+-]?[0-9]+%$" ;
+    sh:message "pdl:impactDemand must be a signed percentage, e.g. -30% or +10%." ;
+  ] ;
+  sh:property [
+    sh:path pdl:impactPrice ;
+    sh:pattern "^[+-]?[0-9]+%$" ;
+    sh:message "pdl:impactPrice must be a signed percentage, e.g. -30% or +10%." ;
+  ] ;
+  sh:property [
+    sh:path pdl:impactDuration ;
+    sh:pattern "^[0-9]+[dhwmy]$" ;
+    sh:message "pdl:impactDuration must match duration format, e.g. 14d, 2w, 6m." ;
+  ] ;
+  sh:property [
+    sh:path pdl:causes ;
+    sh:nodeKind sh:IRI ;
+    sh:node pdlsh:EventNode ;
+    sh:message "Each pdl:causes reference must point to an existing event." ;
+  ] ;
+  sh:property [
+    sh:path pdl:substitutionRef ;
+    sh:nodeKind sh:IRI ;
+    sh:node pdlsh:SubstitutionNode ;
+    sh:message "Event substitution reference must point to a valid substitution." ;
+  ] .
+
+pdlsh:SubstitutionShape a sh:NodeShape ;
+  sh:targetClass pdl:Substitution ;
+  sh:property [
+    sh:path pdl:partOfScenario ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:node pdlsh:ScenarioNode ;
+    sh:message "Substitution must link to exactly one valid scenario via pdl:partOfScenario." ;
+  ] ;
+  sh:property [
+    sh:path pdl:substitutionFor ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    sh:node pdlsh:EntityNode ;
+    sh:disjoint pdl:substitutionBy ;
+    sh:message "pdl:substitutionFor must reference exactly one entity and must differ from pdl:substitutionBy." ;
+  ] ;
+  sh:property [
+    sh:path pdl:substitutionBy ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    sh:node pdlsh:EntityNode ;
+    sh:message "pdl:substitutionBy must reference exactly one valid entity." ;
+  ] ;
+  sh:property [
+    sh:path pdl:coverage ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 0 ;
+    sh:maxInclusive 1 ;
+    sh:message "pdl:coverage must be in range [0, 1]." ;
+  ] ;
+  sh:property [
+    sh:path pdl:rampUp ;
+    sh:pattern "^[0-9]+[dhwmy]$" ;
+    sh:message "pdl:rampUp must match duration format, e.g. 14d, 2w, 6m." ;
+  ] ;
+  sh:property [
+    sh:path pdl:durationMax ;
+    sh:pattern "^[0-9]+[dhwmy]$" ;
+    sh:message "pdl:durationMax must match duration format, e.g. 14d, 2w, 6m." ;
+  ] ;
+  sh:property [
+    sh:path pdl:hasActivationCondition ;
+    sh:maxCount 1 ;
+    sh:message "Substitution can have at most one activation condition node." ;
+  ] ;
+  sh:property [
+    sh:path pdl:hasDependencyOverlap ;
+    sh:nodeKind sh:IRI ;
+    sh:node pdlsh:EntityNode ;
+    sh:message "Dependency overlap references must point to valid entities." ;
+  ] .
+
+pdlsh:ActivationConditionShape a sh:NodeShape ;
+  sh:targetClass pdl:ActivationCondition ;
+  sh:property [
+    sh:path pdl:activationEvent ;
+    sh:nodeKind sh:IRI ;
+    sh:node pdlsh:EventNode ;
+    sh:message "Activation event references must point to valid events." ;
+  ] ;
+  sh:property [
+    sh:path pdl:activationThresholdPriceIncrease ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 0 ;
+    sh:maxInclusive 1 ;
+    sh:message "Price increase threshold must be in range [0, 1]." ;
+  ] ;
+  sh:property [
+    sh:path pdl:activationThresholdSupplyDrop ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 0 ;
+    sh:maxInclusive 1 ;
+    sh:message "Supply drop threshold must be in range [0, 1]." ;
+  ] ;
+  sh:property [
+    sh:path pdl:activationThresholdDurationMin ;
+    sh:pattern "^[0-9]+[dhwmy]$" ;
+    sh:message "pdl:activationThresholdDurationMin must match duration format, e.g. 14d, 2w, 6m." ;
+  ] .
+
+pdlsh:SideEffectShape a sh:NodeShape ;
+  sh:targetClass pdl:SubstitutionSideEffect ;
+  sh:property [
+    sh:path pdl:sideEffectTarget ;
+    sh:nodeKind sh:IRI ;
+    sh:node pdlsh:EntityNode ;
+    sh:message "Side effect target must reference a valid entity." ;
+  ] ;
+  sh:property [
+    sh:path pdl:sideEffectMagnitude ;
+    sh:datatype xsd:decimal ;
+    sh:message "Side effect magnitude must be a decimal value." ;
+  ] .
+
+pdlsh:CascadeShape a sh:NodeShape ;
+  sh:targetClass pdl:Cascade ;
+  sh:property [
+    sh:path pdl:partOfScenario ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:node pdlsh:ScenarioNode ;
+    sh:message "Cascade must link to exactly one valid scenario via pdl:partOfScenario." ;
+  ] ;
+  sh:property [
+    sh:path pdl:originEvent ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    sh:node pdlsh:EventNode ;
+    sh:message "Cascade must define exactly one valid origin event." ;
+  ] ;
+  sh:property [
+    sh:path pdl:probability ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 0 ;
+    sh:maxInclusive 1 ;
+    sh:message "Cascade probability must be in range [0, 1]." ;
+  ] ;
+  sh:property [
+    sh:path pdl:validationConfidence ;
+    sh:datatype xsd:decimal ;
+    sh:minInclusive 0 ;
+    sh:maxInclusive 1 ;
+    sh:message "Cascade validation confidence must be in range [0, 1]." ;
+  ] .
+
+pdlsh:TimelineEntryShape a sh:NodeShape ;
+  sh:targetClass pdl:TimelineEntry ;
+  sh:property [
+    sh:path pdl:sequence ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive 1 ;
+    sh:message "Timeline entry sequence must be a positive integer." ;
+  ] ;
+  sh:property [
+    sh:path pdl:atTime ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:pattern "^[0-9]+[dhwmy]$" ;
+    sh:message "Timeline entry time must match duration format, e.g. 14d, 2w, 6m." ;
+  ] ;
+  sh:property [
+    sh:path pdl:timelineEvent ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    sh:node pdlsh:EventNode ;
+    sh:message "Timeline entry must reference exactly one valid event." ;
+  ] ;
+  sh:property [
+    sh:path pdl:belongsToCascade ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    sh:node pdlsh:CascadeNode ;
+    sh:message "Timeline entry must belong to exactly one valid cascade." ;
+  ] ;
+  sh:property [
+    sh:path pdl:impactSeverity ;
+    sh:in ( pdl:Severity_critical pdl:Severity_high pdl:Severity_medium pdl:Severity_low ) ;
+    sh:message "Timeline severity must be one of critical, high, medium, low." ;
+  ] ;
+  sh:property [
+    sh:path pdl:affects ;
+    sh:nodeKind sh:IRI ;
+    sh:node pdlsh:EntityNode ;
+    sh:message "Each pdl:affects reference must point to a valid entity." ;
+  ] .

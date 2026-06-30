@@ -1,0 +1,21 @@
+pdl_version: "1.0"
+
+scenario:
+  id: minimal_demo
+  name: "Minimal Demo"
+  sector: test
+  criticality: low
+
+entities:
+  - id: supplier
+    type: manufacturer
+    name: "Supplier"
+
+  - id: customer
+    type: manufacturer
+    name: "Customer"
+
+events:
+  - id: supplier_outage
+    type: infrastructure_failure
+    name: "Supplier Outage"

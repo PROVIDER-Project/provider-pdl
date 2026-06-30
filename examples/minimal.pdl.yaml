@@ -1,0 +1,27 @@
+# Kleinstes gueltiges PDL-Dokument.
+# Pflicht sind nur `pdl_version` und `scenario`. Entities und Events sind
+# optional, ohne sie ist das Dokument aber inhaltsleer.
+pdl_version: "1.0"
+
+scenario:
+  id: minimal_example          # ^[a-z][a-z0-9_]*$
+  name: "Minimal PDL Example"
+  sector: example
+  criticality: low             # low | medium | high
+
+entities:
+  - id: factory_a
+    type: manufacturer         # manufacturer | commodity | infrastructure | service | region
+    name: "Factory A"
+    sector: example
+
+events:
+  - id: supply_shock
+    name: "Supply Shock"
+    type: market_shock
+    trigger:
+      target: factory_a        # muss auf eine existierende Entity verweisen
+      probability: 0.2         # 0..1 -> Root-Event (probabilistisch ausgewertet)
+    impact:
+      supply: "-30%"
+      duration: 30d

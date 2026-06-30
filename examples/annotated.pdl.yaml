@@ -1,0 +1,136 @@
+# =============================================================================
+# Annotiertes PDL-Beispiel
+# -----------------------------------------------------------------------------
+# Dieses Szenario ist bewusst klein, demonstriert aber JEDE PDL-Sektion und ist
+# vollstaendig gueltig (laedt mit `load_pdl`, validiert gegen pdl-schema.json).
+# Ziel: ein Konsortialpartner kann die PDL allein anhand dieser Datei verstehen.
+#
+# Modelliert wird eine vereinfachte Lieferkette:
+#   rohstoff  ->  werk  ->  hafen   (Exportroute)
+#   werk haengt zusaetzlich an energie (Energie-Abhaengigkeit).
+# =============================================================================
+
+pdl_version: "1.0"             # Spezifikationsversion: "1.0" oder "1.1"
+
+# --- scenario: Metadaten (Pflicht) ------------------------------------------
+scenario:
+  id: annotated_demo           # Pflicht, Muster ^[a-z][a-z0-9_]*$
+  name: "Annotiertes Demo-Szenario"
+  sector: demo                 # primaerer Wirtschaftssektor
+  criticality: medium          # low | medium | high
+  description: >
+    Vereinfachte Export-Lieferkette zur Illustration aller PDL-Sektionen.
+
+# --- entities: Akteure, Orte, Rohstoffe (optional, aber zentral) ------------
+entities:
+  - id: rohstoff
+    type: commodity            # manufacturer | commodity | infrastructure | service | region
+    name: "Rohstoff"
+    sector: demo
+    vulnerability: 0.5         # 0..1 — Anfaelligkeit gegen Stoerungen
+
+  - id: werk
+    type: manufacturer
+    name: "Verarbeitendes Werk"
+    sector: demo
+    location: "Region X"       # optional
+    vulnerability: 0.4
+    extra:                     # frei: domaenenspezifische, untypisierte Zusatzfelder
+      market_share: 0.3
+      tier: 1
+
+  - id: hafen
+    type: infrastructure
+    name: "Exporthafen"
+    sector: logistics
+    vulnerability: 0.3
+    _kg_source:                # optionale Herkunfts-/KG-Verknuepfung (siehe docs/data-sources.md)
+      wpi_locode: XXYYY
+      wpi_kg_uri: https://data.coypu.org/infrastructure/port/XXYYY
+
+  - id: energie
+    type: service
+    name: "Energieversorgung"
+    sector: energy
+    vulnerability: 0.6
+
+# --- supply_chains: Verkettung + Abhaengigkeiten (optional) -----------------
+supply_chains:
+  - id: export_chain
+    name: "Export-Lieferkette"
+    stages:                    # Liste von [from_id, to_id]-Paaren (sequenzielle Hops)
+      - [rohstoff, werk]
+      - [werk, hafen]
+    dependencies:              # Querabhaengigkeiten ausserhalb des Hauptflusses
+      - from: werk
+        to: energie
+        type: energy           # z.B. input | energy | logistics
+        criticality: high      # low | medium | high
+
+# --- substitutions: Ausweich-/Ersatzmechanismen (optional, v1.1-reich) ------
+substitutions:
+  - id: sub_alt_rohstoff
+    from: rohstoff
+    to: werk                   # die ueber `from` belieferte Entity
+    type: supplier             # product | supplier | route | technology | buffer | mode
+    coverage: 0.25             # 0..1 — Anteil der Nachfrage, der ersetzbar ist
+    quality_delta: -0.1        # -1..+1
+    cost_delta: 0.2            # Kostenaufschlag (0 = gleich teuer)
+    ramp_up: 14d               # Aktivierungszeit (Duration)
+    activation:                # wann greift die Substitution?
+      trigger: rohstoff_shortage.active     # Condition-Ausdruck (siehe Grammatik)
+      threshold:
+        price_increase: 0.2
+    reversible: true
+    side_effects:
+      - type: price_pressure
+        target: werk
+        magnitude: 0.15
+        description: "Ersatzbeschaffung treibt Einkaufspreis"
+
+# --- events: Stoerereignisse (optional) -------------------------------------
+events:
+  - id: rohstoff_shortage
+    name: "Rohstoffknappheit"
+    type: market_shock         # natural_disaster | market_shock | infrastructure_failure |
+                               # regulatory | geopolitical | pandemic | cyber_attack
+    trigger:
+      target: rohstoff
+      probability: 0.2         # gesetzt + keine condition => Root-Event
+    impact:
+      supply: "-50%"           # Prozentangaben als String mit Vorzeichen
+      price: "+30%"
+      duration: 60d            # Duration: h | d | w | m | y
+    causes: [werk_slowdown]    # dieses Event kann Folge-Events ausloesen (Kaskade)
+    reference: "Illustratives Beispiel — keine reale Quelle"
+
+  - id: werk_slowdown
+    name: "Produktionsdrosselung im Werk"
+    type: infrastructure_failure
+    trigger:
+      target: werk
+      # condition statt probability => bedingtes Event (AST-Auswertung)
+      condition: "rohstoff_shortage.active AND rohstoff_shortage.duration > 14d"
+    impact:
+      supply: "-40%"
+      duration: 45d
+
+# --- cascades: zeitlicher Ablauf entlang einer Stoerung (optional) ----------
+cascades:
+  - id: main_cascade
+    name: "Hauptkaskade"
+    origin: rohstoff_shortage          # ausloesendes Event
+    probability: 0.8
+    timeline:
+      - at: 0d                         # Zeitpunkt relativ zum Origin (Duration)
+        event: rohstoff_shortage
+        impact: { sector: demo, severity: high }   # severity: critical|high|medium|low
+        affects: [rohstoff]
+      - at: 14d
+        event: werk_slowdown
+        impact: { sector: demo, severity: high }
+        affects: [werk, hafen]
+    validation:                        # Belegbarkeit der Kaskade (optional)
+      reference: "Illustratives Beispiel"
+      source: "—"
+      confidence: 0.6

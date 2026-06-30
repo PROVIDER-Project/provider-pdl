@@ -1,0 +1,1313 @@
+# =============================================================================
+# PDL to RDF/Turtle Export
+# =============================================================================
+# Generated: 2026-02-04T19:56:22.537Z
+# Ontology: https://provider-project.org/ontology/pdl
+# Extends: https://schema.coypu.org/global/2.3 (CoyPu Ontology)
+# =============================================================================
+
+@prefix pdl: <https://provider-project.org/ontology/pdl#> .
+@prefix pdlr: <https://provider-project.org/resource/> .
+@prefix coy: <https://schema.coypu.org/global#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+
+# Ontology Import
+<https://provider-project.org/resource/export> a owl:Ontology ;
+    owl:imports <https://provider-project.org/ontology/pdl> ;
+    owl:imports <https://schema.coypu.org/global/2.3> ;
+    dcterms:created "2026-02-04"^^xsd:date .
+
+# =============================================================================
+# Scenario: Rechenzentren und digitale Verwaltung
+# =============================================================================
+
+pdlr:scenario_datacenter_disruption a pdl:Scenario ;
+    dcterms:identifier "datacenter_disruption" ;
+    rdfs:label "Rechenzentren und digitale Verwaltung" ;
+    pdl:sector "it" ;
+    pdl:criticality pdl:Criticality_high ;
+    dcterms:description "Simulation der Kaskadeneffekte eines regionalen Stromausfalls auf Rechenzentren in der Frankfurt Rhein-Main Region. Rechenzentren haben USV-Autonomie von 10-30 Minuten und Diesel-Notstrom für 24-72 Stunden. DE-CIX Frankfurt wickelt ca. 40% des deutschen Internetverkehrs ab. Betroffen: Öffentliche Verwaltung, Finanzsektor, Gesundheitswesen, Logistik und Kommunikation.\n" ;
+    pdl:pdlVersion "1.1" .
+
+# =============================================================================
+# Entities
+# =============================================================================
+
+pdlr:entity_power_grid_frankfurt a pdl:Infrastructure, coy:Infrastructure ;
+    dcterms:identifier "power_grid_frankfurt" ;
+    rdfs:label "Stromnetz Frankfurt Rhein-Main" ;
+    pdl:entityType "infrastructure" ;
+    pdl:sector "energy" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.4"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_diesel_supply a pdl:Commodity, coy:Commodity ;
+    dcterms:identifier "diesel_supply" ;
+    rdfs:label "Diesel-Kraftstoff" ;
+    pdl:entityType "commodity" ;
+    pdl:sector "energy" ;
+    pdl:vulnerability "0.6"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_decix_frankfurt a pdl:Infrastructure, coy:Infrastructure ;
+    dcterms:identifier "decix_frankfurt" ;
+    rdfs:label "DE-CIX Frankfurt" ;
+    pdl:entityType "infrastructure" ;
+    pdl:sector "it" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.5"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_equinix_frankfurt a pdl:Infrastructure, coy:Infrastructure ;
+    dcterms:identifier "equinix_frankfurt" ;
+    rdfs:label "Equinix FR7 Frankfurt" ;
+    pdl:entityType "infrastructure" ;
+    pdl:sector "it" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.55"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_interxion_frankfurt a pdl:Infrastructure, coy:Infrastructure ;
+    dcterms:identifier "interxion_frankfurt" ;
+    rdfs:label "Interxion FRA Frankfurt" ;
+    pdl:entityType "infrastructure" ;
+    pdl:sector "it" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.6"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_tsystems_frankfurt a pdl:Infrastructure, coy:Infrastructure ;
+    dcterms:identifier "tsystems_frankfurt" ;
+    rdfs:label "T-Systems Frankfurt" ;
+    pdl:entityType "infrastructure" ;
+    pdl:sector "it" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.65"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_ups_systems a pdl:Infrastructure, coy:Infrastructure ;
+    dcterms:identifier "ups_systems" ;
+    rdfs:label "USV-Anlagen (10-30 Min.)" ;
+    pdl:entityType "infrastructure" ;
+    pdl:sector "it" ;
+    pdl:vulnerability "0.3"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_diesel_generators a pdl:Infrastructure, coy:Infrastructure ;
+    dcterms:identifier "diesel_generators" ;
+    rdfs:label "Notstromaggregate (24-72h)" ;
+    pdl:entityType "infrastructure" ;
+    pdl:sector "it" ;
+    pdl:vulnerability "0.5"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_cooling_systems a pdl:Infrastructure, coy:Infrastructure ;
+    dcterms:identifier "cooling_systems" ;
+    rdfs:label "Kühlsysteme Rechenzentren" ;
+    pdl:entityType "infrastructure" ;
+    pdl:sector "it" ;
+    pdl:vulnerability "0.7"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_network_carriers a pdl:Infrastructure, coy:Infrastructure ;
+    dcterms:identifier "network_carriers" ;
+    rdfs:label "Netzwerk-Carrier" ;
+    pdl:entityType "infrastructure" ;
+    pdl:sector "telecommunications" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.5"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_ozg_services a pdl:Service ;
+    dcterms:identifier "ozg_services" ;
+    rdfs:label "OZG-Dienste (>600 Online-Dienste)" ;
+    pdl:entityType "service" ;
+    pdl:sector "government" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.7"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_meldewesen a pdl:Service ;
+    dcterms:identifier "meldewesen" ;
+    rdfs:label "Meldewesen/Einwohnermeldeamt" ;
+    pdl:entityType "service" ;
+    pdl:sector "government" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.75"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_sozialleistungen a pdl:Service ;
+    dcterms:identifier "sozialleistungen" ;
+    rdfs:label "Sozialleistungen (Jobcenter/Rente)" ;
+    pdl:entityType "service" ;
+    pdl:sector "government" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.7"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_steuerverwaltung a pdl:Service ;
+    dcterms:identifier "steuerverwaltung" ;
+    rdfs:label "Steuerverwaltung (ELSTER)" ;
+    pdl:entityType "service" ;
+    pdl:sector "government" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.65"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_payment_systems a pdl:Service ;
+    dcterms:identifier "payment_systems" ;
+    rdfs:label "Zahlungsverkehr (SEPA/Karten)" ;
+    pdl:entityType "service" ;
+    pdl:sector "finance" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.8"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_online_banking a pdl:Service ;
+    dcterms:identifier "online_banking" ;
+    rdfs:label "Online-Banking" ;
+    pdl:entityType "service" ;
+    pdl:sector "finance" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.75"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_stock_exchange a pdl:Service ;
+    dcterms:identifier "stock_exchange" ;
+    rdfs:label "Börsenhandel" ;
+    pdl:entityType "service" ;
+    pdl:sector "finance" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.7"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_hospital_it a pdl:Service ;
+    dcterms:identifier "hospital_it" ;
+    rdfs:label "Krankenhaus-IT-Systeme" ;
+    pdl:entityType "service" ;
+    pdl:sector "health" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.85"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_epa_systems a pdl:Service ;
+    dcterms:identifier "epa_systems" ;
+    rdfs:label "Elektronische Patientenakte" ;
+    pdl:entityType "service" ;
+    pdl:sector "health" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.7"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_emergency_dispatch a pdl:Service ;
+    dcterms:identifier "emergency_dispatch" ;
+    rdfs:label "Notrufleitstellen (112)" ;
+    pdl:entityType "service" ;
+    pdl:sector "health" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.9"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_logistics_control a pdl:Service ;
+    dcterms:identifier "logistics_control" ;
+    rdfs:label "Güterverkehrssteuerung" ;
+    pdl:entityType "service" ;
+    pdl:sector "logistics" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.7"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_parcel_tracking a pdl:Service ;
+    dcterms:identifier "parcel_tracking" ;
+    rdfs:label "Paketdienste/Tracking" ;
+    pdl:entityType "service" ;
+    pdl:sector "logistics" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.6"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_rail_systems a pdl:Service ;
+    dcterms:identifier "rail_systems" ;
+    rdfs:label "Deutsche Bahn IT-Systeme" ;
+    pdl:entityType "service" ;
+    pdl:sector "logistics" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.7"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_email_services a pdl:Service ;
+    dcterms:identifier "email_services" ;
+    rdfs:label "E-Mail-Dienste" ;
+    pdl:entityType "service" ;
+    pdl:sector "telecommunications" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.6"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_voip_systems a pdl:Service ;
+    dcterms:identifier "voip_systems" ;
+    rdfs:label "VoIP/Telefonie" ;
+    pdl:entityType "service" ;
+    pdl:sector "telecommunications" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.7"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_mobile_backend a pdl:Service ;
+    dcterms:identifier "mobile_backend" ;
+    rdfs:label "Mobilfunk-Backend" ;
+    pdl:entityType "service" ;
+    pdl:sector "telecommunications" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.65"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_ecommerce a pdl:Service ;
+    dcterms:identifier "ecommerce" ;
+    rdfs:label "E-Commerce Plattformen" ;
+    pdl:entityType "service" ;
+    pdl:sector "retail" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.6"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_retail_pos a pdl:Infrastructure, coy:Infrastructure ;
+    dcterms:identifier "retail_pos" ;
+    rdfs:label "Einzelhandel Kassensysteme" ;
+    pdl:entityType "infrastructure" ;
+    pdl:sector "retail" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.7"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:entity_citizens a pdl:Region, coy:Region ;
+    dcterms:identifier "citizens" ;
+    rdfs:label "Bevölkerung Deutschland" ;
+    pdl:entityType "region" ;
+    pdl:sector "society" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.5"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+# =============================================================================
+# Supply Chains
+# =============================================================================
+
+pdlr:chain_datacenter_power_chain a pdl:SupplyChain ;
+    dcterms:identifier "datacenter_power_chain" ;
+    rdfs:label "Rechenzentrum-Stromversorgung" ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:connection_datacenter_power_chain_1 a pdl:SupplyChainConnection ;
+    pdl:sequence 1 ;
+    pdl:fromEntity pdlr:entity_power_grid_frankfurt ;
+    pdl:toEntity pdlr:entity_ups_systems ;
+    pdl:belongsToChain pdlr:chain_datacenter_power_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_ups_systems coy:hasSupplier pdlr:entity_power_grid_frankfurt .
+pdlr:entity_power_grid_frankfurt coy:hasCustomer pdlr:entity_ups_systems .
+
+pdlr:connection_datacenter_power_chain_2 a pdl:SupplyChainConnection ;
+    pdl:sequence 2 ;
+    pdl:fromEntity pdlr:entity_ups_systems ;
+    pdl:toEntity pdlr:entity_diesel_generators ;
+    pdl:belongsToChain pdlr:chain_datacenter_power_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_diesel_generators coy:hasSupplier pdlr:entity_ups_systems .
+pdlr:entity_ups_systems coy:hasCustomer pdlr:entity_diesel_generators .
+
+pdlr:connection_datacenter_power_chain_3 a pdl:SupplyChainConnection ;
+    pdl:sequence 3 ;
+    pdl:fromEntity pdlr:entity_diesel_supply ;
+    pdl:toEntity pdlr:entity_diesel_generators ;
+    pdl:belongsToChain pdlr:chain_datacenter_power_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_diesel_generators coy:hasSupplier pdlr:entity_diesel_supply .
+pdlr:entity_diesel_supply coy:hasCustomer pdlr:entity_diesel_generators .
+
+pdlr:connection_datacenter_power_chain_4 a pdl:SupplyChainConnection ;
+    pdl:sequence 4 ;
+    pdl:fromEntity pdlr:entity_diesel_generators ;
+    pdl:toEntity pdlr:entity_decix_frankfurt ;
+    pdl:belongsToChain pdlr:chain_datacenter_power_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_decix_frankfurt coy:hasSupplier pdlr:entity_diesel_generators .
+pdlr:entity_diesel_generators coy:hasCustomer pdlr:entity_decix_frankfurt .
+
+pdlr:connection_datacenter_power_chain_5 a pdl:SupplyChainConnection ;
+    pdl:sequence 5 ;
+    pdl:fromEntity pdlr:entity_diesel_generators ;
+    pdl:toEntity pdlr:entity_equinix_frankfurt ;
+    pdl:belongsToChain pdlr:chain_datacenter_power_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_equinix_frankfurt coy:hasSupplier pdlr:entity_diesel_generators .
+pdlr:entity_diesel_generators coy:hasCustomer pdlr:entity_equinix_frankfurt .
+
+pdlr:connection_datacenter_power_chain_6 a pdl:SupplyChainConnection ;
+    pdl:sequence 6 ;
+    pdl:fromEntity pdlr:entity_diesel_generators ;
+    pdl:toEntity pdlr:entity_interxion_frankfurt ;
+    pdl:belongsToChain pdlr:chain_datacenter_power_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_interxion_frankfurt coy:hasSupplier pdlr:entity_diesel_generators .
+pdlr:entity_diesel_generators coy:hasCustomer pdlr:entity_interxion_frankfurt .
+
+pdlr:connection_datacenter_power_chain_7 a pdl:SupplyChainConnection ;
+    pdl:sequence 7 ;
+    pdl:fromEntity pdlr:entity_diesel_generators ;
+    pdl:toEntity pdlr:entity_tsystems_frankfurt ;
+    pdl:belongsToChain pdlr:chain_datacenter_power_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_tsystems_frankfurt coy:hasSupplier pdlr:entity_diesel_generators .
+pdlr:entity_diesel_generators coy:hasCustomer pdlr:entity_tsystems_frankfurt .
+
+pdlr:dependency_datacenter_power_chain_1 a pdl:Dependency ;
+    pdl:fromEntity pdlr:entity_decix_frankfurt ;
+    pdl:toEntity pdlr:entity_power_grid_frankfurt ;
+    pdl:dependencyType "energy" ;
+    pdl:dependencyTypeRef pdl:DependencyType_energy ;
+    pdl:criticality pdl:Criticality_high ;
+    pdl:belongsToChain pdlr:chain_datacenter_power_chain .
+
+# Direct dependency relationship
+pdlr:entity_decix_frankfurt pdl:dependsOn pdlr:entity_power_grid_frankfurt .
+
+pdlr:dependency_datacenter_power_chain_2 a pdl:Dependency ;
+    pdl:fromEntity pdlr:entity_equinix_frankfurt ;
+    pdl:toEntity pdlr:entity_power_grid_frankfurt ;
+    pdl:dependencyType "energy" ;
+    pdl:dependencyTypeRef pdl:DependencyType_energy ;
+    pdl:criticality pdl:Criticality_high ;
+    pdl:belongsToChain pdlr:chain_datacenter_power_chain .
+
+# Direct dependency relationship
+pdlr:entity_equinix_frankfurt pdl:dependsOn pdlr:entity_power_grid_frankfurt .
+
+pdlr:dependency_datacenter_power_chain_3 a pdl:Dependency ;
+    pdl:fromEntity pdlr:entity_diesel_generators ;
+    pdl:toEntity pdlr:entity_diesel_supply ;
+    pdl:dependencyType "input" ;
+    pdl:dependencyTypeRef pdl:DependencyType_input ;
+    pdl:criticality pdl:Criticality_high ;
+    pdl:belongsToChain pdlr:chain_datacenter_power_chain .
+
+# Direct dependency relationship
+pdlr:entity_diesel_generators pdl:dependsOn pdlr:entity_diesel_supply .
+
+pdlr:chain_datacenter_cooling_chain a pdl:SupplyChain ;
+    dcterms:identifier "datacenter_cooling_chain" ;
+    rdfs:label "Rechenzentrum-Kühlung" ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:connection_datacenter_cooling_chain_1 a pdl:SupplyChainConnection ;
+    pdl:sequence 1 ;
+    pdl:fromEntity pdlr:entity_power_grid_frankfurt ;
+    pdl:toEntity pdlr:entity_cooling_systems ;
+    pdl:belongsToChain pdlr:chain_datacenter_cooling_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_cooling_systems coy:hasSupplier pdlr:entity_power_grid_frankfurt .
+pdlr:entity_power_grid_frankfurt coy:hasCustomer pdlr:entity_cooling_systems .
+
+pdlr:connection_datacenter_cooling_chain_2 a pdl:SupplyChainConnection ;
+    pdl:sequence 2 ;
+    pdl:fromEntity pdlr:entity_cooling_systems ;
+    pdl:toEntity pdlr:entity_decix_frankfurt ;
+    pdl:belongsToChain pdlr:chain_datacenter_cooling_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_decix_frankfurt coy:hasSupplier pdlr:entity_cooling_systems .
+pdlr:entity_cooling_systems coy:hasCustomer pdlr:entity_decix_frankfurt .
+
+pdlr:connection_datacenter_cooling_chain_3 a pdl:SupplyChainConnection ;
+    pdl:sequence 3 ;
+    pdl:fromEntity pdlr:entity_cooling_systems ;
+    pdl:toEntity pdlr:entity_equinix_frankfurt ;
+    pdl:belongsToChain pdlr:chain_datacenter_cooling_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_equinix_frankfurt coy:hasSupplier pdlr:entity_cooling_systems .
+pdlr:entity_cooling_systems coy:hasCustomer pdlr:entity_equinix_frankfurt .
+
+pdlr:connection_datacenter_cooling_chain_4 a pdl:SupplyChainConnection ;
+    pdl:sequence 4 ;
+    pdl:fromEntity pdlr:entity_cooling_systems ;
+    pdl:toEntity pdlr:entity_interxion_frankfurt ;
+    pdl:belongsToChain pdlr:chain_datacenter_cooling_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_interxion_frankfurt coy:hasSupplier pdlr:entity_cooling_systems .
+pdlr:entity_cooling_systems coy:hasCustomer pdlr:entity_interxion_frankfurt .
+
+pdlr:dependency_datacenter_cooling_chain_1 a pdl:Dependency ;
+    pdl:fromEntity pdlr:entity_cooling_systems ;
+    pdl:toEntity pdlr:entity_power_grid_frankfurt ;
+    pdl:dependencyType "energy" ;
+    pdl:dependencyTypeRef pdl:DependencyType_energy ;
+    pdl:criticality pdl:Criticality_high ;
+    pdl:belongsToChain pdlr:chain_datacenter_cooling_chain .
+
+# Direct dependency relationship
+pdlr:entity_cooling_systems pdl:dependsOn pdlr:entity_power_grid_frankfurt .
+
+pdlr:chain_digital_services_chain a pdl:SupplyChain ;
+    dcterms:identifier "digital_services_chain" ;
+    rdfs:label "Digitale Dienste Kette" ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:connection_digital_services_chain_1 a pdl:SupplyChainConnection ;
+    pdl:sequence 1 ;
+    pdl:fromEntity pdlr:entity_decix_frankfurt ;
+    pdl:toEntity pdlr:entity_network_carriers ;
+    pdl:belongsToChain pdlr:chain_digital_services_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_network_carriers coy:hasSupplier pdlr:entity_decix_frankfurt .
+pdlr:entity_decix_frankfurt coy:hasCustomer pdlr:entity_network_carriers .
+
+pdlr:connection_digital_services_chain_2 a pdl:SupplyChainConnection ;
+    pdl:sequence 2 ;
+    pdl:fromEntity pdlr:entity_network_carriers ;
+    pdl:toEntity pdlr:entity_ozg_services ;
+    pdl:belongsToChain pdlr:chain_digital_services_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_ozg_services coy:hasSupplier pdlr:entity_network_carriers .
+pdlr:entity_network_carriers coy:hasCustomer pdlr:entity_ozg_services .
+
+pdlr:connection_digital_services_chain_3 a pdl:SupplyChainConnection ;
+    pdl:sequence 3 ;
+    pdl:fromEntity pdlr:entity_network_carriers ;
+    pdl:toEntity pdlr:entity_payment_systems ;
+    pdl:belongsToChain pdlr:chain_digital_services_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_payment_systems coy:hasSupplier pdlr:entity_network_carriers .
+pdlr:entity_network_carriers coy:hasCustomer pdlr:entity_payment_systems .
+
+pdlr:connection_digital_services_chain_4 a pdl:SupplyChainConnection ;
+    pdl:sequence 4 ;
+    pdl:fromEntity pdlr:entity_network_carriers ;
+    pdl:toEntity pdlr:entity_hospital_it ;
+    pdl:belongsToChain pdlr:chain_digital_services_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_hospital_it coy:hasSupplier pdlr:entity_network_carriers .
+pdlr:entity_network_carriers coy:hasCustomer pdlr:entity_hospital_it .
+
+pdlr:connection_digital_services_chain_5 a pdl:SupplyChainConnection ;
+    pdl:sequence 5 ;
+    pdl:fromEntity pdlr:entity_network_carriers ;
+    pdl:toEntity pdlr:entity_logistics_control ;
+    pdl:belongsToChain pdlr:chain_digital_services_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_logistics_control coy:hasSupplier pdlr:entity_network_carriers .
+pdlr:entity_network_carriers coy:hasCustomer pdlr:entity_logistics_control .
+
+pdlr:connection_digital_services_chain_6 a pdl:SupplyChainConnection ;
+    pdl:sequence 6 ;
+    pdl:fromEntity pdlr:entity_network_carriers ;
+    pdl:toEntity pdlr:entity_voip_systems ;
+    pdl:belongsToChain pdlr:chain_digital_services_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_voip_systems coy:hasSupplier pdlr:entity_network_carriers .
+pdlr:entity_network_carriers coy:hasCustomer pdlr:entity_voip_systems .
+
+pdlr:connection_digital_services_chain_7 a pdl:SupplyChainConnection ;
+    pdl:sequence 7 ;
+    pdl:fromEntity pdlr:entity_ozg_services ;
+    pdl:toEntity pdlr:entity_meldewesen ;
+    pdl:belongsToChain pdlr:chain_digital_services_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_meldewesen coy:hasSupplier pdlr:entity_ozg_services .
+pdlr:entity_ozg_services coy:hasCustomer pdlr:entity_meldewesen .
+
+pdlr:connection_digital_services_chain_8 a pdl:SupplyChainConnection ;
+    pdl:sequence 8 ;
+    pdl:fromEntity pdlr:entity_ozg_services ;
+    pdl:toEntity pdlr:entity_sozialleistungen ;
+    pdl:belongsToChain pdlr:chain_digital_services_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_sozialleistungen coy:hasSupplier pdlr:entity_ozg_services .
+pdlr:entity_ozg_services coy:hasCustomer pdlr:entity_sozialleistungen .
+
+pdlr:connection_digital_services_chain_9 a pdl:SupplyChainConnection ;
+    pdl:sequence 9 ;
+    pdl:fromEntity pdlr:entity_ozg_services ;
+    pdl:toEntity pdlr:entity_steuerverwaltung ;
+    pdl:belongsToChain pdlr:chain_digital_services_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_steuerverwaltung coy:hasSupplier pdlr:entity_ozg_services .
+pdlr:entity_ozg_services coy:hasCustomer pdlr:entity_steuerverwaltung .
+
+pdlr:connection_digital_services_chain_10 a pdl:SupplyChainConnection ;
+    pdl:sequence 10 ;
+    pdl:fromEntity pdlr:entity_payment_systems ;
+    pdl:toEntity pdlr:entity_online_banking ;
+    pdl:belongsToChain pdlr:chain_digital_services_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_online_banking coy:hasSupplier pdlr:entity_payment_systems .
+pdlr:entity_payment_systems coy:hasCustomer pdlr:entity_online_banking .
+
+pdlr:connection_digital_services_chain_11 a pdl:SupplyChainConnection ;
+    pdl:sequence 11 ;
+    pdl:fromEntity pdlr:entity_payment_systems ;
+    pdl:toEntity pdlr:entity_retail_pos ;
+    pdl:belongsToChain pdlr:chain_digital_services_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_retail_pos coy:hasSupplier pdlr:entity_payment_systems .
+pdlr:entity_payment_systems coy:hasCustomer pdlr:entity_retail_pos .
+
+pdlr:connection_digital_services_chain_12 a pdl:SupplyChainConnection ;
+    pdl:sequence 12 ;
+    pdl:fromEntity pdlr:entity_hospital_it ;
+    pdl:toEntity pdlr:entity_epa_systems ;
+    pdl:belongsToChain pdlr:chain_digital_services_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_epa_systems coy:hasSupplier pdlr:entity_hospital_it .
+pdlr:entity_hospital_it coy:hasCustomer pdlr:entity_epa_systems .
+
+pdlr:connection_digital_services_chain_13 a pdl:SupplyChainConnection ;
+    pdl:sequence 13 ;
+    pdl:fromEntity pdlr:entity_hospital_it ;
+    pdl:toEntity pdlr:entity_emergency_dispatch ;
+    pdl:belongsToChain pdlr:chain_digital_services_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_emergency_dispatch coy:hasSupplier pdlr:entity_hospital_it .
+pdlr:entity_hospital_it coy:hasCustomer pdlr:entity_emergency_dispatch .
+
+pdlr:dependency_digital_services_chain_1 a pdl:Dependency ;
+    pdl:fromEntity pdlr:entity_payment_systems ;
+    pdl:toEntity pdlr:entity_decix_frankfurt ;
+    pdl:dependencyType "data" ;
+    pdl:dependencyTypeRef pdl:DependencyType_data ;
+    pdl:criticality pdl:Criticality_high ;
+    pdl:belongsToChain pdlr:chain_digital_services_chain .
+
+# Direct dependency relationship
+pdlr:entity_payment_systems pdl:dependsOn pdlr:entity_decix_frankfurt .
+
+pdlr:dependency_digital_services_chain_2 a pdl:Dependency ;
+    pdl:fromEntity pdlr:entity_emergency_dispatch ;
+    pdl:toEntity pdlr:entity_voip_systems ;
+    pdl:dependencyType "data" ;
+    pdl:dependencyTypeRef pdl:DependencyType_data ;
+    pdl:criticality pdl:Criticality_high ;
+    pdl:belongsToChain pdlr:chain_digital_services_chain .
+
+# Direct dependency relationship
+pdlr:entity_emergency_dispatch pdl:dependsOn pdlr:entity_voip_systems .
+
+pdlr:chain_consumer_services_chain a pdl:SupplyChain ;
+    dcterms:identifier "consumer_services_chain" ;
+    rdfs:label "Verbraucher-Dienste" ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:connection_consumer_services_chain_1 a pdl:SupplyChainConnection ;
+    pdl:sequence 1 ;
+    pdl:fromEntity pdlr:entity_online_banking ;
+    pdl:toEntity pdlr:entity_citizens ;
+    pdl:belongsToChain pdlr:chain_consumer_services_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_citizens coy:hasSupplier pdlr:entity_online_banking .
+pdlr:entity_online_banking coy:hasCustomer pdlr:entity_citizens .
+
+pdlr:connection_consumer_services_chain_2 a pdl:SupplyChainConnection ;
+    pdl:sequence 2 ;
+    pdl:fromEntity pdlr:entity_ecommerce ;
+    pdl:toEntity pdlr:entity_citizens ;
+    pdl:belongsToChain pdlr:chain_consumer_services_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_citizens coy:hasSupplier pdlr:entity_ecommerce .
+pdlr:entity_ecommerce coy:hasCustomer pdlr:entity_citizens .
+
+pdlr:connection_consumer_services_chain_3 a pdl:SupplyChainConnection ;
+    pdl:sequence 3 ;
+    pdl:fromEntity pdlr:entity_mobile_backend ;
+    pdl:toEntity pdlr:entity_citizens ;
+    pdl:belongsToChain pdlr:chain_consumer_services_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_citizens coy:hasSupplier pdlr:entity_mobile_backend .
+pdlr:entity_mobile_backend coy:hasCustomer pdlr:entity_citizens .
+
+pdlr:connection_consumer_services_chain_4 a pdl:SupplyChainConnection ;
+    pdl:sequence 4 ;
+    pdl:fromEntity pdlr:entity_retail_pos ;
+    pdl:toEntity pdlr:entity_citizens ;
+    pdl:belongsToChain pdlr:chain_consumer_services_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_citizens coy:hasSupplier pdlr:entity_retail_pos .
+pdlr:entity_retail_pos coy:hasCustomer pdlr:entity_citizens .
+
+# =============================================================================
+# Events
+# =============================================================================
+
+pdlr:event_regional_blackout a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "regional_blackout" ;
+    rdfs:label "Regionaler Stromausfall" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_power_grid_frankfurt ;
+    coy:hasImpactOn pdlr:entity_power_grid_frankfurt ;
+    pdl:triggerProbability "0.05"^^xsd:decimal ;
+    pdl:impactSupply "-100%" ;
+    pdl:impactDuration "96h" ;
+    pdl:causes pdlr:event_ups_takeover ;
+    dcterms:source "Großflächiger Stromausfall durch Extremwetterereignis" ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:event_ups_takeover a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "ups_takeover" ;
+    rdfs:label "USV übernimmt Stromversorgung" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_ups_systems ;
+    coy:hasImpactOn pdlr:entity_ups_systems ;
+    pdl:triggerCondition "regional_blackout.active" ;
+    pdl:impactSupply "-0%" ;
+    pdl:impactDuration "30m" ;
+    pdl:causes pdlr:event_ups_depleted ;
+    dcterms:source "Automatische USV-Umschaltung in <0.01 Sekunden" ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:event_ups_depleted a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "ups_depleted" ;
+    rdfs:label "USV-Kapazität erschöpft" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_ups_systems ;
+    coy:hasImpactOn pdlr:entity_ups_systems ;
+    pdl:triggerCondition "ups_takeover.active" ;
+    pdl:impactSupply "-100%" ;
+    pdl:impactDuration "96h" ;
+    pdl:causes pdlr:event_diesel_generators_start ;
+    dcterms:source "USV-Autonomie: 10-30 Minuten" ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:event_diesel_generators_start a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "diesel_generators_start" ;
+    rdfs:label "Notstromaggregate gestartet" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_diesel_generators ;
+    coy:hasImpactOn pdlr:entity_diesel_generators ;
+    pdl:triggerCondition "ups_depleted.active" ;
+    pdl:impactSupply "-0%" ;
+    pdl:impactDuration "48h" ;
+    pdl:causes pdlr:event_diesel_shortage ;
+    dcterms:source "Diesel-Notstrom-Reichweite: 24-72 Stunden" ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:event_diesel_shortage a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "diesel_shortage" ;
+    rdfs:label "Diesel-Nachschub kritisch" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_diesel_supply ;
+    coy:hasImpactOn pdlr:entity_diesel_supply ;
+    pdl:triggerCondition "diesel_generators_start.active" ;
+    pdl:impactSupply "-80%" ;
+    pdl:impactDuration "72h" ;
+    pdl:causes pdlr:event_datacenter_shutdown_tsystems, pdlr:event_datacenter_shutdown_interxion ;
+    dcterms:source "Tanklaster bei Blackout nicht verfügbar" ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:event_datacenter_shutdown_tsystems a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "datacenter_shutdown_tsystems" ;
+    rdfs:label "T-Systems Frankfurt heruntergefahren" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_tsystems_frankfurt ;
+    coy:hasImpactOn pdlr:entity_tsystems_frankfurt ;
+    pdl:triggerCondition "diesel_shortage.active" ;
+    pdl:impactSupply "-100%" ;
+    pdl:impactDuration "72h" ;
+    pdl:causes pdlr:event_government_services_offline ;
+    dcterms:source "T-Systems: 24h Diesel-Vorrat" ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:event_datacenter_shutdown_interxion a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "datacenter_shutdown_interxion" ;
+    rdfs:label "Interxion Frankfurt heruntergefahren" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_interxion_frankfurt ;
+    coy:hasImpactOn pdlr:entity_interxion_frankfurt ;
+    pdl:triggerCondition "diesel_shortage.active" ;
+    pdl:impactSupply "-100%" ;
+    pdl:impactDuration "60h" ;
+    pdl:causes pdlr:event_healthcare_it_offline ;
+    dcterms:source "Interxion: 36h Diesel-Vorrat" ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:event_datacenter_shutdown_equinix a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "datacenter_shutdown_equinix" ;
+    rdfs:label "Equinix Frankfurt heruntergefahren" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_equinix_frankfurt ;
+    coy:hasImpactOn pdlr:entity_equinix_frankfurt ;
+    pdl:triggerCondition "diesel_shortage.active" ;
+    pdl:impactSupply "-100%" ;
+    pdl:impactDuration "48h" ;
+    pdl:causes pdlr:event_payment_systems_offline ;
+    dcterms:source "Equinix: 48h Diesel-Vorrat" ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:event_datacenter_shutdown_decix a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "datacenter_shutdown_decix" ;
+    rdfs:label "DE-CIX Frankfurt heruntergefahren" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_decix_frankfurt ;
+    coy:hasImpactOn pdlr:entity_decix_frankfurt ;
+    pdl:triggerCondition "diesel_shortage.active" ;
+    pdl:impactSupply "-100%" ;
+    pdl:impactDuration "24h" ;
+    pdl:causes pdlr:event_internet_disruption ;
+    dcterms:source "DE-CIX: 72h Diesel-Vorrat, 40% deutscher Internetverkehr" ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:event_cooling_failure a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "cooling_failure" ;
+    rdfs:label "Kühlungsausfall" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_cooling_systems ;
+    coy:hasImpactOn pdlr:entity_cooling_systems ;
+    pdl:triggerCondition "regional_blackout.active" ;
+    pdl:impactSupply "-100%" ;
+    pdl:impactDuration "60m" ;
+    pdl:causes pdlr:event_thermal_shutdown ;
+    dcterms:source "Ohne Kühlung: kritische Temperatur nach 30-45 Min." ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:event_thermal_shutdown a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "thermal_shutdown" ;
+    rdfs:label "Thermische Notabschaltung" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_decix_frankfurt ;
+    coy:hasImpactOn pdlr:entity_decix_frankfurt ;
+    pdl:triggerCondition "cooling_failure.active" ;
+    pdl:impactSupply "-100%" ;
+    pdl:impactDuration "48h" ;
+    dcterms:source "Automatischer Shutdown bei >35°C zum Schutz der Hardware" ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:event_government_services_offline a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "government_services_offline" ;
+    rdfs:label "OZG-Dienste offline" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_ozg_services ;
+    coy:hasImpactOn pdlr:entity_ozg_services ;
+    pdl:triggerCondition "datacenter_shutdown_tsystems.active" ;
+    pdl:impactSupply "-100%" ;
+    pdl:impactDuration "72h" ;
+    pdl:causes pdlr:event_citizen_services_disrupted ;
+    dcterms:source ">600 Online-Verwaltungsdienste betroffen" ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:event_payment_systems_offline a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "payment_systems_offline" ;
+    rdfs:label "Zahlungsverkehr gestört" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_payment_systems ;
+    coy:hasImpactOn pdlr:entity_payment_systems ;
+    pdl:triggerCondition "datacenter_shutdown_equinix.active" ;
+    pdl:impactSupply "-80%" ;
+    pdl:impactDuration "48h" ;
+    pdl:causes pdlr:event_retail_cash_only ;
+    dcterms:source "SEPA, Kartenzahlungen, Online-Banking betroffen" ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:event_healthcare_it_offline a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "healthcare_it_offline" ;
+    rdfs:label "Krankenhaus-IT ausgefallen" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_hospital_it ;
+    coy:hasImpactOn pdlr:entity_hospital_it ;
+    pdl:triggerCondition "datacenter_shutdown_interxion.active" ;
+    pdl:impactSupply "-70%" ;
+    pdl:impactDuration "48h" ;
+    pdl:causes pdlr:event_emergency_protocols ;
+    dcterms:source "Patientensicherheit gefährdet, Papier-Fallback aktiviert" ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:event_internet_disruption a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "internet_disruption" ;
+    rdfs:label "Internet-Störung national" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_network_carriers ;
+    coy:hasImpactOn pdlr:entity_network_carriers ;
+    pdl:triggerCondition "datacenter_shutdown_decix.active" ;
+    pdl:impactSupply "-40%" ;
+    pdl:impactDuration "24h" ;
+    pdl:causes pdlr:event_communication_breakdown ;
+    dcterms:source "DE-CIX: zentraler Internet-Austauschpunkt" ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:event_retail_cash_only a pdl:Event, pdl:Event_MarketShock ;
+    dcterms:identifier "retail_cash_only" ;
+    rdfs:label "Einzelhandel nur Bargeld" ;
+    pdl:eventType "market_shock" ;
+    pdl:triggerTarget pdlr:entity_retail_pos ;
+    coy:hasImpactOn pdlr:entity_retail_pos ;
+    pdl:triggerCondition "payment_systems_offline.active" ;
+    pdl:impactSupply "-50%" ;
+    pdl:impactDuration "48h" ;
+    dcterms:source "Kartenzahlungen nicht möglich" ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:event_emergency_protocols a pdl:Event, pdl:Event_Regulatory ;
+    dcterms:identifier "emergency_protocols" ;
+    rdfs:label "Krankenhäuser Notfall-Protokolle" ;
+    pdl:eventType "regulatory" ;
+    pdl:triggerTarget pdlr:entity_emergency_dispatch ;
+    coy:hasImpactOn pdlr:entity_emergency_dispatch ;
+    pdl:triggerCondition "healthcare_it_offline.active" ;
+    pdl:impactSupply "-30%" ;
+    pdl:impactDuration "72h" ;
+    dcterms:source "Papierbasierte Fallback-Verfahren aktiviert" ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:event_communication_breakdown a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "communication_breakdown" ;
+    rdfs:label "Kommunikation eingeschränkt" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_voip_systems ;
+    coy:hasImpactOn pdlr:entity_voip_systems ;
+    pdl:triggerCondition "internet_disruption.active" ;
+    pdl:impactSupply "-60%" ;
+    pdl:impactDuration "48h" ;
+    dcterms:source "VoIP, E-Mail, Mobilfunk-Backend betroffen" ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:event_citizen_services_disrupted a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "citizen_services_disrupted" ;
+    rdfs:label "Bürgerdienste unterbrochen" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_citizens ;
+    coy:hasImpactOn pdlr:entity_citizens ;
+    pdl:triggerCondition "government_services_offline.active" ;
+    pdl:impactDemand "+100%" ;
+    pdl:impactDuration "96h" ;
+    dcterms:source "Identitätsnachweis, Sozialleistungen, Steuern nicht verfügbar" ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:event_logistics_disruption a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "logistics_disruption" ;
+    rdfs:label "Logistik-Systeme gestört" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_logistics_control ;
+    coy:hasImpactOn pdlr:entity_logistics_control ;
+    pdl:triggerCondition "internet_disruption.active" ;
+    pdl:impactSupply "-50%" ;
+    pdl:impactDuration "72h" ;
+    dcterms:source "Güterverkehr, Bahn, Paketdienste betroffen" ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+# CoyPu-compatible inverse impact relationships
+pdlr:entity_power_grid_frankfurt coy:isImpactedBy pdlr:event_regional_blackout .
+pdlr:entity_ups_systems coy:isImpactedBy pdlr:event_ups_takeover .
+pdlr:entity_ups_systems coy:isImpactedBy pdlr:event_ups_depleted .
+pdlr:entity_diesel_generators coy:isImpactedBy pdlr:event_diesel_generators_start .
+pdlr:entity_diesel_supply coy:isImpactedBy pdlr:event_diesel_shortage .
+pdlr:entity_tsystems_frankfurt coy:isImpactedBy pdlr:event_datacenter_shutdown_tsystems .
+pdlr:entity_interxion_frankfurt coy:isImpactedBy pdlr:event_datacenter_shutdown_interxion .
+pdlr:entity_equinix_frankfurt coy:isImpactedBy pdlr:event_datacenter_shutdown_equinix .
+pdlr:entity_decix_frankfurt coy:isImpactedBy pdlr:event_datacenter_shutdown_decix .
+pdlr:entity_cooling_systems coy:isImpactedBy pdlr:event_cooling_failure .
+pdlr:entity_decix_frankfurt coy:isImpactedBy pdlr:event_thermal_shutdown .
+pdlr:entity_ozg_services coy:isImpactedBy pdlr:event_government_services_offline .
+pdlr:entity_payment_systems coy:isImpactedBy pdlr:event_payment_systems_offline .
+pdlr:entity_hospital_it coy:isImpactedBy pdlr:event_healthcare_it_offline .
+pdlr:entity_network_carriers coy:isImpactedBy pdlr:event_internet_disruption .
+pdlr:entity_retail_pos coy:isImpactedBy pdlr:event_retail_cash_only .
+pdlr:entity_emergency_dispatch coy:isImpactedBy pdlr:event_emergency_protocols .
+pdlr:entity_voip_systems coy:isImpactedBy pdlr:event_communication_breakdown .
+pdlr:entity_citizens coy:isImpactedBy pdlr:event_citizen_services_disrupted .
+pdlr:entity_logistics_control coy:isImpactedBy pdlr:event_logistics_disruption .
+
+# =============================================================================
+# Cascades
+# =============================================================================
+
+pdlr:cascade_blackout_datacenter_cascade a pdl:Cascade ;
+    dcterms:identifier "blackout_datacenter_cascade" ;
+    rdfs:label "Blackout-Rechenzentren-Kaskade" ;
+    pdl:originEvent pdlr:event_regional_blackout ;
+    pdl:probability "0.9"^^xsd:decimal ;
+    dcterms:source "Basiert auf PROVIDER-Szenarien-Dokumentation, Szenario 6" ;
+    pdl:validationConfidence "0.85"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:timeline_blackout_datacenter_cascade_1 a pdl:TimelineEntry ;
+    pdl:sequence 1 ;
+    pdl:atTime "0h" ;
+    pdl:timelineEvent pdlr:event_regional_blackout ;
+    pdl:belongsToCascade pdlr:cascade_blackout_datacenter_cascade ;
+    pdl:impactSector "energy" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_power_grid_frankfurt .
+
+pdlr:timeline_blackout_datacenter_cascade_2 a pdl:TimelineEntry ;
+    pdl:sequence 2 ;
+    pdl:atTime "0h" ;
+    pdl:timelineEvent pdlr:event_ups_takeover ;
+    pdl:belongsToCascade pdlr:cascade_blackout_datacenter_cascade ;
+    pdl:impactSector "it" ;
+    pdl:impactSeverity pdl:Severity_medium ;
+    pdl:affects pdlr:entity_ups_systems .
+
+pdlr:timeline_blackout_datacenter_cascade_3 a pdl:TimelineEntry ;
+    pdl:sequence 3 ;
+    pdl:atTime "0h" ;
+    pdl:timelineEvent pdlr:event_cooling_failure ;
+    pdl:belongsToCascade pdlr:cascade_blackout_datacenter_cascade ;
+    pdl:impactSector "it" ;
+    pdl:impactSeverity pdl:Severity_high ;
+    pdl:affects pdlr:entity_cooling_systems .
+
+pdlr:timeline_blackout_datacenter_cascade_4 a pdl:TimelineEntry ;
+    pdl:sequence 4 ;
+    pdl:atTime "1h" ;
+    pdl:timelineEvent pdlr:event_ups_depleted ;
+    pdl:belongsToCascade pdlr:cascade_blackout_datacenter_cascade ;
+    pdl:impactSector "it" ;
+    pdl:impactSeverity pdl:Severity_high ;
+    pdl:affects pdlr:entity_ups_systems .
+
+pdlr:timeline_blackout_datacenter_cascade_5 a pdl:TimelineEntry ;
+    pdl:sequence 5 ;
+    pdl:atTime "1h" ;
+    pdl:timelineEvent pdlr:event_diesel_generators_start ;
+    pdl:belongsToCascade pdlr:cascade_blackout_datacenter_cascade ;
+    pdl:impactSector "it" ;
+    pdl:impactSeverity pdl:Severity_medium ;
+    pdl:affects pdlr:entity_diesel_generators .
+
+pdlr:timeline_blackout_datacenter_cascade_6 a pdl:TimelineEntry ;
+    pdl:sequence 6 ;
+    pdl:atTime "4h" ;
+    pdl:timelineEvent pdlr:event_diesel_shortage ;
+    pdl:belongsToCascade pdlr:cascade_blackout_datacenter_cascade ;
+    pdl:impactSector "energy" ;
+    pdl:impactSeverity pdl:Severity_high ;
+    pdl:affects pdlr:entity_diesel_supply .
+
+pdlr:timeline_blackout_datacenter_cascade_7 a pdl:TimelineEntry ;
+    pdl:sequence 7 ;
+    pdl:atTime "25h" ;
+    pdl:timelineEvent pdlr:event_datacenter_shutdown_tsystems ;
+    pdl:belongsToCascade pdlr:cascade_blackout_datacenter_cascade ;
+    pdl:impactSector "it" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_tsystems_frankfurt .
+
+pdlr:timeline_blackout_datacenter_cascade_8 a pdl:TimelineEntry ;
+    pdl:sequence 8 ;
+    pdl:atTime "25h" ;
+    pdl:timelineEvent pdlr:event_government_services_offline ;
+    pdl:belongsToCascade pdlr:cascade_blackout_datacenter_cascade ;
+    pdl:impactSector "government" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_ozg_services, pdlr:entity_meldewesen, pdlr:entity_sozialleistungen .
+
+pdlr:timeline_blackout_datacenter_cascade_9 a pdl:TimelineEntry ;
+    pdl:sequence 9 ;
+    pdl:atTime "37h" ;
+    pdl:timelineEvent pdlr:event_datacenter_shutdown_interxion ;
+    pdl:belongsToCascade pdlr:cascade_blackout_datacenter_cascade ;
+    pdl:impactSector "it" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_interxion_frankfurt .
+
+pdlr:timeline_blackout_datacenter_cascade_10 a pdl:TimelineEntry ;
+    pdl:sequence 10 ;
+    pdl:atTime "37h" ;
+    pdl:timelineEvent pdlr:event_healthcare_it_offline ;
+    pdl:belongsToCascade pdlr:cascade_blackout_datacenter_cascade ;
+    pdl:impactSector "health" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_hospital_it, pdlr:entity_epa_systems .
+
+pdlr:timeline_blackout_datacenter_cascade_11 a pdl:TimelineEntry ;
+    pdl:sequence 11 ;
+    pdl:atTime "49h" ;
+    pdl:timelineEvent pdlr:event_datacenter_shutdown_equinix ;
+    pdl:belongsToCascade pdlr:cascade_blackout_datacenter_cascade ;
+    pdl:impactSector "it" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_equinix_frankfurt .
+
+pdlr:timeline_blackout_datacenter_cascade_12 a pdl:TimelineEntry ;
+    pdl:sequence 12 ;
+    pdl:atTime "49h" ;
+    pdl:timelineEvent pdlr:event_payment_systems_offline ;
+    pdl:belongsToCascade pdlr:cascade_blackout_datacenter_cascade ;
+    pdl:impactSector "finance" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_payment_systems, pdlr:entity_online_banking .
+
+pdlr:timeline_blackout_datacenter_cascade_13 a pdl:TimelineEntry ;
+    pdl:sequence 13 ;
+    pdl:atTime "50h" ;
+    pdl:timelineEvent pdlr:event_retail_cash_only ;
+    pdl:belongsToCascade pdlr:cascade_blackout_datacenter_cascade ;
+    pdl:impactSector "retail" ;
+    pdl:impactSeverity pdl:Severity_high ;
+    pdl:affects pdlr:entity_retail_pos .
+
+pdlr:timeline_blackout_datacenter_cascade_14 a pdl:TimelineEntry ;
+    pdl:sequence 14 ;
+    pdl:atTime "73h" ;
+    pdl:timelineEvent pdlr:event_datacenter_shutdown_decix ;
+    pdl:belongsToCascade pdlr:cascade_blackout_datacenter_cascade ;
+    pdl:impactSector "it" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_decix_frankfurt .
+
+pdlr:timeline_blackout_datacenter_cascade_15 a pdl:TimelineEntry ;
+    pdl:sequence 15 ;
+    pdl:atTime "73h" ;
+    pdl:timelineEvent pdlr:event_internet_disruption ;
+    pdl:belongsToCascade pdlr:cascade_blackout_datacenter_cascade ;
+    pdl:impactSector "telecommunications" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_network_carriers .
+
+pdlr:timeline_blackout_datacenter_cascade_16 a pdl:TimelineEntry ;
+    pdl:sequence 16 ;
+    pdl:atTime "74h" ;
+    pdl:timelineEvent pdlr:event_communication_breakdown ;
+    pdl:belongsToCascade pdlr:cascade_blackout_datacenter_cascade ;
+    pdl:impactSector "telecommunications" ;
+    pdl:impactSeverity pdl:Severity_high ;
+    pdl:affects pdlr:entity_voip_systems, pdlr:entity_mobile_backend .
+
+pdlr:timeline_blackout_datacenter_cascade_17 a pdl:TimelineEntry ;
+    pdl:sequence 17 ;
+    pdl:atTime "74h" ;
+    pdl:timelineEvent pdlr:event_logistics_disruption ;
+    pdl:belongsToCascade pdlr:cascade_blackout_datacenter_cascade ;
+    pdl:impactSector "logistics" ;
+    pdl:impactSeverity pdl:Severity_high ;
+    pdl:affects pdlr:entity_logistics_control, pdlr:entity_parcel_tracking .
+
+pdlr:cascade_cooling_cascade a pdl:Cascade ;
+    dcterms:identifier "cooling_cascade" ;
+    rdfs:label "Kühlungsausfall-Kaskade" ;
+    pdl:originEvent pdlr:event_cooling_failure ;
+    pdl:probability "0.7"^^xsd:decimal ;
+    dcterms:source "Thermische Notabschaltung nach 45-60 Minuten" ;
+    pdl:validationConfidence "0.9"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:timeline_cooling_cascade_1 a pdl:TimelineEntry ;
+    pdl:sequence 1 ;
+    pdl:atTime "0h" ;
+    pdl:timelineEvent pdlr:event_cooling_failure ;
+    pdl:belongsToCascade pdlr:cascade_cooling_cascade ;
+    pdl:impactSector "it" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_cooling_systems .
+
+pdlr:timeline_cooling_cascade_2 a pdl:TimelineEntry ;
+    pdl:sequence 2 ;
+    pdl:atTime "1h" ;
+    pdl:timelineEvent pdlr:event_thermal_shutdown ;
+    pdl:belongsToCascade pdlr:cascade_cooling_cascade ;
+    pdl:impactSector "it" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_decix_frankfurt, pdlr:entity_equinix_frankfurt, pdlr:entity_interxion_frankfurt .
+
+pdlr:timeline_cooling_cascade_3 a pdl:TimelineEntry ;
+    pdl:sequence 3 ;
+    pdl:atTime "2h" ;
+    pdl:timelineEvent pdlr:event_internet_disruption ;
+    pdl:belongsToCascade pdlr:cascade_cooling_cascade ;
+    pdl:impactSector "telecommunications" ;
+    pdl:impactSeverity pdl:Severity_critical .
+
+pdlr:timeline_cooling_cascade_4 a pdl:TimelineEntry ;
+    pdl:sequence 4 ;
+    pdl:atTime "2h" ;
+    pdl:timelineEvent pdlr:event_payment_systems_offline ;
+    pdl:belongsToCascade pdlr:cascade_cooling_cascade ;
+    pdl:impactSector "finance" ;
+    pdl:impactSeverity pdl:Severity_critical .
+
+pdlr:timeline_cooling_cascade_5 a pdl:TimelineEntry ;
+    pdl:sequence 5 ;
+    pdl:atTime "3h" ;
+    pdl:timelineEvent pdlr:event_healthcare_it_offline ;
+    pdl:belongsToCascade pdlr:cascade_cooling_cascade ;
+    pdl:impactSector "health" ;
+    pdl:impactSeverity pdl:Severity_critical .
+
+pdlr:cascade_finance_cascade a pdl:Cascade ;
+    dcterms:identifier "finance_cascade" ;
+    rdfs:label "Finanzsektor-Kaskade" ;
+    pdl:originEvent pdlr:event_payment_systems_offline ;
+    pdl:probability "0.85"^^xsd:decimal ;
+    dcterms:source "Koordination mit Bundesbank für Notfallverfahren" ;
+    pdl:validationConfidence "0.8"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:timeline_finance_cascade_1 a pdl:TimelineEntry ;
+    pdl:sequence 1 ;
+    pdl:atTime "0h" ;
+    pdl:timelineEvent pdlr:event_payment_systems_offline ;
+    pdl:belongsToCascade pdlr:cascade_finance_cascade ;
+    pdl:impactSector "finance" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_payment_systems .
+
+pdlr:timeline_finance_cascade_2 a pdl:TimelineEntry ;
+    pdl:sequence 2 ;
+    pdl:atTime "1h" ;
+    pdl:timelineEvent pdlr:event_retail_cash_only ;
+    pdl:belongsToCascade pdlr:cascade_finance_cascade ;
+    pdl:impactSector "retail" ;
+    pdl:impactSeverity pdl:Severity_high ;
+    pdl:affects pdlr:entity_retail_pos .
+
+pdlr:timeline_finance_cascade_3 a pdl:TimelineEntry ;
+    pdl:sequence 3 ;
+    pdl:atTime "2h" ;
+    pdl:timelineEvent pdlr:event_citizen_services_disrupted ;
+    pdl:belongsToCascade pdlr:cascade_finance_cascade ;
+    pdl:impactSector "society" ;
+    pdl:impactSeverity pdl:Severity_high ;
+    pdl:affects pdlr:entity_citizens .
+
+pdlr:cascade_total_digital_collapse a pdl:Cascade ;
+    dcterms:identifier "total_digital_collapse" ;
+    rdfs:label "Totaler digitaler Zusammenbruch" ;
+    pdl:originEvent pdlr:event_regional_blackout ;
+    pdl:probability "0.3"^^xsd:decimal ;
+    dcterms:source "Hypothetisches Worst-Case über 96+ Stunden" ;
+    pdl:validationConfidence "0.6"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_datacenter_disruption .
+
+pdlr:timeline_total_digital_collapse_1 a pdl:TimelineEntry ;
+    pdl:sequence 1 ;
+    pdl:atTime "0h" ;
+    pdl:timelineEvent pdlr:event_regional_blackout ;
+    pdl:belongsToCascade pdlr:cascade_total_digital_collapse ;
+    pdl:impactSector "energy" ;
+    pdl:impactSeverity pdl:Severity_critical .
+
+pdlr:timeline_total_digital_collapse_2 a pdl:TimelineEntry ;
+    pdl:sequence 2 ;
+    pdl:atTime "1h" ;
+    pdl:timelineEvent pdlr:event_cooling_failure ;
+    pdl:belongsToCascade pdlr:cascade_total_digital_collapse ;
+    pdl:impactSector "it" ;
+    pdl:impactSeverity pdl:Severity_critical .
+
+pdlr:timeline_total_digital_collapse_3 a pdl:TimelineEntry ;
+    pdl:sequence 3 ;
+    pdl:atTime "1h" ;
+    pdl:timelineEvent pdlr:event_thermal_shutdown ;
+    pdl:belongsToCascade pdlr:cascade_total_digital_collapse ;
+    pdl:impactSector "it" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_decix_frankfurt, pdlr:entity_equinix_frankfurt .
+
+pdlr:timeline_total_digital_collapse_4 a pdl:TimelineEntry ;
+    pdl:sequence 4 ;
+    pdl:atTime "2h" ;
+    pdl:timelineEvent pdlr:event_internet_disruption ;
+    pdl:belongsToCascade pdlr:cascade_total_digital_collapse ;
+    pdl:impactSector "telecommunications" ;
+    pdl:impactSeverity pdl:Severity_critical .
+
+pdlr:timeline_total_digital_collapse_5 a pdl:TimelineEntry ;
+    pdl:sequence 5 ;
+    pdl:atTime "2h" ;
+    pdl:timelineEvent pdlr:event_payment_systems_offline ;
+    pdl:belongsToCascade pdlr:cascade_total_digital_collapse ;
+    pdl:impactSector "finance" ;
+    pdl:impactSeverity pdl:Severity_critical .
+
+pdlr:timeline_total_digital_collapse_6 a pdl:TimelineEntry ;
+    pdl:sequence 6 ;
+    pdl:atTime "2h" ;
+    pdl:timelineEvent pdlr:event_government_services_offline ;
+    pdl:belongsToCascade pdlr:cascade_total_digital_collapse ;
+    pdl:impactSector "government" ;
+    pdl:impactSeverity pdl:Severity_critical .
+
+pdlr:timeline_total_digital_collapse_7 a pdl:TimelineEntry ;
+    pdl:sequence 7 ;
+    pdl:atTime "3h" ;
+    pdl:timelineEvent pdlr:event_healthcare_it_offline ;
+    pdl:belongsToCascade pdlr:cascade_total_digital_collapse ;
+    pdl:impactSector "health" ;
+    pdl:impactSeverity pdl:Severity_critical .
+
+pdlr:timeline_total_digital_collapse_8 a pdl:TimelineEntry ;
+    pdl:sequence 8 ;
+    pdl:atTime "3h" ;
+    pdl:timelineEvent pdlr:event_emergency_protocols ;
+    pdl:belongsToCascade pdlr:cascade_total_digital_collapse ;
+    pdl:impactSector "health" ;
+    pdl:impactSeverity pdl:Severity_high ;
+    pdl:affects pdlr:entity_emergency_dispatch .
+
+pdlr:timeline_total_digital_collapse_9 a pdl:TimelineEntry ;
+    pdl:sequence 9 ;
+    pdl:atTime "4h" ;
+    pdl:timelineEvent pdlr:event_communication_breakdown ;
+    pdl:belongsToCascade pdlr:cascade_total_digital_collapse ;
+    pdl:impactSector "telecommunications" ;
+    pdl:impactSeverity pdl:Severity_critical .
+
+pdlr:timeline_total_digital_collapse_10 a pdl:TimelineEntry ;
+    pdl:sequence 10 ;
+    pdl:atTime "4h" ;
+    pdl:timelineEvent pdlr:event_logistics_disruption ;
+    pdl:belongsToCascade pdlr:cascade_total_digital_collapse ;
+    pdl:impactSector "logistics" ;
+    pdl:impactSeverity pdl:Severity_critical .
+
+pdlr:timeline_total_digital_collapse_11 a pdl:TimelineEntry ;
+    pdl:sequence 11 ;
+    pdl:atTime "6h" ;
+    pdl:timelineEvent pdlr:event_retail_cash_only ;
+    pdl:belongsToCascade pdlr:cascade_total_digital_collapse ;
+    pdl:impactSector "retail" ;
+    pdl:impactSeverity pdl:Severity_high .
+
+pdlr:timeline_total_digital_collapse_12 a pdl:TimelineEntry ;
+    pdl:sequence 12 ;
+    pdl:atTime "12h" ;
+    pdl:timelineEvent pdlr:event_citizen_services_disrupted ;
+    pdl:belongsToCascade pdlr:cascade_total_digital_collapse ;
+    pdl:impactSector "society" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_citizens .
+
+
+# =============================================================================
+# End of Export
+# =============================================================================

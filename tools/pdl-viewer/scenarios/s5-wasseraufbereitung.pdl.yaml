@@ -1,0 +1,1030 @@
+# =============================================================================
+# PDL Szenario: Wasseraufbereitung und Chemieindustrie
+# =============================================================================
+# Beschreibung: Kaskadeneffekte eines Chlorproduktionsstopps durch
+#               Strompreisexplosion auf die Trinkwasserversorgung
+# Basiert auf: PROVIDER-Szenarien-Dokumentation.md, Szenario 5
+# =============================================================================
+
+pdl_version: "1.1"
+
+scenario:
+  id: water_treatment_disruption
+  name: Wasseraufbereitung und Chemieindustrie
+  sector: water
+  criticality: high
+  description: >
+    Simulation der Auswirkungen eines Chlorproduktionsstopps durch
+    Strompreisexplosion auf die deutsche Trinkwasserversorgung.
+    Chlor-Alkali-Elektrolyse benötigt 2.400-3.000 kWh/t Chlor.
+    Bei Strompreisen >400 EUR/MWh werden Produktionen schrittweise gedrosselt.
+    Deutsche Chlorproduktionskapazität ca. 5,5 Mio. t/Jahr (Output ca. 3,5 Mio. t).
+
+# =============================================================================
+# Entities
+# =============================================================================
+entities:
+  # Energieversorgung
+  - id: electricity_grid
+    type: infrastructure
+    name: Stromversorgung Deutschland
+    sector: energy
+    location: Germany
+    vulnerability: 0.4
+
+  # Chlor-Alkali-Elektrolyse Werke
+  - id: basf_ludwigshafen
+    type: manufacturer
+    name: BASF Ludwigshafen
+    sector: chemistry
+    location: Germany
+    vulnerability: 0.7
+
+  - id: covestro_leverkusen
+    type: manufacturer
+    name: Covestro Leverkusen
+    sector: chemistry
+    location: Germany
+    vulnerability: 0.7
+
+  - id: evonik_marl
+    type: manufacturer
+    name: Evonik Marl
+    sector: chemistry
+    location: Germany
+    vulnerability: 0.7
+
+  - id: dow_stade
+    type: manufacturer
+    name: Dow Stade
+    sector: chemistry
+    location: Germany
+    vulnerability: 0.7
+
+  - id: vinnolit_gendorf
+    type: manufacturer
+    name: Vinnolit Gendorf (Westlake)
+    sector: chemistry
+    location: Germany
+    vulnerability: 0.65
+    process: membrane
+    capacity_kt_year: 250
+
+  - id: inovyn_rheinberg
+    type: manufacturer
+    name: INOVYN Rheinberg (INEOS)
+    sector: chemistry
+    location: Germany
+    vulnerability: 0.75
+    process: membrane
+    closure_risk: high
+
+  # Chemieprodukte
+  - id: chlorine_supply
+    type: commodity
+    name: Chlorversorgung
+    sector: chemistry
+    vulnerability: 0.8
+
+  - id: sodium_hydroxide_supply
+    type: commodity
+    name: Natronlauge-Versorgung
+    sector: chemistry
+    vulnerability: 0.6
+
+  # Wasserversorger nach Größe
+  - id: small_rural_utilities
+    type: service
+    name: Kleine ländliche Wasserversorger (<1.000 Einw.)
+    sector: water
+    location: Germany
+    vulnerability: 0.9
+
+  - id: small_urban_utilities
+    type: service
+    name: Kleine städtische Wasserversorger (1.000-10.000 Einw.)
+    sector: water
+    location: Germany
+    vulnerability: 0.75
+
+  - id: medium_utilities
+    type: service
+    name: Mittlere Wasserversorger (10.000-100.000 Einw.)
+    sector: water
+    location: Germany
+    vulnerability: 0.35
+    alternative_disinfection: "teilweise UV/Ozon vorhanden"
+
+  - id: large_utilities
+    type: service
+    name: Große Wasserversorger (>100.000 Einw.)
+    sector: water
+    location: Germany
+    vulnerability: 0.2
+    alternative_disinfection: "UV/Ozon/Vor-Ort-Elektrolyse verbreitet"
+
+  # Abnehmer/Betroffene
+  - id: hospitals
+    type: infrastructure
+    name: Krankenhäuser
+    sector: health
+    location: Germany
+    vulnerability: 0.6
+
+  - id: food_industry
+    type: manufacturer
+    name: Lebensmittelindustrie
+    sector: food
+    location: Germany
+    vulnerability: 0.7
+
+  - id: pharma_industry
+    type: manufacturer
+    name: Pharmaindustrie
+    sector: health
+    location: Germany
+    vulnerability: 0.65
+
+  - id: paper_industry
+    type: manufacturer
+    name: Papierindustrie
+    sector: manufacturing
+    location: Germany
+    vulnerability: 0.5
+
+  - id: population_rural
+    type: region
+    name: Ländliche Bevölkerung
+    sector: society
+    location: Germany
+    vulnerability: 0.8
+
+  - id: population_urban
+    type: region
+    name: Städtische Bevölkerung
+    sector: society
+    location: Germany
+    vulnerability: 0.5
+
+  # Resilienz-Mechanismen
+  - id: chlorine_import_eu
+    type: manufacturer
+    name: Chlorimport EU (NL/BE/FR)
+    sector: chemistry
+    location: Europe
+    vulnerability: 0.35
+    sources: ["Nouryon Delfzijl (NL)", "INOVYN Jemeppe (BE)", "Kem One Lavera (FR)"]
+
+  - id: thw_water_emergency
+    type: infrastructure
+    name: THW Trinkwasser-Notversorgung
+    sector: emergency
+    location: Germany
+    vulnerability: 0.2
+    capacity: "ca. 40 TWA-Anlagen bundesweit"
+
+  # Querschnitts-Abhängigkeiten
+  - id: dialysis_centers
+    type: infrastructure
+    name: Dialysezentren (ca. 90.000 Patienten)
+    sector: health
+    location: Germany
+    vulnerability: 0.8
+
+  - id: hygiene_products
+    type: commodity
+    name: Hygieneprodukte (Seife, Reinigungsmittel)
+    sector: manufacturing
+    vulnerability: 0.5
+
+# =============================================================================
+# Supply Chains
+# =============================================================================
+supply_chains:
+  # Hauptlieferkette: Strom → Chlor → Wasserversorgung
+  - id: chlorine_water_main
+    name: Chlor-Wasserversorgungs-Kette
+    stages:
+      - [electricity_grid, basf_ludwigshafen]
+      - [electricity_grid, covestro_leverkusen]
+      - [electricity_grid, evonik_marl]
+      - [electricity_grid, dow_stade]
+      - [electricity_grid, vinnolit_gendorf]
+      - [electricity_grid, inovyn_rheinberg]
+      - [basf_ludwigshafen, chlorine_supply]
+      - [covestro_leverkusen, chlorine_supply]
+      - [evonik_marl, chlorine_supply]
+      - [dow_stade, chlorine_supply]
+      - [vinnolit_gendorf, chlorine_supply]
+      - [inovyn_rheinberg, chlorine_supply]
+      - [chlorine_import_eu, chlorine_supply]
+      - [chlorine_supply, small_rural_utilities]
+      - [chlorine_supply, small_urban_utilities]
+      - [chlorine_supply, medium_utilities]
+      - [chlorine_supply, large_utilities]
+    dependencies:
+      - from: basf_ludwigshafen
+        to: electricity_grid
+        type: energy
+        criticality: high
+      - from: covestro_leverkusen
+        to: electricity_grid
+        type: energy
+        criticality: high
+      - from: chlorine_import_eu
+        to: electricity_grid
+        type: energy
+        criticality: medium
+      - from: chlorine_import_eu
+        to: chlorine_supply
+        type: substitution
+        substitution_ref: sub_chlorine_import_eu
+        criticality: medium
+      - from: large_utilities
+        to: chlorine_supply
+        type: substitution
+        substitution_ref: sub_uv_ozon_technology
+        criticality: low
+
+  # Natronlauge-Kette
+  - id: sodium_hydroxide_chain
+    name: Natronlauge-Lieferkette
+    stages:
+      - [basf_ludwigshafen, sodium_hydroxide_supply]
+      - [covestro_leverkusen, sodium_hydroxide_supply]
+      - [evonik_marl, sodium_hydroxide_supply]
+      - [dow_stade, sodium_hydroxide_supply]
+      - [sodium_hydroxide_supply, paper_industry]
+      - [sodium_hydroxide_supply, food_industry]
+      - [sodium_hydroxide_supply, hygiene_products]
+
+  # Wasserversorgung zu Abnehmern
+  - id: water_to_consumers
+    name: Trinkwasser-Verteilung
+    stages:
+      - [small_rural_utilities, population_rural]
+      - [small_urban_utilities, population_urban]
+      - [medium_utilities, hospitals]
+      - [medium_utilities, food_industry]
+      - [medium_utilities, dialysis_centers]
+      - [large_utilities, pharma_industry]
+      - [large_utilities, dialysis_centers]
+      - [thw_water_emergency, population_rural]
+      - [pharma_industry, hospitals]
+    dependencies:
+      - from: hospitals
+        to: medium_utilities
+        type: input
+        criticality: high
+      - from: pharma_industry
+        to: large_utilities
+        type: input
+        criticality: high
+      - from: dialysis_centers
+        to: medium_utilities
+        type: input
+        criticality: high
+      - from: thw_water_emergency
+        to: small_rural_utilities
+        type: substitution
+        substitution_ref: sub_thw_emergency_buffer
+        criticality: low
+
+  # Feedback-Schleifen (Rückkopplungseffekte)
+  - id: feedback_loops_chain
+    name: Feedback-Schleifen (Rückkopplungseffekte)
+    stages:
+      - [population_rural, small_rural_utilities]
+      - [pharma_industry, hospitals]
+      - [hygiene_products, population_rural]
+    dependencies:
+      - from: small_rural_utilities
+        to: population_rural
+        type: input
+        criticality: high
+      - from: hospitals
+        to: pharma_industry
+        type: input
+        criticality: high
+
+# =============================================================================
+# Substitutions
+# =============================================================================
+substitutions:
+
+  - id: sub_uv_ozon_technology
+    from: chlorine_supply
+    to: large_utilities
+    type: technology
+    coverage: 0.40
+    quality_delta: 0.0
+    cost_delta: 0.50
+    ramp_up: 60d
+    activation:
+      trigger: "chlorine_delivery_stop.active"
+    reversible: false
+    side_effects: []
+    dependency_overlap: []
+    reference: "Große Versorger (>100.000 Einw.) können auf UV/Ozon/Vor-Ort-Elektrolyse umstellen; entspricht ~40% des Wasservolumens. Investitionskosten hoch, aber technisch erprobt (DVGW W 625)."
+
+  - id: sub_chlorine_import_eu
+    from: chlorine_supply
+    to: chlorine_import_eu
+    type: supplier
+    coverage: 0.35
+    quality_delta: 0.0
+    cost_delta: 0.30
+    ramp_up: 14d
+    activation:
+      trigger: "chlorine_delivery_stop.active"
+    reversible: true
+    side_effects:
+      - type: correlated_risk
+        target: chlorine_import_eu
+        description: "EU-weiter Gaspreis-/Strompreisschock trifft alle Chlor-Alkali-Produzenten (NL/BE/FR) gleichzeitig; Substitution verliert bei System-Krise an Wirksamkeit."
+    dependency_overlap:
+      - electricity_grid
+    reference: "Nouryon Delfzijl (NL), INOVYN Jemeppe (BE), Kem One Lavera (FR) decken zusammen ca. 30-40% des deutschen Chlorbedarfs; Gefahrgut-Transport (ADR Klasse 2.3) begrenzt kurzfristige Kapazitätserweiterung."
+
+  - id: sub_thw_emergency_buffer
+    from: small_rural_utilities
+    to: thw_water_emergency
+    type: buffer
+    coverage: 0.05
+    quality_delta: 0.0
+    cost_delta: 0.0
+    ramp_up: 24h
+    duration_max: 30d
+    activation:
+      trigger: "boil_water_advisory.active"
+    reversible: false
+    side_effects: []
+    dependency_overlap: []
+    reference: "THW betreibt ca. 40 Trinkwasseraufbereitungsanlagen (TWA) bundesweit; Einsatzbereitschaft 24-48h; Kapazität reicht nur für kritische Bevölkerungsgruppen (Krankenhäuser, Dialyse, Notunterkünfte)."
+
+# =============================================================================
+# Events
+# =============================================================================
+events:
+  # Primärer Auslöser
+  - id: electricity_price_spike
+    name: Strompreisexplosion
+    type: market_shock
+    trigger:
+      target: electricity_grid
+      probability: 0.15
+    impact:
+      price: "+300%"
+      duration: 45d
+    causes:
+      - chlorine_production_halt
+    reference: "Strompreis >400 EUR/MWh führt zu Produktionsstopps"
+
+  # Chlorproduktionsstopp
+  - id: chlorine_production_halt
+    name: Chlorproduktionsstopp
+    type: infrastructure_failure
+    trigger:
+      target: basf_ludwigshafen
+      condition: "electricity_price_spike.active"
+    impact:
+      supply: "-85%"
+      duration: 45d
+    causes:
+      - chlorine_delivery_stop
+      - sodium_hydroxide_shortage
+    reference: "Chlorproduktion Deutschland (Kapazität ~5,5 Mio. t/Jahr) wird schrittweise gedrosselt"
+
+  # Lieferstopp
+  - id: chlorine_delivery_stop
+    name: Chlorlieferungen gestoppt
+    type: infrastructure_failure
+    trigger:
+      target: chlorine_supply
+      condition: "chlorine_production_halt.active"
+    impact:
+      supply: "-60%"
+      duration: 60d
+    causes:
+      - small_utility_shortage
+      - small_urban_utility_shortage
+      - medium_utility_shortage
+      - large_utility_shortage
+      - pharma_production_halt
+      - chlorine_import_activated
+    substitution_ref: sub_chlorine_import_eu
+    reference: "Chlor nur begrenzt lagerfähig (Gefahrgut); EU-Importe mildern auf -60%"
+
+  # Wasserversorger-Engpässe
+  - id: small_utility_shortage
+    name: Kleine Wasserversorger - Vorräte erschöpft
+    type: infrastructure_failure
+    trigger:
+      target: small_rural_utilities
+      condition: "chlorine_delivery_stop.active"
+    impact:
+      supply: "-80%"
+      duration: 30d
+    causes:
+      - disinfection_stopped
+    reference: "Kleine Versorger: Lagerkapazität oft <7 Tage"
+
+  - id: medium_utility_shortage
+    name: Mittlere Wasserversorger - Engpass
+    type: infrastructure_failure
+    trigger:
+      target: medium_utilities
+      condition: "chlorine_delivery_stop.active"
+    impact:
+      supply: "-25%"
+      duration: 21d
+    causes:
+      - food_production_halt
+      - dialysis_emergency
+    reference: "Mittlere Versorger: 10-14 Tage Vorräte; viele haben UV/Ozon-Backup"
+
+  # Desinfektion gestoppt
+  - id: disinfection_stopped
+    name: Desinfektion eingestellt
+    type: infrastructure_failure
+    trigger:
+      target: small_rural_utilities
+      condition: "small_utility_shortage.active"
+    impact:
+      supply: "-100%"
+      duration: 21d
+    causes:
+      - water_contamination
+      - boil_water_advisory
+    reference: "Betrifft Versorger ohne UV/Ozon-Alternative; DE nutzt weniger Chlor als international üblich"
+
+  # Kontamination und Gesundheitsfolgen
+  - id: boil_water_advisory
+    name: Abkochgebot
+    type: regulatory
+    trigger:
+      target: population_rural
+      condition: "disinfection_stopped.active"
+    impact:
+      demand: "+50%"
+      duration: 30d
+    causes:
+      - emergency_water_activation
+    substitution_ref: sub_thw_emergency_buffer
+    reference: "Erste Abkochgebote ab Tag 5"
+
+  - id: water_contamination
+    name: Mikrobiologische Kontamination
+    type: natural_disaster
+    trigger:
+      target: small_rural_utilities
+      condition: "disinfection_stopped.active"
+    impact:
+      supply: "-100%"
+      duration: 14d
+    causes:
+      - gastrointestinal_outbreak
+    reference: "Kontamination nach 10-14 Tagen ohne Desinfektion"
+
+  - id: gastrointestinal_outbreak
+    name: Durchfallerkrankungen
+    type: pandemic
+    trigger:
+      target: population_rural
+      condition: "water_contamination.active"
+    impact:
+      demand: "+200%"
+      duration: 21d
+    causes:
+      - hospital_capacity_strain
+      - water_workforce_shortage
+    reference: "Durchfallerkrankungen ab Tag 14"
+
+  - id: hospital_capacity_strain
+    name: Krankenhauskapazität überlastet
+    type: infrastructure_failure
+    trigger:
+      target: hospitals
+      condition: "gastrointestinal_outbreak.active"
+    impact:
+      supply: "-30%"
+      duration: 28d
+    reference: "Krankenhauseinweisungen ab Tag 21"
+
+  # Industrielle Folgen
+  - id: food_production_halt
+    name: Lebensmittelproduktion gestoppt
+    type: infrastructure_failure
+    trigger:
+      target: food_industry
+      condition: "medium_utility_shortage.active"
+    impact:
+      supply: "-45%"
+      duration: 21d
+    causes:
+      - hospital_capacity_strain
+    reference: "Prozesswasser für Lebensmittelproduktion; große Betriebe haben eigene Aufbereitung"
+
+  - id: pharma_production_halt
+    name: Pharmaproduktion eingeschränkt
+    type: infrastructure_failure
+    trigger:
+      target: pharma_industry
+      condition: "chlorine_delivery_stop.active"
+    impact:
+      supply: "-30%"
+      duration: 14d
+    causes:
+      - medication_shortage
+    reference: "Reinstwasser (WFI) für Pharmaproduktion; eigene RO-Anlagen mildern Effekt"
+
+  # NaOH-Koppelprodukt
+  - id: sodium_hydroxide_shortage
+    name: Natronlauge-Versorgungsengpass
+    type: infrastructure_failure
+    trigger:
+      target: sodium_hydroxide_supply
+      condition: "chlorine_production_halt.active"
+    impact:
+      supply: "-85%"
+      duration: 45d
+    causes:
+      - paper_production_halt
+      - hygiene_product_shortage
+    reference: "NaOH als Koppelprodukt der Chlor-Alkali-Elektrolyse (1:1,13 Verhältnis)"
+
+  - id: paper_production_halt
+    name: Papierproduktion eingeschränkt
+    type: infrastructure_failure
+    trigger:
+      target: paper_industry
+      condition: "sodium_hydroxide_shortage.active"
+    impact:
+      supply: "-50%"
+      duration: 30d
+    reference: "NaOH als Bleichmittel in der Zellstoff-/Papierherstellung"
+
+  # Resilienz-Events
+  - id: chlorine_import_activated
+    name: EU-Chlorimporte aktiviert
+    type: market_shock
+    trigger:
+      target: chlorine_import_eu
+      condition: "chlorine_delivery_stop.active"
+    impact:
+      supply: "-30%"
+      duration: 45d
+    reference: "NL/BE/FR-Importe decken ca. 30-40% des Bedarfs; Gefahrgut-Transport begrenzt"
+
+  - id: emergency_water_activation
+    name: THW Trinkwasser-Notversorgung aktiviert
+    type: regulatory
+    trigger:
+      target: thw_water_emergency
+      condition: "boil_water_advisory.active"
+    impact:
+      supply: "+15%"
+      duration: 30d
+    reference: "THW: ca. 40 TWA-Anlagen bundesweit, Einsatzbereitschaft 24-48h"
+
+  - id: small_urban_utility_shortage
+    name: Kleine städtische Wasserversorger - Vorräte erschöpft
+    type: infrastructure_failure
+    trigger:
+      target: small_urban_utilities
+      condition: "chlorine_delivery_stop.active"
+    impact:
+      supply: "-60%"
+      duration: 21d
+    causes:
+      - boil_water_advisory
+    reference: "Städtische kleine Versorger: 7-14 Tage Lagerkapazität"
+
+  - id: large_utility_shortage
+    name: Große Wasserversorger - Engpass
+    type: infrastructure_failure
+    trigger:
+      target: large_utilities
+      condition: "chlorine_delivery_stop.active"
+    impact:
+      supply: "-15%"
+      duration: 14d
+    reference: "Große Versorger: 21-30 Tage Vorräte, UV/Ozon/Vor-Ort-Elektrolyse als Alternative"
+
+  # Feedback-Loop Events
+  - id: water_workforce_shortage
+    name: Personalausfall Wasserversorger
+    type: infrastructure_failure
+    trigger:
+      target: small_rural_utilities
+      condition: "gastrointestinal_outbreak.active"
+    impact:
+      supply: "-30%"
+      duration: 14d
+    causes:
+      - disinfection_stopped
+    reference: "Kleine Versorger haben oft nur 2-3 Fachkräfte (DVGW W 1000)"
+
+  - id: medication_shortage
+    name: Medikamentenengpass (ORS, Antibiotika, Infusionen)
+    type: infrastructure_failure
+    trigger:
+      target: pharma_industry
+      condition: "pharma_production_halt.active"
+    impact:
+      supply: "-50%"
+      duration: 21d
+    causes:
+      - hospital_capacity_strain
+    reference: "Pharma benötigt Reinstwasser (WFI) nach Ph. Eur."
+
+  - id: hygiene_product_shortage
+    name: Hygieneprodukt-Engpass (Seife, Reinigungsmittel)
+    type: infrastructure_failure
+    trigger:
+      target: hygiene_products
+      condition: "sodium_hydroxide_shortage.active"
+    impact:
+      supply: "-40%"
+      duration: 30d
+    causes:
+      - gastrointestinal_outbreak
+    reference: "NaOH ist Grundstoff für Seife und Reinigungsmittel"
+
+  # Querschnitts-Events
+  - id: dialysis_emergency
+    name: Dialyse-Notfall (Wasserqualität unzureichend)
+    type: infrastructure_failure
+    trigger:
+      target: dialysis_centers
+      condition: "medium_utility_shortage.active"
+    impact:
+      supply: "-60%"
+      duration: 14d
+    causes:
+      - hospital_capacity_strain
+    reference: "Ca. 90.000 Dialysepatienten; Urämie-Risiko bei 48-72h ohne Behandlung"
+
+# =============================================================================
+# Cascades
+# =============================================================================
+cascades:
+  # Hauptkaskade: Strompreis → Gesundheitskrise
+  - id: chlorine_crisis_cascade
+    name: Chlor-Wasser-Gesundheits-Kaskade
+    origin: electricity_price_spike
+    probability: 0.85
+    validation:
+      reference: "Basiert auf PROVIDER-Szenarien-Dokumentation, Szenario 5"
+      confidence: 0.8
+    timeline:
+      - at: 0d
+        event: electricity_price_spike
+        impact:
+          sector: energy
+          severity: high
+        affects:
+          - electricity_grid
+      - at: 1d
+        event: chlorine_production_halt
+        impact:
+          sector: chemistry
+          severity: critical
+        affects:
+          - basf_ludwigshafen
+          - covestro_leverkusen
+          - evonik_marl
+          - dow_stade
+          - vinnolit_gendorf
+          - inovyn_rheinberg
+      - at: 1d
+        event: sodium_hydroxide_shortage
+        impact:
+          sector: chemistry
+          severity: high
+        affects:
+          - sodium_hydroxide_supply
+      - at: 3d
+        event: chlorine_delivery_stop
+        impact:
+          sector: chemistry
+          severity: critical
+        affects:
+          - chlorine_supply
+      - at: 3d
+        event: chlorine_import_activated
+        impact:
+          sector: chemistry
+          severity: medium
+        affects:
+          - chlorine_import_eu
+      - at: 5d
+        event: small_utility_shortage
+        impact:
+          sector: water
+          severity: critical
+        affects:
+          - small_rural_utilities
+      - at: 5d
+        event: small_urban_utility_shortage
+        impact:
+          sector: water
+          severity: high
+        affects:
+          - small_urban_utilities
+      - at: 7d
+        event: pharma_production_halt
+        impact:
+          sector: health
+          severity: high
+        affects:
+          - pharma_industry
+      - at: 7d
+        event: hygiene_product_shortage
+        impact:
+          sector: manufacturing
+          severity: medium
+        affects:
+          - hygiene_products
+      - at: 10d
+        event: disinfection_stopped
+        impact:
+          sector: water
+          severity: critical
+        affects:
+          - small_rural_utilities
+      - at: 10d
+        event: boil_water_advisory
+        impact:
+          sector: society
+          severity: medium
+        affects:
+          - population_rural
+      - at: 10d
+        event: paper_production_halt
+        impact:
+          sector: manufacturing
+          severity: medium
+        affects:
+          - paper_industry
+      - at: 11d
+        event: emergency_water_activation
+        impact:
+          sector: emergency
+          severity: medium
+        affects:
+          - thw_water_emergency
+      - at: 14d
+        event: water_contamination
+        impact:
+          sector: water
+          severity: critical
+        affects:
+          - small_rural_utilities
+      - at: 14d
+        event: medium_utility_shortage
+        impact:
+          sector: water
+          severity: high
+        affects:
+          - medium_utilities
+      - at: 14d
+        event: food_production_halt
+        impact:
+          sector: food
+          severity: high
+        affects:
+          - food_industry
+      - at: 15d
+        event: dialysis_emergency
+        impact:
+          sector: health
+          severity: critical
+        affects:
+          - dialysis_centers
+      - at: 18d
+        event: gastrointestinal_outbreak
+        impact:
+          sector: health
+          severity: critical
+        affects:
+          - population_rural
+          - population_urban
+      - at: 18d
+        event: medication_shortage
+        impact:
+          sector: health
+          severity: high
+        affects:
+          - pharma_industry
+      - at: 20d
+        event: water_workforce_shortage
+        impact:
+          sector: water
+          severity: high
+        affects:
+          - small_rural_utilities
+      - at: 21d
+        event: hospital_capacity_strain
+        impact:
+          sector: health
+          severity: critical
+        affects:
+          - hospitals
+
+  # Alternative Kaskade: Fokus auf Industrieauswirkungen
+  - id: industrial_cascade
+    name: Industrie-Kaskade
+    origin: chlorine_production_halt
+    probability: 0.9
+    validation:
+      reference: "Chlor und NaOH als Koppelprodukte der Elektrolyse"
+      confidence: 0.85
+    timeline:
+      - at: 0d
+        event: chlorine_production_halt
+        impact:
+          sector: chemistry
+          severity: critical
+        affects:
+          - basf_ludwigshafen
+          - covestro_leverkusen
+      - at: 0d
+        event: sodium_hydroxide_shortage
+        impact:
+          sector: chemistry
+          severity: high
+        affects:
+          - sodium_hydroxide_supply
+      - at: 5d
+        event: hygiene_product_shortage
+        impact:
+          sector: manufacturing
+          severity: medium
+        affects:
+          - hygiene_products
+      - at: 7d
+        event: pharma_production_halt
+        impact:
+          sector: health
+          severity: high
+        affects:
+          - pharma_industry
+      - at: 7d
+        event: paper_production_halt
+        impact:
+          sector: manufacturing
+          severity: medium
+        affects:
+          - paper_industry
+      - at: 10d
+        event: food_production_halt
+        impact:
+          sector: food
+          severity: high
+        affects:
+          - food_industry
+      - at: 14d
+        event: medication_shortage
+        impact:
+          sector: health
+          severity: high
+        affects:
+          - pharma_industry
+      - at: 14d
+        event: hospital_capacity_strain
+        impact:
+          sector: health
+          severity: medium
+        affects:
+          - hospitals
+
+  # Worst-Case Kaskade
+  - id: worst_case_cascade
+    name: Worst-Case Szenario
+    origin: electricity_price_spike
+    probability: 0.3
+    validation:
+      reference: "Kombination aller Effekte bei längerem Strompreisschock"
+      confidence: 0.6
+    timeline:
+      - at: 0d
+        event: electricity_price_spike
+        impact:
+          sector: energy
+          severity: critical
+      - at: 3d
+        event: chlorine_production_halt
+        impact:
+          sector: chemistry
+          severity: critical
+        affects:
+          - basf_ludwigshafen
+          - covestro_leverkusen
+          - evonik_marl
+          - dow_stade
+          - vinnolit_gendorf
+          - inovyn_rheinberg
+      - at: 3d
+        event: sodium_hydroxide_shortage
+        impact:
+          sector: chemistry
+          severity: high
+        affects:
+          - sodium_hydroxide_supply
+      - at: 7d
+        event: chlorine_delivery_stop
+        impact:
+          sector: chemistry
+          severity: critical
+      - at: 7d
+        event: chlorine_import_activated
+        impact:
+          sector: chemistry
+          severity: medium
+        affects:
+          - chlorine_import_eu
+      - at: 10d
+        event: small_utility_shortage
+        impact:
+          sector: water
+          severity: critical
+        affects:
+          - small_rural_utilities
+      - at: 10d
+        event: small_urban_utility_shortage
+        impact:
+          sector: water
+          severity: high
+        affects:
+          - small_urban_utilities
+      - at: 10d
+        event: hygiene_product_shortage
+        impact:
+          sector: manufacturing
+          severity: medium
+        affects:
+          - hygiene_products
+      - at: 14d
+        event: disinfection_stopped
+        impact:
+          sector: water
+          severity: critical
+      - at: 14d
+        event: medium_utility_shortage
+        impact:
+          sector: water
+          severity: high
+        affects:
+          - medium_utilities
+      - at: 15d
+        event: dialysis_emergency
+        impact:
+          sector: health
+          severity: critical
+        affects:
+          - dialysis_centers
+      - at: 21d
+        event: water_contamination
+        impact:
+          sector: water
+          severity: critical
+        affects:
+          - small_rural_utilities
+          - medium_utilities
+      - at: 21d
+        event: paper_production_halt
+        impact:
+          sector: manufacturing
+          severity: medium
+        affects:
+          - paper_industry
+      - at: 28d
+        event: gastrointestinal_outbreak
+        impact:
+          sector: health
+          severity: critical
+        affects:
+          - population_rural
+          - population_urban
+      - at: 28d
+        event: medication_shortage
+        impact:
+          sector: health
+          severity: high
+        affects:
+          - pharma_industry
+      - at: 30d
+        event: water_workforce_shortage
+        impact:
+          sector: water
+          severity: high
+        affects:
+          - small_rural_utilities
+      - at: 35d
+        event: hospital_capacity_strain
+        impact:
+          sector: health
+          severity: critical
+        affects:
+          - hospitals

@@ -1,0 +1,982 @@
+# =============================================================================
+# PDL Szenario: Pharmazeutische Wirkstoffe
+# =============================================================================
+# Beschreibung: Kaskadeneffekte eines Exportstopps chinesischer
+#               API-Produktion (Active Pharmaceutical Ingredients) auf die
+#               europäische Arzneimittelversorgung, mit Fokus auf Antibiotika,
+#               Schmerzmittel und Krankenhausversorgung
+# Basiert auf: PROVIDER-Szenarien-Dokumentation.md, Szenario 3
+# Historische Referenz: Piperacillin-Engpass 2017, COVID-Lockdowns 2020,
+#                       Energiekrise Sichuan 2022
+# =============================================================================
+
+pdl_version: "1.1"
+
+scenario:
+  id: pharma_api_disruption
+  name: Pharmazeutische Wirkstoff-Lieferkettenkrise
+  sector: healthcare
+  criticality: high
+  description: >
+    Simulation der Kaskadeneffekte eines Exportstopps chinesischer
+    API-Produktion (Active Pharmaceutical Ingredients) auf die europäische
+    Arzneimittelversorgung. China produziert ~40% der globalen APIs,
+    bei Antibiotika-Wirkstoffen hohe Importabhängigkeit aus Asien
+    (Chinas Exportanteil ~44%). Durchschnittliche Lagerhaltung in
+    Kliniken: 2-4 Wochen. Gesamtdurchlaufzeit API-Produktion:
+    6-12 Monate.
+
+# =============================================================================
+# Entities
+# =============================================================================
+entities:
+  # Rohstoffe und Vorprodukte (China)
+  - id: china_basic_chemicals
+    type: commodity
+    name: Grundchemikalien China (Benzol, Toluol, Phenol)
+    sector: chemistry
+    location: China
+    vulnerability: 0.6
+    note: "Ausgangsstoffe für Pharma-Synthese"
+
+  - id: china_intermediates
+    type: commodity
+    name: Pharma-Intermediate China (6-APA, Clavulansäure)
+    sector: chemistry
+    location: China
+    vulnerability: 0.8
+    market_share: 0.6
+    note: "6-APA (6-Aminopenicillansäure): ~60% Weltmarktanteil China"
+
+  # API-Produktion
+  - id: china_api_producers
+    type: manufacturer
+    name: API-Hersteller China (Zhejiang, Shandong)
+    sector: healthcare
+    location: China
+    vulnerability: 0.75
+    market_share: 0.4
+    note: "~40% der globalen API-Produktion, 3 Hauptproduzenten für Phenylessigsäure (~90% Weltmarkt)"
+
+  - id: india_api_producers
+    type: manufacturer
+    name: API-Hersteller Indien
+    sector: healthcare
+    location: India
+    vulnerability: 0.6
+    market_share: 0.09
+    note: "~8-9% globale API-Produktion (Volumen), abhängig von China für Intermediate"
+
+  # Spezifische Wirkstoff-Gruppen
+  - id: antibiotics_api
+    type: commodity
+    name: Antibiotika-Wirkstoffe (Amoxicillin, Ciprofloxacin, Azithromycin)
+    sector: healthcare
+    vulnerability: 0.9
+    note: "Hohe Importabhängigkeit bei Antibiotika-Wirkstoffen, Chinas Exportanteil ~44%"
+
+  - id: alternative_antibiotics_api
+    type: commodity
+    name: Alternative Antibiotika-Wirkstoffe (Ampicillin, Levofloxacin)
+    sector: healthcare
+    vulnerability: 0.7
+    note: "Therapiealternativen bei Engpässen, oft mit geringerer Eignung"
+
+  - id: paracetamol_api
+    type: commodity
+    name: Paracetamol/Ibuprofen-Wirkstoffe
+    sector: healthcare
+    vulnerability: 0.75
+    note: "Schmerzmittel-Grundversorgung, hohe Volumina"
+
+  - id: oncology_api
+    type: commodity
+    name: Onkologie-Wirkstoffe
+    sector: healthcare
+    vulnerability: 0.65
+    note: "Zytostatika, teilweise EU-Produktion vorhanden"
+
+  # EU-Verarbeitung
+  - id: eu_formulators
+    type: manufacturer
+    name: EU-Formulierungsbetriebe (Tabletten, Kapseln, Injektionen)
+    sector: healthcare
+    location: EU
+    vulnerability: 0.55
+    note: "Formulierung in DE, CH, IE — abhängig von importierten APIs"
+
+  - id: pharma_packaging
+    type: manufacturer
+    name: Pharma-Verpackung und Qualitätskontrolle
+    sector: healthcare
+    location: EU
+    vulnerability: 0.4
+    note: "Blister, Ampullen, Vials — QC dauert 4-6 Wochen"
+
+  # Distribution
+  - id: pharma_grosshandel
+    type: service
+    name: Pharma-Großhandel (Phoenix, Alliance, Noweda)
+    sector: healthcare
+    location: Germany
+    vulnerability: 0.5
+    note: "Just-in-time-Logistik, geringe Pufferbestände"
+
+  - id: apotheken
+    type: service
+    name: Apotheken (Öffentliche Apotheken)
+    sector: healthcare
+    location: Germany
+    vulnerability: 0.6
+
+  - id: kliniken
+    type: service
+    name: Krankenhäuser und Kliniken
+    sector: healthcare
+    location: Germany
+    vulnerability: 0.7
+    note: "Lagerhaltung 2-4 Wochen, Intensivstationen besonders kritisch"
+
+  # Kühlkette
+  - id: pharma_cold_chain
+    type: infrastructure
+    name: Pharma-Kühlkette (2-8°C, -20°C, -80°C)
+    sector: logistics
+    location: EU
+    vulnerability: 0.45
+    note: "25% des Pharmamarkts kühlpflichtig (Impfstoffe, Biologika)"
+
+  # Patienten und Gesundheitssystem
+  - id: patients
+    type: region
+    name: Patienten
+    sector: healthcare
+    location: Germany
+    vulnerability: 0.8
+
+  - id: pediatric_patients
+    type: region
+    name: Pädiatrische Patienten
+    sector: healthcare
+    location: Germany
+    vulnerability: 0.9
+    note: "Pädiatrische Darreichungsformen zuerst betroffen (geringere Volumina)"
+
+  # Resilienz-Mechanismen
+  - id: india_alternative_sourcing
+    type: infrastructure
+    name: Indien als alternative API-Quelle
+    sector: healthcare
+    location: India
+    vulnerability: 0.5
+    note: "Alternative zu China, aber selbst abhängig von chinesischen Intermediaten"
+
+  - id: eu_api_production
+    type: infrastructure
+    name: EU-API-Eigenproduktion (Ramp-up)
+    sector: healthcare
+    location: EU
+    vulnerability: 0.3
+    note: "IPCEI Health, Sandoz Kundl (AT) — Ramp-up 8-12 Monate Minimum, volle Kapazität erst nach mehreren Jahren"
+
+  - id: strategic_pharma_reserves
+    type: commodity
+    name: Strategische Arzneimittelreserven
+    sector: healthcare
+    location: Germany
+    vulnerability: 0.2
+    note: "Nationale Notfallreserve (NAKI) für kritische Antibiotika — Reichweite ~4-8 Wochen"
+
+# =============================================================================
+# Supply Chains
+# =============================================================================
+supply_chains:
+  # Hauptkette: Grundchemie → Intermediate → API → Formulierung → Patient
+  - id: antibiotics_main_chain
+    name: Antibiotika-Hauptlieferkette
+    stages:
+      - [china_basic_chemicals, china_intermediates]
+      - [china_intermediates, china_api_producers]
+      - [china_intermediates, india_api_producers]
+      - [china_api_producers, antibiotics_api]
+      - [india_api_producers, antibiotics_api]
+      - [antibiotics_api, eu_formulators]
+      - [eu_formulators, pharma_packaging]
+      - [pharma_packaging, pharma_grosshandel]
+      - [pharma_grosshandel, apotheken]
+      - [pharma_grosshandel, kliniken]
+      - [apotheken, patients]
+      - [apotheken, pediatric_patients]
+      - [kliniken, patients]
+    dependencies:
+      - from: china_api_producers
+        to: china_intermediates
+        type: input
+        criticality: high
+      - from: india_api_producers
+        to: china_intermediates
+        type: input
+        criticality: high
+        note: "Indien abhängig von China für ~70% der Pharma-Intermediate"
+      - from: eu_formulators
+        to: antibiotics_api
+        type: input
+        criticality: high
+      - from: kliniken
+        to: pharma_grosshandel
+        type: input
+        criticality: high
+      - from: antibiotics_api
+        to: alternative_antibiotics_api
+        type: substitution
+        substitution_ref: sub_antibiotic_product
+        criticality: medium
+        note: "Produktsubstitution: Amoxicillin→Ampicillin / Ciprofloxacin→Levofloxacin (60% Coverage, 7d Ramp-up, Resistenzrisiko)"
+
+  # Schmerzmittel-Kette
+  - id: painkiller_chain
+    name: Schmerzmittel-Versorgungskette
+    stages:
+      - [china_api_producers, paracetamol_api]
+      - [india_api_producers, paracetamol_api]
+      - [paracetamol_api, eu_formulators]
+      - [eu_formulators, pharma_grosshandel]
+    dependencies:
+      - from: eu_formulators
+        to: paracetamol_api
+        type: input
+        criticality: high
+
+  # Onkologie-Kette
+  - id: oncology_chain
+    name: Onkologie-Versorgungskette
+    stages:
+      - [china_api_producers, oncology_api]
+      - [oncology_api, eu_formulators]
+      - [eu_formulators, pharma_cold_chain]
+      - [pharma_cold_chain, kliniken]
+    dependencies:
+      - from: kliniken
+        to: pharma_cold_chain
+        type: logistics
+        criticality: high
+
+  # Resilienz-Ketten
+  - id: alternative_sourcing_chain
+    name: Alternative API-Beschaffung
+    stages:
+      - [india_alternative_sourcing, eu_formulators]
+      - [eu_api_production, eu_formulators]
+      - [strategic_pharma_reserves, pharma_grosshandel]
+    dependencies:
+      - from: eu_formulators
+        to: india_alternative_sourcing
+        type: input
+        criticality: medium
+      - from: india_alternative_sourcing
+        to: china_intermediates
+        type: input
+        criticality: high
+        note: "Indien selbst zu ~70% von chinesischen Intermediaten abhängig"
+      - from: india_alternative_sourcing
+        to: china_api_producers
+        type: substitution
+        substitution_ref: sub_india_sourcing
+        criticality: medium
+        note: "Lieferantensubstitution: China-API-Produzenten → Indien (30% Coverage, +60% Kosten, 60d Ramp-up)"
+      - from: eu_api_production
+        to: china_api_producers
+        type: substitution
+        substitution_ref: sub_eu_production_rampup
+        criticality: low
+        note: "EU-Eigenproduktions-Ramp-up als langfristige Lieferantensubstitution (15% Coverage, 270d Ramp-up)"
+
+  # Feedback-Kette
+  - id: feedback_loops_chain
+    name: Feedback-Schleifen
+    stages:
+      - [patients, kliniken]
+      - [kliniken, eu_formulators]
+    dependencies:
+      - from: eu_formulators
+        to: kliniken
+        type: demand
+        criticality: medium
+        note: "Rationierung ändert Nachfragemuster"
+
+# =============================================================================
+# Substitutions
+# =============================================================================
+substitutions:
+
+  - id: sub_india_sourcing
+    from: china_api_producers
+    to: india_alternative_sourcing
+    type: supplier
+    coverage: 0.30
+    quality_delta: 0.0
+    cost_delta: 0.60
+    ramp_up: 60d
+    activation:
+      trigger: "antibiotics_api_shortage.active"
+      threshold:
+        supply_drop: 0.50
+    reversible: true
+    side_effects:
+      - type: correlated_risk
+        target: india_api_producers
+        magnitude: 0.60
+        description: "Indien bezieht ~70% seiner Pharma-Intermediate aus China — Pseudo-Diversifikation, da Indien selbst vulnerabel gegenüber China-Ausfällen"
+    dependency_overlap:
+      - china_intermediates
+    reference: "Indien als alternativer API-Lieferant: Lead-Time +60%, aber strukturelle Abhängigkeit von chinesischen Intermediaten (6-APA, Clavulansäure)"
+
+  - id: sub_antibiotic_product
+    from: antibiotics_api
+    to: alternative_antibiotics_api
+    type: product
+    coverage: 0.60
+    quality_delta: -0.10
+    cost_delta: 0.10
+    ramp_up: 7d
+    activation:
+      trigger: "apotheken_rationierung.active"
+      threshold:
+        supply_drop: 0.30
+    reversible: true
+    side_effects:
+      - type: resistance_risk
+        target: patients
+        magnitude: 0.20
+        description: "Kreuzresistenz durch Breitspektrum-Antibiotika-Substitution (Amoxicillin→Ampicillin, Ciprofloxacin→Levofloxacin) — fördert Resistenzentwicklung bei ~20% der Fälle"
+    reference: "Amoxicillin→Ampicillin, Ciprofloxacin→Levofloxacin: therapeutisch austauschbar für ~60% der Fälle; Resistenzrisiko durch unkontrollierten Breitspektrum-Einsatz"
+
+  - id: sub_eu_production_rampup
+    from: china_api_producers
+    to: eu_api_production
+    type: supplier
+    coverage: 0.15
+    quality_delta: 0.0
+    cost_delta: 0.40
+    ramp_up: 270d
+    activation:
+      trigger: "eu_production_rampup.active"
+      threshold:
+        duration_min: 60d
+    reversible: false
+    side_effects: []
+    reference: "EU-API-Eigenproduktion (Sandoz Kundl AT, IPCEI Health): struktureller Ramp-up 8-12 Monate bis erste Kapazitäten, mehrere Jahre bis volle Kapazität — nicht reversibel (strategische Investitionsentscheidung)"
+
+# =============================================================================
+# Events
+# =============================================================================
+events:
+  # Primäre Auslöser
+  - id: china_api_export_restriction
+    name: China API-Exportbeschränkung
+    type: regulatory
+    trigger:
+      target: china_api_producers
+      probability: 0.1
+    impact:
+      supply: "-80%"
+      duration: 90d
+    causes:
+      - intermediate_shortage
+      - india_supply_disruption
+    reference: "Regulatorische Exportbeschränkung oder Lockdown — Alle Antibiotika-APIs betroffen"
+
+  - id: china_energy_crisis
+    name: Energiekrise China (Sichuan-Szenario)
+    type: infrastructure_failure
+    trigger:
+      target: china_api_producers
+      probability: 0.15
+    impact:
+      supply: "-40%"
+      duration: 60d
+    causes:
+      - intermediate_shortage
+    reference: "Energiekrise Sichuan 2022: 17 API-Hersteller betroffen"
+
+  # Lieferketten-Unterbrechungen
+  - id: intermediate_shortage
+    name: Pharma-Intermediate-Engpass
+    type: infrastructure_failure
+    trigger:
+      target: china_intermediates
+      condition: "china_api_export_restriction.active OR china_energy_crisis.active"
+    impact:
+      supply: "-70%"
+      duration: 90d
+    causes:
+      - antibiotics_api_shortage
+      - paracetamol_shortage
+      - oncology_api_shortage
+    reference: "6-APA und Clavulansäure: Fermentation dauert 14-21 Tage, kein schneller Ramp-up"
+
+  - id: india_supply_disruption
+    name: Indien-Lieferkette gestört
+    type: infrastructure_failure
+    trigger:
+      target: india_api_producers
+      condition: "china_api_export_restriction.active"
+    impact:
+      supply: "-45%"
+      duration: 60d
+    causes:
+      - antibiotics_api_shortage
+    reference: "Indien bezieht ~70% der Pharma-Intermediate aus China"
+
+  # Wirkstoff-Engpässe
+  - id: antibiotics_api_shortage
+    name: Antibiotika-Wirkstoffmangel
+    type: infrastructure_failure
+    substitution_ref: sub_india_sourcing
+    trigger:
+      target: antibiotics_api
+      condition: "intermediate_shortage.active OR india_supply_disruption.active"
+    impact:
+      supply: "-75%"
+      duration: 90d
+    causes:
+      - formulierer_stock_depletion
+      - india_sourcing_activated
+      - reserve_release
+    reference: "Amoxicillin, Ciprofloxacin, Azithromycin, Penicillin G betroffen"
+
+  - id: paracetamol_shortage
+    name: Paracetamol/Schmerzmittel-Engpass
+    type: infrastructure_failure
+    trigger:
+      target: paracetamol_api
+      condition: "intermediate_shortage.active"
+    impact:
+      supply: "-50%"
+      duration: 60d
+    causes:
+      - formulierer_stock_depletion
+    reference: "COVID-19 2020: Paracetamol-Mangel in EU durch China-Lockdowns"
+
+  - id: oncology_api_shortage
+    name: Onkologie-Wirkstoff-Engpass
+    type: infrastructure_failure
+    trigger:
+      target: oncology_api
+      condition: "intermediate_shortage.active"
+    impact:
+      supply: "-30%"
+      duration: 90d
+    causes:
+      - klinik_notfallplaene
+    reference: "Zytostatika teilweise EU-produziert, aber Vorstufen aus China"
+
+  # Verarbeitungs- und Verteilungskette
+  - id: formulierer_stock_depletion
+    name: Formulierer-Lagerbestände erschöpft
+    type: infrastructure_failure
+    trigger:
+      target: eu_formulators
+      condition: "antibiotics_api_shortage.active OR paracetamol_shortage.active"
+    impact:
+      supply: "-60%"
+      duration: 60d
+    causes:
+      - grosshandel_shortage
+    reference: "Lagerbestände bei EU-Formulierern reichen 4-6 Wochen, QC benötigt weitere 4-6 Wochen"
+
+  - id: grosshandel_shortage
+    name: Großhandels-Lieferengpass
+    type: infrastructure_failure
+    trigger:
+      target: pharma_grosshandel
+      condition: "formulierer_stock_depletion.active"
+    impact:
+      supply: "-50%"
+      duration: 45d
+    causes:
+      - apotheken_rationierung
+      - klinik_notfallplaene
+    reference: "Just-in-time-Logistik bei Phoenix, Alliance, Noweda — geringe Puffer"
+
+  - id: apotheken_rationierung
+    name: Apotheken-Rationierung
+    type: infrastructure_failure
+    substitution_ref: sub_antibiotic_product
+    trigger:
+      target: apotheken
+      condition: "grosshandel_shortage.active"
+    impact:
+      supply: "-40%"
+      duration: 45d
+    causes:
+      - pediatric_crisis
+      - substitution_problems
+    reference: "Verschreibungspflichtige Medikamente nur noch begrenzt verfügbar"
+
+  - id: klinik_notfallplaene
+    name: Kliniken aktivieren Notfallpläne
+    type: infrastructure_failure
+    trigger:
+      target: kliniken
+      condition: "grosshandel_shortage.active OR oncology_api_shortage.active"
+    impact:
+      supply: "-35%"
+      duration: 60d
+    causes:
+      - surgery_delays
+      - mortality_increase
+    reference: "Priorisierung lebensrettender Behandlungen, elektive OPs verschoben"
+
+  # Patientenauswirkungen
+  - id: pediatric_crisis
+    name: Pädiatrische Versorgungskrise
+    type: infrastructure_failure
+    trigger:
+      target: pediatric_patients
+      condition: "apotheken_rationierung.active"
+    impact:
+      supply: "-55%"
+      duration: 45d
+    causes:
+      - mortality_increase
+    reference: "Pädiatrische Darreichungsformen (Säfte, Suppositorien) zuerst erschöpft (Day 25)"
+
+  - id: surgery_delays
+    name: Operationsverzögerungen
+    type: infrastructure_failure
+    trigger:
+      target: kliniken
+      condition: "klinik_notfallplaene.active"
+    impact:
+      supply: "-25%"
+      duration: 90d
+    causes:
+      - mortality_increase
+    reference: "IV-Antibiotika kritisch für Sepsis-Behandlung, 6 Monate Rückstau"
+
+  - id: substitution_problems
+    name: Antibiotika-Substitutionsprobleme
+    type: infrastructure_failure
+    trigger:
+      target: patients
+      condition: "apotheken_rationierung.active"
+    impact:
+      supply: "-15%"
+      duration: 120d
+    causes:
+      - resistance_development
+    reference: "Amoxicillin→Ampicillin, Ciprofloxacin→Levofloxacin: begrenzte Verfügbarkeit"
+
+  - id: resistance_development
+    name: Resistenzentwicklung durch Substitution
+    type: infrastructure_failure
+    trigger:
+      target: patients
+      condition: "substitution_problems.active"
+    impact:
+      supply: "-5%"
+      duration: 365d
+    reference: "Breitspektrum-Einsatz und subtherapeutische Dosierung fördern Resistenzen"
+
+  - id: mortality_increase
+    name: Erhöhte Mortalität
+    type: infrastructure_failure
+    trigger:
+      target: patients
+      condition: "klinik_notfallplaene.active AND pediatric_crisis.active"
+    impact:
+      supply: "-10%"
+      duration: 90d
+    reference: "Sepsis-Mortalität steigt ohne adäquate Antibiotika, Chemotherapie-Verzögerungen"
+
+  # Resilienz-Events
+  - id: india_sourcing_activated
+    name: Indien-Alternativbeschaffung aktiviert
+    type: market_shock
+    trigger:
+      target: india_alternative_sourcing
+      condition: "antibiotics_api_shortage.active"
+    impact:
+      supply: "-20%"
+      price: "+60%"
+      duration: 120d
+    reference: "Lead-Time +60%, aber Indien selbst abhängig von chinesischen Intermediaten"
+
+  - id: reserve_release
+    name: Strategische Reserven freigegeben
+    type: regulatory
+    trigger:
+      target: strategic_pharma_reserves
+      condition: "antibiotics_api_shortage.active"
+    impact:
+      supply: "+15%"
+      duration: 45d
+    reference: "NAKI-Reserve für kritische Antibiotika, Reichweite 4-8 Wochen"
+
+  - id: eu_production_rampup
+    name: EU-API-Produktion hochgefahren
+    type: regulatory
+    substitution_ref: sub_eu_production_rampup
+    trigger:
+      target: eu_api_production
+      condition: "antibiotics_api_shortage.active AND antibiotics_api_shortage.duration > 60d"
+    impact:
+      supply: "+8%"
+      duration: 365d
+    reference: "Sandoz Kundl (AT), IPCEI Health — Ramp-up 8-12 Monate, volle Kapazität nach mehreren Jahren"
+
+# =============================================================================
+# Cascades
+# =============================================================================
+cascades:
+  # API-Exportbeschränkung — Hauptkaskade
+  - id: api_restriction_cascade
+    name: API-Exportbeschränkung-Kaskade
+    origin: china_api_export_restriction
+    probability: 0.85
+    validation:
+      reference: "Piperacillin-Engpass 2017, COVID-Lockdowns 2020"
+      confidence: 0.8
+    timeline:
+      - at: 0d
+        event: china_api_export_restriction
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - china_api_producers
+      - at: 3d
+        event: intermediate_shortage
+        impact:
+          sector: chemistry
+          severity: critical
+        affects:
+          - china_intermediates
+      - at: 7d
+        event: india_supply_disruption
+        impact:
+          sector: healthcare
+          severity: high
+        affects:
+          - india_api_producers
+      - at: 14d
+        event: antibiotics_api_shortage
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - antibiotics_api
+      - at: 14d
+        event: paracetamol_shortage
+        impact:
+          sector: healthcare
+          severity: high
+        affects:
+          - paracetamol_api
+      - at: 14d
+        event: india_sourcing_activated
+        impact:
+          sector: healthcare
+          severity: medium
+        affects:
+          - india_alternative_sourcing
+      - at: 14d
+        event: reserve_release
+        impact:
+          sector: healthcare
+          severity: low
+        affects:
+          - strategic_pharma_reserves
+      - at: 21d
+        event: oncology_api_shortage
+        impact:
+          sector: healthcare
+          severity: high
+        affects:
+          - oncology_api
+      - at: 28d
+        event: formulierer_stock_depletion
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - eu_formulators
+          - pharma_packaging
+      - at: 35d
+        event: grosshandel_shortage
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - pharma_grosshandel
+      - at: 42d
+        event: apotheken_rationierung
+        impact:
+          sector: healthcare
+          severity: high
+        affects:
+          - apotheken
+      - at: 42d
+        event: klinik_notfallplaene
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - kliniken
+      - at: 45d
+        event: pediatric_crisis
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - pediatric_patients
+      - at: 50d
+        event: surgery_delays
+        impact:
+          sector: healthcare
+          severity: high
+        affects:
+          - kliniken
+          - patients
+      - at: 55d
+        event: substitution_problems
+        impact:
+          sector: healthcare
+          severity: medium
+        affects:
+          - patients
+      - at: 60d
+        event: mortality_increase
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - patients
+          - pediatric_patients
+      - at: 90d
+        event: eu_production_rampup
+        impact:
+          sector: healthcare
+          severity: low
+        affects:
+          - eu_api_production
+      - at: 120d
+        event: resistance_development
+        impact:
+          sector: healthcare
+          severity: medium
+        affects:
+          - patients
+
+  # Energiekrise-Kaskade (milder, kürzere Dauer)
+  - id: energy_crisis_cascade
+    name: China-Energiekrise-Pharma-Kaskade
+    origin: china_energy_crisis
+    probability: 0.75
+    validation:
+      reference: "Energiekrise Sichuan 2022: 17 API-Hersteller betroffen"
+      confidence: 0.7
+    timeline:
+      - at: 0d
+        event: china_energy_crisis
+        impact:
+          sector: healthcare
+          severity: high
+        affects:
+          - china_api_producers
+      - at: 7d
+        event: intermediate_shortage
+        impact:
+          sector: chemistry
+          severity: high
+        affects:
+          - china_intermediates
+      - at: 21d
+        event: antibiotics_api_shortage
+        impact:
+          sector: healthcare
+          severity: high
+        affects:
+          - antibiotics_api
+      - at: 21d
+        event: paracetamol_shortage
+        impact:
+          sector: healthcare
+          severity: medium
+        affects:
+          - paracetamol_api
+      - at: 21d
+        event: india_sourcing_activated
+        impact:
+          sector: healthcare
+          severity: medium
+        affects:
+          - india_alternative_sourcing
+      - at: 28d
+        event: reserve_release
+        impact:
+          sector: healthcare
+          severity: low
+        affects:
+          - strategic_pharma_reserves
+      - at: 35d
+        event: formulierer_stock_depletion
+        impact:
+          sector: healthcare
+          severity: high
+        affects:
+          - eu_formulators
+      - at: 45d
+        event: grosshandel_shortage
+        impact:
+          sector: healthcare
+          severity: high
+        affects:
+          - pharma_grosshandel
+      - at: 55d
+        event: apotheken_rationierung
+        impact:
+          sector: healthcare
+          severity: medium
+        affects:
+          - apotheken
+      - at: 55d
+        event: klinik_notfallplaene
+        impact:
+          sector: healthcare
+          severity: high
+        affects:
+          - kliniken
+
+  # Worst-Case: Exportbeschränkung + Indien-Dürre
+  - id: compound_pharma_crisis
+    name: Kombinierte Pharma-Versorgungskrise
+    origin: china_api_export_restriction
+    probability: 0.2
+    validation:
+      reference: "Hypothetisch: China-Exportbeschränkung + Indien-Produktion gleichzeitig gestört"
+      confidence: 0.5
+    timeline:
+      - at: 0d
+        event: china_api_export_restriction
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - china_api_producers
+      - at: 3d
+        event: intermediate_shortage
+        impact:
+          sector: chemistry
+          severity: critical
+        affects:
+          - china_intermediates
+      - at: 7d
+        event: india_supply_disruption
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - india_api_producers
+          - india_alternative_sourcing
+      - at: 10d
+        event: antibiotics_api_shortage
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - antibiotics_api
+      - at: 10d
+        event: paracetamol_shortage
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - paracetamol_api
+      - at: 10d
+        event: reserve_release
+        impact:
+          sector: healthcare
+          severity: low
+        affects:
+          - strategic_pharma_reserves
+      - at: 14d
+        event: oncology_api_shortage
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - oncology_api
+      - at: 20d
+        event: formulierer_stock_depletion
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - eu_formulators
+      - at: 25d
+        event: pediatric_crisis
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - pediatric_patients
+      - at: 28d
+        event: grosshandel_shortage
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - pharma_grosshandel
+      - at: 35d
+        event: apotheken_rationierung
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - apotheken
+      - at: 35d
+        event: klinik_notfallplaene
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - kliniken
+      - at: 38d
+        event: surgery_delays
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - kliniken
+          - patients
+      - at: 42d
+        event: substitution_problems
+        impact:
+          sector: healthcare
+          severity: high
+        affects:
+          - patients
+      - at: 45d
+        event: mortality_increase
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - patients
+          - pediatric_patients
+      - at: 90d
+        event: eu_production_rampup
+        impact:
+          sector: healthcare
+          severity: low
+        affects:
+          - eu_api_production
+      - at: 120d
+        event: resistance_development
+        impact:
+          sector: healthcare
+          severity: high
+        affects:
+          - patients

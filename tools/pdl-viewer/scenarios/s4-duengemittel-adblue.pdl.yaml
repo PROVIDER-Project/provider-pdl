@@ -1,0 +1,1203 @@
+# =============================================================================
+# PDL Szenario: Düngemittel und AdBlue
+# =============================================================================
+# Beschreibung: Kaskadeneffekte eines Erdgas-Lieferstopps auf die
+#               Ammoniakproduktion und deren Folgeprodukte (CO2, Harnstoff,
+#               AdBlue, Düngemittel) mit Auswirkungen auf Lebensmittel,
+#               Logistik und Landwirtschaft
+# Basiert auf: PROVIDER-Szenarien-Dokumentation.md, Szenario 4
+# Historische Referenz: Gaskrise 2022 (Erdgaspreis-Peak ~320 EUR/MWh TTF Aug 2022)
+# =============================================================================
+
+pdl_version: "1.1"
+
+scenario:
+  id: fertilizer_adblue_disruption
+  name: Düngemittel und AdBlue Lieferkettenkrise
+  sector: chemistry
+  criticality: high
+  description: >
+    Simulation der Kaskadeneffekte eines Erdgas-Lieferstopps auf die
+    Ammoniakproduktion (Haber-Bosch-Verfahren) und deren Folgeprodukte.
+    Erdgas macht 70-80% der NH3-Produktionskosten aus. Bei Gaspreisen
+    über 150 EUR/MWh wird Produktion unrentabel. Betroffen: CO2 für
+    Lebensmittelindustrie, AdBlue für LKW-Logistik, Düngemittel für
+    Landwirtschaft.
+
+# =============================================================================
+# Entities
+# =============================================================================
+entities:
+  # Energieversorgung
+  - id: natural_gas_supply
+    type: commodity
+    name: Erdgasversorgung
+    sector: energy
+    location: Germany
+    vulnerability: 0.7
+
+  # Ammoniak-Produktionsstandorte
+  - id: basf_ludwigshafen
+    type: manufacturer
+    name: BASF Ludwigshafen (Ammoniak)
+    sector: chemistry
+    location: Germany
+    vulnerability: 0.8
+    note: "BASF hat NH3-Kapazität in Ludwigshafen ab 2023 deutlich reduziert"
+
+  - id: skw_piesteritz
+    type: manufacturer
+    name: SKW Piesteritz
+    sector: chemistry
+    location: Germany
+    vulnerability: 0.75
+
+  - id: yara_brunsbuettel
+    type: manufacturer
+    name: Yara Brunsbüttel
+    sector: chemistry
+    location: Germany
+    vulnerability: 0.7
+
+  - id: ineos_koeln
+    type: manufacturer
+    name: INEOS Köln
+    sector: chemistry
+    location: Germany
+    vulnerability: 0.7
+
+  # Chemische Zwischenprodukte
+  - id: ammonia_supply
+    type: commodity
+    name: Ammoniak (NH3)
+    sector: chemistry
+    vulnerability: 0.8
+
+  - id: co2_industrial
+    type: commodity
+    name: Industrielles CO2
+    sector: chemistry
+    vulnerability: 0.85
+
+  - id: urea_supply
+    type: commodity
+    name: Harnstoff
+    sector: chemistry
+    vulnerability: 0.75
+
+  # Endprodukte
+  - id: adblue_supply
+    type: commodity
+    name: AdBlue (Harnstofflösung)
+    sector: chemistry
+    vulnerability: 0.8
+
+  - id: nitrogen_fertilizer
+    type: commodity
+    name: Stickstoffdünger
+    sector: chemistry
+    vulnerability: 0.75
+
+  - id: ammonium_nitrate
+    type: commodity
+    name: Ammoniumnitrat
+    sector: chemistry
+    vulnerability: 0.7
+
+  # Abhängige Industrien - Lebensmittel
+  - id: food_packaging
+    type: manufacturer
+    name: Lebensmittelverpackung (MAP)
+    sector: food
+    location: Germany
+    vulnerability: 0.8
+
+  - id: beverage_industry
+    type: manufacturer
+    name: Getränkeindustrie
+    sector: food
+    location: Germany
+    vulnerability: 0.75
+
+  - id: slaughterhouses
+    type: manufacturer
+    name: Schlachtbetriebe
+    sector: food
+    location: Germany
+    vulnerability: 0.85
+
+  - id: greenhouses
+    type: manufacturer
+    name: Gewächshäuser
+    sector: agriculture
+    location: Germany
+    vulnerability: 0.6
+
+  # Logistik
+  - id: heavy_trucks
+    type: infrastructure
+    name: Schwerlast-LKW (Euro 6)
+    sector: logistics
+    location: Germany
+    vulnerability: 0.8
+
+  - id: delivery_vans
+    type: infrastructure
+    name: Lieferfahrzeuge
+    sector: logistics
+    location: Germany
+    vulnerability: 0.7
+
+  - id: bus_fleet
+    type: infrastructure
+    name: Busflotte (ÖPNV)
+    sector: logistics
+    location: Germany
+    vulnerability: 0.65
+
+  # Landwirtschaft
+  - id: agriculture_grain
+    type: region
+    name: Getreideanbau Deutschland
+    sector: agriculture
+    location: Germany
+    vulnerability: 0.7
+
+  - id: agriculture_vegetables
+    type: region
+    name: Gemüseanbau Deutschland
+    sector: agriculture
+    location: Germany
+    vulnerability: 0.75
+
+  # Endverbraucher/Gesellschaft
+  - id: food_retail
+    type: service
+    name: Lebensmitteleinzelhandel
+    sector: retail
+    location: Germany
+    vulnerability: 0.5
+
+  - id: consumers
+    type: region
+    name: Verbraucher
+    sector: society
+    location: Germany
+    vulnerability: 0.6
+
+  # Resilienz-Mechanismen
+  - id: ammonia_import_global
+    type: infrastructure
+    name: Ammoniak-Importe (Trinidad, Saudi-Arabien, Russland)
+    sector: chemistry
+    location: Global
+    vulnerability: 0.4
+    import_capacity_share: 0.3
+    note: "DE importiert ~30% des NH3-Bedarfs, hauptsächlich über Seehäfen"
+
+  - id: bio_co2_sources
+    type: infrastructure
+    name: Biogenes CO2 (Biogas, Fermentation, Brauereien)
+    sector: chemistry
+    location: Germany
+    vulnerability: 0.35
+    capacity_share: 0.15
+    note: "Biogenes CO2 deckt ~10-15% des Lebensmittel-CO2-Bedarfs"
+
+  # Erweiterte Abhängigkeiten
+  - id: livestock_farms
+    type: manufacturer
+    name: Tierhaltungsbetriebe
+    sector: agriculture
+    location: Germany
+    vulnerability: 0.7
+
+  - id: animal_feed_supply
+    type: commodity
+    name: Futtermittelversorgung
+    sector: agriculture
+    vulnerability: 0.65
+
+  - id: cold_chain_logistics
+    type: infrastructure
+    name: Kühlketten-Logistik
+    sector: logistics
+    location: Germany
+    vulnerability: 0.8
+
+  - id: hospital_logistics
+    type: service
+    name: Krankenhaus-Versorgungslogistik
+    sector: healthcare
+    location: Germany
+    vulnerability: 0.7
+
+# =============================================================================
+# Supply Chains
+# =============================================================================
+supply_chains:
+  # Hauptkette: Erdgas → Ammoniak → Produkte
+  - id: ammonia_production_chain
+    name: Ammoniak-Produktionskette
+    stages:
+      - [natural_gas_supply, basf_ludwigshafen]
+      - [natural_gas_supply, skw_piesteritz]
+      - [natural_gas_supply, yara_brunsbuettel]
+      - [natural_gas_supply, ineos_koeln]
+      - [basf_ludwigshafen, ammonia_supply]
+      - [skw_piesteritz, ammonia_supply]
+      - [yara_brunsbuettel, ammonia_supply]
+      - [ineos_koeln, ammonia_supply]
+    dependencies:
+      - from: basf_ludwigshafen
+        to: natural_gas_supply
+        type: energy
+        criticality: high
+      - from: skw_piesteritz
+        to: natural_gas_supply
+        type: energy
+        criticality: high
+      - from: yara_brunsbuettel
+        to: natural_gas_supply
+        type: energy
+        criticality: high
+      - from: ineos_koeln
+        to: natural_gas_supply
+        type: energy
+        criticality: high
+
+  # Import-Alternative
+  - id: ammonia_import_chain
+    name: Ammoniak-Importkette
+    stages:
+      - [ammonia_import_global, ammonia_supply]
+    dependencies:
+      - from: ammonia_supply
+        to: ammonia_import_global
+        type: input
+        criticality: medium
+      - from: ammonia_supply
+        to: ammonia_import_global
+        type: substitution
+        substitution_ref: sub_ammonia_import
+        criticality: medium
+
+  # CO2-Kette (Nebenprodukt)
+  - id: co2_supply_chain
+    name: CO2-Versorgungskette
+    stages:
+      - [ammonia_supply, co2_industrial]
+      - [co2_industrial, food_packaging]
+      - [co2_industrial, beverage_industry]
+      - [co2_industrial, slaughterhouses]
+      - [co2_industrial, greenhouses]
+      - [bio_co2_sources, co2_industrial]
+    dependencies:
+      - from: slaughterhouses
+        to: co2_industrial
+        type: input
+        criticality: high
+      - from: beverage_industry
+        to: co2_industrial
+        type: input
+        criticality: high
+      - from: co2_industrial
+        to: bio_co2_sources
+        type: input
+        criticality: medium
+      - from: co2_industrial
+        to: bio_co2_sources
+        type: substitution
+        substitution_ref: sub_bio_co2
+        criticality: medium
+
+  # Harnstoff/AdBlue-Kette
+  - id: urea_adblue_chain
+    name: Harnstoff-AdBlue-Kette
+    stages:
+      - [ammonia_supply, urea_supply]
+      - [urea_supply, adblue_supply]
+      - [adblue_supply, heavy_trucks]
+      - [adblue_supply, delivery_vans]
+      - [adblue_supply, bus_fleet]
+    dependencies:
+      - from: heavy_trucks
+        to: adblue_supply
+        type: input
+        criticality: high
+      - from: delivery_vans
+        to: adblue_supply
+        type: input
+        criticality: medium
+
+  # Düngemittel-Kette
+  - id: fertilizer_chain
+    name: Düngemittel-Landwirtschafts-Kette
+    stages:
+      - [ammonia_supply, nitrogen_fertilizer]
+      - [ammonia_supply, ammonium_nitrate]
+      - [nitrogen_fertilizer, agriculture_grain]
+      - [nitrogen_fertilizer, agriculture_vegetables]
+      - [ammonium_nitrate, agriculture_grain]
+      - [agriculture_grain, food_retail]
+      - [agriculture_vegetables, food_retail]
+      - [food_retail, consumers]
+    dependencies:
+      - from: agriculture_grain
+        to: nitrogen_fertilizer
+        type: input
+        criticality: high
+      - from: agriculture_vegetables
+        to: nitrogen_fertilizer
+        type: input
+        criticality: high
+      - from: livestock_farms
+        to: animal_feed_supply
+        type: input
+        criticality: high
+
+  # Erweiterte Logistik-Kette (Kühlketten, Krankenhäuser)
+  - id: logistics_dependency_chain
+    name: Logistik-Abhängigkeitskette
+    stages:
+      - [heavy_trucks, cold_chain_logistics]
+      - [heavy_trucks, hospital_logistics]
+      - [cold_chain_logistics, food_retail]
+      - [hospital_logistics, consumers]
+      - [animal_feed_supply, livestock_farms]
+      - [livestock_farms, slaughterhouses]
+    dependencies:
+      - from: cold_chain_logistics
+        to: heavy_trucks
+        type: logistics
+        criticality: high
+      - from: hospital_logistics
+        to: heavy_trucks
+        type: logistics
+        criticality: high
+      - from: livestock_farms
+        to: animal_feed_supply
+        type: input
+        criticality: high
+
+  # Feedback-Schleifen (Rückkopplungseffekte)
+  - id: feedback_loops_chain
+    name: Feedback-Schleifen
+    stages:
+      - [heavy_trucks, adblue_supply]
+      - [heavy_trucks, natural_gas_supply]
+      - [slaughterhouses, livestock_farms]
+    dependencies:
+      - from: adblue_supply
+        to: heavy_trucks
+        type: logistics
+        criticality: high
+        note: "AdBlue-Distribution benötigt selbst LKW-Transport"
+      - from: natural_gas_supply
+        to: heavy_trucks
+        type: logistics
+        criticality: medium
+        note: "Gas-Distribution teilweise per LKW (LNG, Flüssiggas)"
+
+# =============================================================================
+# Substitutions
+# =============================================================================
+substitutions:
+
+  # 1) Lieferantensubstitution: EU-Ammoniak-Produktion → Ammoniak-Importe
+  - id: sub_ammonia_import
+    from: ammonia_supply          # EU-Inlandsproduktion (basf_ludwigshafen, skw_piesteritz, yara_brunsbuettel, ineos_koeln)
+    to: ammonia_import_global     # Import aus Trinidad, Saudi-Arabien
+    type: supplier
+
+    coverage: 0.30                # DE importiert ~30 % des NH3-Bedarfs
+    quality_delta: 0.0            # gleichwertige Qualität
+    cost_delta: 0.80              # +80 % Kosten durch Seetransport und Spot-Markt-Aufschläge
+    ramp_up: 30d                  # Hochlauf Seehafen-Logistik 4-6 Wochen
+
+    activation:
+      trigger: "ammonia_production_halt.active"
+      threshold:
+        supply_drop: 0.30
+
+    reversible: true
+
+    side_effects:
+      - type: price_pressure
+        target: ammonia_import_global
+        description: "Steigende globale NH3-Nachfrage erhöht Spotpreise und verdrängt andere Importeure"
+
+    dependency_overlap: []        # Produktionsstandorte unabhängig von EU-Gasnetz
+
+    reference: "NH3-Importanteil DE ~30 %; Seehäfen Hamburg, Bremen als Umschlagspunkte; Hochlauf 4-6 Wochen (Trinidad/Saudi-Arabien)"
+
+  # 2) Produktsubstitution: Industrielles CO2 → Biogenes CO2
+  - id: sub_bio_co2
+    from: co2_industrial          # konventionelles Industrie-CO2 (Nebenprodukt NH3-Produktion)
+    to: bio_co2_sources           # Biogas-Anlagen, Fermentation, Brauereien
+    type: product
+
+    coverage: 0.15                # biogenes CO2 deckt ~10-15 % des Lebensmittel-CO2-Bedarfs
+    quality_delta: -0.05          # Reinheitsanforderungen (Lebensmittelgrade) schwieriger einzuhalten
+    cost_delta: 0.20              # +20 % Mehrkosten durch dezentrale Erfassung und Aufbereitung
+    ramp_up: 14d                  # Schnellerer Hochlauf da dezentrale Quellen vorhanden
+
+    activation:
+      trigger: "co2_shortage.active"
+      threshold:
+        supply_drop: 0.20
+
+    reversible: true
+
+    side_effects: []              # keine nennenswerten Nebeneffekte
+
+    dependency_overlap: []        # unabhängig von Erdgas-/NH3-Infrastruktur
+
+    reference: "Biogenes CO2 aus Biogas-Anlagen (~500 Anlagen DE), Brauereien, Bioethanol deckt 10-15 % Lebensmittel-CO2-Bedarf"
+
+# =============================================================================
+# Events
+# =============================================================================
+events:
+  # Primärer Auslöser
+  - id: gas_price_spike
+    name: Erdgas-Preisexplosion
+    type: market_shock
+    trigger:
+      target: natural_gas_supply
+      probability: 0.2
+    impact:
+      price: "+300%"
+      duration: 60d
+    causes:
+      - ammonia_production_halt
+    reference: "Gaskrise 2022: Erdgaspreis-Peak ~320 EUR/MWh TTF Aug 2022 (vs. 20 EUR normal)"
+
+  - id: gas_supply_disruption
+    name: Erdgas-Lieferunterbrechung
+    type: infrastructure_failure
+    trigger:
+      target: natural_gas_supply
+      probability: 0.1
+    impact:
+      supply: "-40%"
+      duration: 60d
+    causes:
+      - ammonia_production_halt
+    reference: "Pipeline-Schaden oder geopolitische Unterbrechung"
+
+  # Ammoniak-Produktionsstopp
+  - id: ammonia_production_halt
+    name: Ammoniak-Produktionsstopp
+    type: infrastructure_failure
+    trigger:
+      target: basf_ludwigshafen
+      condition: "gas_price_spike.active OR gas_supply_disruption.active"
+    impact:
+      supply: "-55%"
+      duration: 45d
+    causes:
+      - co2_shortage
+      - urea_shortage
+      - ammonia_import_activated
+    reference: "NH3-Produktionskürzung EU 2022: -70%, teilweise durch Importe kompensiert (~30%)"
+
+  # CO2-Mangel und Folgen
+  - id: co2_shortage
+    name: CO2-Mangel
+    type: infrastructure_failure
+    trigger:
+      target: co2_industrial
+      condition: "ammonia_production_halt.active"
+    impact:
+      supply: "-70%"
+      duration: 30d
+    causes:
+      - slaughterhouse_shutdown
+      - beverage_shortage
+      - packaging_shortage
+      - greenhouse_production_decline
+      - bio_co2_activated
+    reference: "1,6-1,8 t CO2 pro t NH3 - CO2 ist Nebenprodukt der Dampfreformierung"
+
+  - id: slaughterhouse_shutdown
+    name: Schlachtbetriebe stoppen
+    type: infrastructure_failure
+    trigger:
+      target: slaughterhouses
+      condition: "co2_shortage.active"
+    impact:
+      supply: "-80%"
+      duration: 21d
+    causes:
+      - meat_shortage
+      - animal_welfare_crisis
+    reference: "CO2-Engpass UK 2021: Schlachtbetriebe 3 Wochen geschlossen"
+
+  - id: beverage_shortage
+    name: Getränkeproduktion eingeschränkt
+    type: infrastructure_failure
+    trigger:
+      target: beverage_industry
+      condition: "co2_shortage.active"
+    impact:
+      supply: "-50%"
+      duration: 30d
+    causes:
+      - food_price_spike
+    reference: "CO2 für Kohlensäure in Bier, Mineralwasser, Softdrinks"
+
+  - id: packaging_shortage
+    name: Lebensmittelverpackung eingeschränkt
+    type: infrastructure_failure
+    trigger:
+      target: food_packaging
+      condition: "co2_shortage.active"
+    impact:
+      supply: "-60%"
+      duration: 21d
+    causes:
+      - food_price_spike
+    reference: "MAP-Verpackung (Modified Atmosphere Packaging) benötigt CO2"
+
+  - id: meat_shortage
+    name: Fleischknappheit
+    type: market_shock
+    trigger:
+      target: food_retail
+      condition: "slaughterhouse_shutdown.active"
+    impact:
+      supply: "-25%"
+      price: "+35%"
+      duration: 60d
+    causes:
+      - food_price_spike
+    reference: "Tierwohl-Krise durch Verarbeitungsstopp"
+
+  # Harnstoff/AdBlue-Mangel
+  - id: urea_shortage
+    name: Harnstoff-Mangel
+    type: infrastructure_failure
+    trigger:
+      target: urea_supply
+      condition: "ammonia_production_halt.active"
+    impact:
+      supply: "-60%"
+      duration: 45d
+    causes:
+      - adblue_shortage
+      - fertilizer_shortage
+    reference: "Harnstoff Hauptrohstoff für AdBlue und Stickstoffdünger"
+
+  - id: adblue_shortage
+    name: AdBlue-Knappheit
+    type: infrastructure_failure
+    trigger:
+      target: adblue_supply
+      condition: "urea_shortage.active"
+    impact:
+      supply: "-55%"
+      duration: 60d
+    causes:
+      - truck_logistics_breakdown
+      - public_transport_disruption
+    reference: "AdBlue-Verbrauch DE ~1,2 Mio. t/Jahr, >6 Mio. LKW betroffen"
+
+  - id: truck_logistics_breakdown
+    name: LKW-Logistik bricht ein
+    type: infrastructure_failure
+    trigger:
+      target: heavy_trucks
+      condition: "adblue_shortage.active"
+    impact:
+      supply: "-40%"
+      duration: 90d
+    causes:
+      - supply_chain_disruption
+      - adblue_distribution_collapse
+      - gas_distribution_degraded
+      - feed_shortage
+      - cold_chain_disruption
+      - hospital_supply_disruption
+    reference: "Euro-6-Fahrzeuge ohne AdBlue gehen in Notlauf"
+
+  - id: supply_chain_disruption
+    name: Lieferketten-Zusammenbruch
+    type: infrastructure_failure
+    trigger:
+      target: food_retail
+      condition: "truck_logistics_breakdown.active"
+    impact:
+      supply: "-30%"
+      duration: 60d
+    causes:
+      - food_price_spike
+    reference: "Lebensmittelversorgung abhängig von LKW-Transport"
+
+  # Düngemittel und Landwirtschaft
+  - id: fertilizer_shortage
+    name: Düngemittelmangel
+    type: market_shock
+    trigger:
+      target: nitrogen_fertilizer
+      condition: "urea_shortage.active"
+    impact:
+      supply: "-50%"
+      price: "+200%"
+      duration: 180d
+    causes:
+      - crop_yield_reduction
+    reference: "Düngerpreise 2022: +200% (vs. 2021)"
+
+  - id: crop_yield_reduction
+    name: Ertragseinbruch Landwirtschaft
+    type: natural_disaster
+    trigger:
+      target: agriculture_grain
+      condition: "fertilizer_shortage.active"
+    impact:
+      supply: "-40%"
+      duration: 365d
+    causes:
+      - food_price_spike
+    reference: "Ohne Dünger: Ertragsrückgang 40-50%"
+
+  - id: food_price_spike
+    name: Nahrungsmittelpreis-Explosion
+    type: market_shock
+    trigger:
+      target: consumers
+      condition: "crop_yield_reduction.active"
+    impact:
+      price: "+40%"
+      duration: 365d
+    reference: "Kombinierte Effekte aus Fleisch-, Gemüse- und Getreideknappheit"
+
+  # Resilienz-Events
+  - id: ammonia_import_activated
+    name: Ammoniak-Importe hochgefahren
+    type: market_shock
+    trigger:
+      target: ammonia_import_global
+      condition: "ammonia_production_halt.active"
+    impact:
+      supply: "-20%"
+      price: "+80%"
+      duration: 90d
+    substitution_ref: sub_ammonia_import
+    reference: "Import-NH3 aus Trinidad/Saudi-Arabien über Seehäfen, Hochlauf dauert 4-6 Wochen"
+
+  - id: bio_co2_activated
+    name: Biogenes CO2 mobilisiert
+    type: market_shock
+    trigger:
+      target: bio_co2_sources
+      condition: "co2_shortage.active"
+    impact:
+      supply: "-15%"
+      price: "+100%"
+      duration: 60d
+    substitution_ref: sub_bio_co2
+    reference: "Biogas-Anlagen, Brauereien und Bioethanol liefern ~10-15% des CO2-Bedarfs"
+
+  # Feedback-Loop Events
+  - id: adblue_distribution_collapse
+    name: AdBlue-Distribution bricht ein
+    type: infrastructure_failure
+    trigger:
+      target: adblue_supply
+      condition: "truck_logistics_breakdown.active"
+    impact:
+      supply: "-25%"
+      duration: 60d
+    causes:
+      - adblue_shortage
+    reference: "Teufelskreis: AdBlue wird per LKW verteilt, LKW brauchen AdBlue"
+
+  - id: gas_distribution_degraded
+    name: Gas-Distribution verschlechtert
+    type: infrastructure_failure
+    trigger:
+      target: natural_gas_supply
+      condition: "truck_logistics_breakdown.active"
+    impact:
+      supply: "-10%"
+      duration: 45d
+    reference: "LNG- und Flüssiggas-Lieferungen teilweise per LKW"
+
+  # Erweiterte Folgeeffekte
+  - id: greenhouse_production_decline
+    name: Gewächshausproduktion eingeschränkt
+    type: infrastructure_failure
+    trigger:
+      target: greenhouses
+      condition: "co2_shortage.active"
+    impact:
+      supply: "-40%"
+      duration: 30d
+    causes:
+      - food_price_spike
+    reference: "CO2-Begasung für Pflanzenwachstum in Gewächshäusern"
+
+  - id: public_transport_disruption
+    name: ÖPNV-Einschränkungen
+    type: infrastructure_failure
+    trigger:
+      target: bus_fleet
+      condition: "adblue_shortage.active"
+    impact:
+      supply: "-30%"
+      duration: 45d
+    reference: "Dieselbusse Euro 6 benötigen AdBlue, betrifft ~50.000 Busse in DE"
+
+  - id: animal_welfare_crisis
+    name: Tierwohl-Krise
+    type: infrastructure_failure
+    trigger:
+      target: livestock_farms
+      condition: "slaughterhouse_shutdown.active"
+    impact:
+      supply: "-50%"
+      duration: 30d
+    causes:
+      - meat_shortage
+    reference: "Überbelegung und Nottötungen bei Schlachtbetrieb-Stopp (UK 2021 Erfahrung)"
+
+  - id: feed_shortage
+    name: Futtermittel-Engpass
+    type: infrastructure_failure
+    trigger:
+      target: animal_feed_supply
+      condition: "truck_logistics_breakdown.active"
+    impact:
+      supply: "-35%"
+      duration: 60d
+    causes:
+      - animal_welfare_crisis
+    reference: "Futtermittel-Lieferung vollständig von LKW-Transport abhängig"
+
+  - id: cold_chain_disruption
+    name: Kühlketten-Unterbrechung
+    type: infrastructure_failure
+    trigger:
+      target: cold_chain_logistics
+      condition: "truck_logistics_breakdown.active"
+    impact:
+      supply: "-45%"
+      duration: 30d
+    causes:
+      - food_price_spike
+    reference: "Frischware, Molkereiprodukte und Fleisch benötigen ununterbrochene Kühlkette"
+
+  - id: hospital_supply_disruption
+    name: Krankenhaus-Versorgungsengpass
+    type: infrastructure_failure
+    trigger:
+      target: hospital_logistics
+      condition: "truck_logistics_breakdown.active"
+    impact:
+      supply: "-20%"
+      duration: 30d
+    reference: "Medikamente, Verbrauchsmaterial und Blutkonserven per LKW"
+
+# =============================================================================
+# Cascades
+# =============================================================================
+cascades:
+  # CO2-Lebensmittel-Kaskade (kurzfristig)
+  - id: co2_food_cascade
+    name: CO2-Lebensmittel-Kaskade
+    origin: gas_price_spike
+    probability: 0.85
+    validation:
+      reference: "UK CO2-Krise 2021, Gaskrise 2022"
+      confidence: 0.9
+    timeline:
+      - at: 0d
+        event: gas_price_spike
+        impact:
+          sector: energy
+          severity: high
+      - at: 7d
+        event: ammonia_production_halt
+        impact:
+          sector: chemistry
+          severity: critical
+        affects:
+          - basf_ludwigshafen
+          - skw_piesteritz
+          - yara_brunsbuettel
+          - ineos_koeln
+      - at: 10d
+        event: co2_shortage
+        impact:
+          sector: chemistry
+          severity: critical
+        affects:
+          - co2_industrial
+      - at: 10d
+        event: ammonia_import_activated
+        impact:
+          sector: chemistry
+          severity: medium
+        affects:
+          - ammonia_import_global
+      - at: 12d
+        event: bio_co2_activated
+        impact:
+          sector: chemistry
+          severity: medium
+        affects:
+          - bio_co2_sources
+      - at: 14d
+        event: slaughterhouse_shutdown
+        impact:
+          sector: food
+          severity: critical
+        affects:
+          - slaughterhouses
+      - at: 14d
+        event: beverage_shortage
+        impact:
+          sector: food
+          severity: high
+        affects:
+          - beverage_industry
+      - at: 14d
+        event: packaging_shortage
+        impact:
+          sector: food
+          severity: high
+        affects:
+          - food_packaging
+      - at: 14d
+        event: greenhouse_production_decline
+        impact:
+          sector: agriculture
+          severity: medium
+        affects:
+          - greenhouses
+      - at: 18d
+        event: animal_welfare_crisis
+        impact:
+          sector: agriculture
+          severity: high
+        affects:
+          - livestock_farms
+      - at: 21d
+        event: meat_shortage
+        impact:
+          sector: retail
+          severity: high
+        affects:
+          - food_retail
+          - consumers
+
+  # AdBlue-Logistik-Kaskade (mittelfristig)
+  - id: adblue_logistics_cascade
+    name: AdBlue-Logistik-Kaskade
+    origin: gas_price_spike
+    probability: 0.8
+    validation:
+      reference: "AdBlue-Knappheit 2021/2022"
+      confidence: 0.85
+    timeline:
+      - at: 0d
+        event: gas_price_spike
+        impact:
+          sector: energy
+          severity: high
+      - at: 14d
+        event: ammonia_production_halt
+        impact:
+          sector: chemistry
+          severity: critical
+      - at: 21d
+        event: urea_shortage
+        impact:
+          sector: chemistry
+          severity: critical
+        affects:
+          - urea_supply
+      - at: 28d
+        event: adblue_shortage
+        impact:
+          sector: chemistry
+          severity: critical
+        affects:
+          - adblue_supply
+      - at: 30d
+        event: public_transport_disruption
+        impact:
+          sector: logistics
+          severity: medium
+        affects:
+          - bus_fleet
+      - at: 35d
+        event: truck_logistics_breakdown
+        impact:
+          sector: logistics
+          severity: critical
+        affects:
+          - heavy_trucks
+          - delivery_vans
+      - at: 37d
+        event: cold_chain_disruption
+        impact:
+          sector: logistics
+          severity: high
+        affects:
+          - cold_chain_logistics
+      - at: 37d
+        event: hospital_supply_disruption
+        impact:
+          sector: healthcare
+          severity: high
+        affects:
+          - hospital_logistics
+      - at: 38d
+        event: feed_shortage
+        impact:
+          sector: agriculture
+          severity: high
+        affects:
+          - animal_feed_supply
+      - at: 40d
+        event: adblue_distribution_collapse
+        impact:
+          sector: chemistry
+          severity: high
+        affects:
+          - adblue_supply
+      - at: 40d
+        event: gas_distribution_degraded
+        impact:
+          sector: energy
+          severity: medium
+        affects:
+          - natural_gas_supply
+      - at: 42d
+        event: supply_chain_disruption
+        impact:
+          sector: retail
+          severity: high
+        affects:
+          - food_retail
+
+  # Düngemittel-Agrar-Kaskade (langfristig)
+  - id: fertilizer_agriculture_cascade
+    name: Düngemittel-Landwirtschafts-Kaskade
+    origin: gas_price_spike
+    probability: 0.75
+    validation:
+      reference: "Düngerpreiskrise 2022, historische Ertragseinbrüche"
+      confidence: 0.8
+    timeline:
+      - at: 0d
+        event: gas_price_spike
+        impact:
+          sector: energy
+          severity: high
+      - at: 14d
+        event: ammonia_production_halt
+        impact:
+          sector: chemistry
+          severity: critical
+      - at: 14d
+        event: ammonia_import_activated
+        impact:
+          sector: chemistry
+          severity: medium
+        affects:
+          - ammonia_import_global
+      - at: 28d
+        event: urea_shortage
+        impact:
+          sector: chemistry
+          severity: critical
+      - at: 35d
+        event: fertilizer_shortage
+        impact:
+          sector: chemistry
+          severity: critical
+        affects:
+          - nitrogen_fertilizer
+          - ammonium_nitrate
+      - at: 90d
+        event: crop_yield_reduction
+        impact:
+          sector: agriculture
+          severity: critical
+        affects:
+          - agriculture_grain
+          - agriculture_vegetables
+      - at: 90d
+        event: greenhouse_production_decline
+        impact:
+          sector: agriculture
+          severity: medium
+        affects:
+          - greenhouses
+          - agriculture_vegetables
+      - at: 180d
+        event: food_price_spike
+        impact:
+          sector: society
+          severity: high
+        affects:
+          - consumers
+          - food_retail
+
+  # Worst-Case: Kombinierte Kaskade
+  - id: combined_crisis_cascade
+    name: Kombinierte Versorgungskrise
+    origin: gas_supply_disruption
+    probability: 0.4
+    validation:
+      reference: "Hypothetisches Worst-Case basierend auf 2022 Daten"
+      confidence: 0.65
+    timeline:
+      - at: 0d
+        event: gas_supply_disruption
+        impact:
+          sector: energy
+          severity: critical
+      - at: 7d
+        event: ammonia_production_halt
+        impact:
+          sector: chemistry
+          severity: critical
+        affects:
+          - basf_ludwigshafen
+          - skw_piesteritz
+          - yara_brunsbuettel
+          - ineos_koeln
+      - at: 7d
+        event: ammonia_import_activated
+        impact:
+          sector: chemistry
+          severity: medium
+        affects:
+          - ammonia_import_global
+      - at: 10d
+        event: co2_shortage
+        impact:
+          sector: chemistry
+          severity: critical
+      - at: 10d
+        event: bio_co2_activated
+        impact:
+          sector: chemistry
+          severity: medium
+        affects:
+          - bio_co2_sources
+      - at: 14d
+        event: slaughterhouse_shutdown
+        impact:
+          sector: food
+          severity: critical
+      - at: 14d
+        event: urea_shortage
+        impact:
+          sector: chemistry
+          severity: critical
+      - at: 14d
+        event: greenhouse_production_decline
+        impact:
+          sector: agriculture
+          severity: medium
+        affects:
+          - greenhouses
+      - at: 18d
+        event: animal_welfare_crisis
+        impact:
+          sector: agriculture
+          severity: high
+        affects:
+          - livestock_farms
+      - at: 21d
+        event: meat_shortage
+        impact:
+          sector: food
+          severity: high
+      - at: 28d
+        event: adblue_shortage
+        impact:
+          sector: logistics
+          severity: critical
+      - at: 30d
+        event: public_transport_disruption
+        impact:
+          sector: logistics
+          severity: medium
+        affects:
+          - bus_fleet
+      - at: 35d
+        event: truck_logistics_breakdown
+        impact:
+          sector: logistics
+          severity: critical
+        affects:
+          - heavy_trucks
+      - at: 37d
+        event: cold_chain_disruption
+        impact:
+          sector: logistics
+          severity: high
+        affects:
+          - cold_chain_logistics
+      - at: 37d
+        event: hospital_supply_disruption
+        impact:
+          sector: healthcare
+          severity: high
+        affects:
+          - hospital_logistics
+      - at: 38d
+        event: feed_shortage
+        impact:
+          sector: agriculture
+          severity: high
+        affects:
+          - animal_feed_supply
+      - at: 40d
+        event: adblue_distribution_collapse
+        impact:
+          sector: chemistry
+          severity: high
+        affects:
+          - adblue_supply
+      - at: 40d
+        event: gas_distribution_degraded
+        impact:
+          sector: energy
+          severity: medium
+        affects:
+          - natural_gas_supply
+      - at: 42d
+        event: fertilizer_shortage
+        impact:
+          sector: agriculture
+          severity: critical
+      - at: 45d
+        event: supply_chain_disruption
+        impact:
+          sector: retail
+          severity: critical
+        affects:
+          - food_retail
+      - at: 120d
+        event: crop_yield_reduction
+        impact:
+          sector: agriculture
+          severity: critical
+        affects:
+          - agriculture_grain
+          - agriculture_vegetables
+      - at: 180d
+        event: food_price_spike
+        impact:
+          sector: society
+          severity: critical
+        affects:
+          - consumers

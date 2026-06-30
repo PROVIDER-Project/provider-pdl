@@ -1,0 +1,599 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://provider-project.org/schemas/pdl-schema.json",
+  "title": "PROVIDER Domain Language (PDL) Schema",
+  "description": "Schema for PDL - a YAML-based DSL for supply chain disruption scenarios",
+  "type": "object",
+  "required": [
+    "pdl_version",
+    "scenario"
+  ],
+  "properties": {
+    "pdl_version": {
+      "type": "string",
+      "enum": [
+        "1.0",
+        "1.1"
+      ],
+      "description": "PDL specification version (supported: 1.0 and 1.1)"
+    },
+    "scenario": {
+      "$ref": "#/definitions/scenario"
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/entity"
+      },
+      "description": "Network nodes: actors, resources, infrastructure"
+    },
+    "supply_chains": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/supplyChain"
+      },
+      "description": "Value chains and dependencies"
+    },
+    "substitutions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/substitution"
+      },
+      "description": "Substitution mechanisms and activation conditions"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/event"
+      },
+      "description": "Disruption events"
+    },
+    "cascades": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/cascade"
+      },
+      "description": "Cascade effects with timeline"
+    }
+  },
+  "definitions": {
+    "scenario": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "sector",
+        "criticality"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Unique scenario identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable scenario name"
+        },
+        "sector": {
+          "type": "string",
+          "description": "Primary sector affected"
+        },
+        "criticality": {
+          "type": "string",
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ],
+          "description": "Overall criticality level"
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional detailed description"
+        }
+      },
+      "additionalProperties": true
+    },
+    "entity": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "name",
+        "sector"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Unique entity identifier"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "manufacturer",
+            "commodity",
+            "infrastructure",
+            "service",
+            "region"
+          ],
+          "description": "Entity type classification"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable entity name"
+        },
+        "sector": {
+          "type": "string",
+          "description": "Business sector"
+        },
+        "location": {
+          "type": "string",
+          "description": "Geographic location"
+        },
+        "vulnerability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Vulnerability score (0-1)"
+        },
+        "substitution_potential": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Entity-level substitution potential (0-1)"
+        }
+      },
+      "additionalProperties": true
+    },
+    "supplyChain": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Unique supply chain identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable name"
+        },
+        "stages": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "description": "Sequential chain stages as [from, to] pairs"
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/dependency"
+          },
+          "description": "Cross-dependencies to other entities"
+        }
+      },
+      "additionalProperties": true
+    },
+    "dependency": {
+      "type": "object",
+      "required": [
+        "from",
+        "to",
+        "type"
+      ],
+      "properties": {
+        "from": {
+          "type": "string",
+          "description": "Source entity ID"
+        },
+        "to": {
+          "type": "string",
+          "description": "Target entity ID"
+        },
+        "type": {
+          "type": "string",
+          "description": "Dependency type (e.g., energy, input, logistics, data, substitution, demand)"
+        },
+        "criticality": {
+          "type": "string",
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ],
+          "description": "Dependency criticality"
+        },
+        "substitution_ref": {
+          "type": "string",
+          "description": "Reference to a substitution definition"
+        }
+      },
+      "additionalProperties": true
+    },
+    "substitution": {
+      "type": "object",
+      "required": [
+        "id",
+        "from",
+        "to",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Unique substitution identifier"
+        },
+        "from": {
+          "type": "string",
+          "description": "Entity ID being replaced"
+        },
+        "to": {
+          "type": "string",
+          "description": "Entity ID that substitutes"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "product",
+            "supplier",
+            "route",
+            "technology",
+            "buffer",
+            "mode"
+          ],
+          "description": "Substitution type"
+        },
+        "direction": {
+          "type": "string",
+          "enum": [
+            "supply",
+            "demand"
+          ],
+          "description": "Substitution direction"
+        },
+        "coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Maximum substitution coverage (0-1)"
+        },
+        "quality_delta": {
+          "type": "number",
+          "description": "Relative quality/performance change"
+        },
+        "cost_delta": {
+          "type": "number",
+          "description": "Relative cost change"
+        },
+        "ramp_up": {
+          "type": "string",
+          "pattern": "^[0-9]+[dhwmy]$",
+          "description": "Ramp-up duration"
+        },
+        "duration_max": {
+          "type": "string",
+          "pattern": "^[0-9]+[dhwmy]$",
+          "description": "Maximum duration for buffer substitutions"
+        },
+        "reversible": {
+          "type": "boolean",
+          "description": "Whether substitution can be reversed"
+        },
+        "activation": {
+          "$ref": "#/definitions/activation",
+          "description": "Activation conditions"
+        },
+        "side_effects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/sideEffect"
+          },
+          "description": "Substitution side effects"
+        },
+        "dependency_overlap": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Shared upstream dependencies (pseudo-diversification risk)"
+        },
+        "reference": {
+          "type": "string",
+          "description": "Documentation reference"
+        }
+      },
+      "additionalProperties": true
+    },
+    "activation": {
+      "type": "object",
+      "properties": {
+        "trigger": {
+          "type": "string",
+          "description": "Trigger expression"
+        },
+        "threshold": {
+          "$ref": "#/definitions/activationThreshold",
+          "description": "Quantitative activation thresholds"
+        }
+      },
+      "additionalProperties": true
+    },
+    "activationThreshold": {
+      "type": "object",
+      "properties": {
+        "price_increase": {
+          "type": "number",
+          "description": "Activation threshold for price increase (decimal)"
+        },
+        "supply_drop": {
+          "type": "number",
+          "description": "Activation threshold for supply drop (decimal)"
+        },
+        "duration_min": {
+          "type": "string",
+          "pattern": "^[0-9]+[dhwmy]$",
+          "description": "Minimum disruption duration before activation"
+        }
+      },
+      "additionalProperties": true
+    },
+    "sideEffect": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "price_pressure",
+            "quality_loss",
+            "correlated_risk",
+            "depletion",
+            "efficiency_loss",
+            "capacity_loss",
+            "latency_increase",
+            "resistance_risk",
+            "demand_reduction"
+          ],
+          "description": "Side effect type"
+        },
+        "target": {
+          "type": "string",
+          "description": "Entity ID affected by the side effect"
+        },
+        "magnitude": {
+          "type": "number",
+          "description": "Relative side effect magnitude"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable side effect description"
+        }
+      },
+      "additionalProperties": true
+    },
+    "event": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "type",
+        "trigger"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Unique event identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable event name"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "natural_disaster",
+            "market_shock",
+            "infrastructure_failure",
+            "regulatory",
+            "geopolitical",
+            "pandemic",
+            "cyber_attack"
+          ],
+          "description": "Event type classification"
+        },
+        "trigger": {
+          "$ref": "#/definitions/trigger",
+          "description": "Event trigger conditions"
+        },
+        "impact": {
+          "$ref": "#/definitions/impact",
+          "description": "Event impact parameters"
+        },
+        "causes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "IDs of events triggered by this event"
+        },
+        "substitution_ref": {
+          "type": "string",
+          "description": "Reference to a substitution activated or represented by this event"
+        },
+        "reference": {
+          "type": "string",
+          "description": "Historical or documentation reference"
+        }
+      },
+      "additionalProperties": true
+    },
+    "trigger": {
+      "type": "object",
+      "required": [
+        "target"
+      ],
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Target entity ID"
+        },
+        "probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Trigger probability (0-1)"
+        },
+        "condition": {
+          "type": "string",
+          "description": "Conditional trigger expression"
+        }
+      },
+      "additionalProperties": true
+    },
+    "impact": {
+      "type": "object",
+      "properties": {
+        "supply": {
+          "type": "string",
+          "pattern": "^[+-]?[0-9]+%$",
+          "description": "Supply impact as percentage (e.g., -40%)"
+        },
+        "demand": {
+          "type": "string",
+          "pattern": "^[+-]?[0-9]+%$",
+          "description": "Demand impact as percentage"
+        },
+        "price": {
+          "type": "string",
+          "pattern": "^[+-]?[0-9]+%$",
+          "description": "Price impact as percentage"
+        },
+        "duration": {
+          "type": "string",
+          "pattern": "^[0-9]+[dhwmy]$",
+          "description": "Impact duration (d=days, h=hours, w=weeks, m=months, y=years)"
+        },
+        "sector": {
+          "type": "string",
+          "description": "Affected sector"
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "critical",
+            "high",
+            "medium",
+            "low"
+          ],
+          "description": "Impact severity level"
+        }
+      },
+      "additionalProperties": true
+    },
+    "cascade": {
+      "type": "object",
+      "required": [
+        "id",
+        "origin",
+        "timeline"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Unique cascade identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable cascade name"
+        },
+        "origin": {
+          "type": "string",
+          "description": "Origin event ID"
+        },
+        "timeline": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/timelineEntry"
+          },
+          "description": "Cascade timeline entries"
+        },
+        "probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Overall cascade probability"
+        },
+        "validation": {
+          "$ref": "#/definitions/validation",
+          "description": "Validation references"
+        }
+      },
+      "additionalProperties": true
+    },
+    "timelineEntry": {
+      "type": "object",
+      "required": [
+        "at",
+        "event"
+      ],
+      "properties": {
+        "at": {
+          "type": "string",
+          "pattern": "^[0-9]+[dhwmy]$",
+          "description": "Time offset from cascade origin"
+        },
+        "event": {
+          "type": "string",
+          "description": "Event ID or event name"
+        },
+        "impact": {
+          "$ref": "#/definitions/impact",
+          "description": "Impact at this timeline point"
+        },
+        "affects": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Entity IDs affected at this point"
+        }
+      },
+      "additionalProperties": true
+    },
+    "validation": {
+      "type": "object",
+      "properties": {
+        "reference": {
+          "type": "string",
+          "description": "Reference to historical data or documentation"
+        },
+        "source": {
+          "type": "string",
+          "description": "Data source"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Confidence level in validation"
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

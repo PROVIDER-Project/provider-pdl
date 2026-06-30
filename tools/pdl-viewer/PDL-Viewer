@@ -1,0 +1,28 @@
+web/index.html:22:      <button id="tabAbout" class="tab" type="button">About</button>
+web/index.html:237:          <p class="eyebrow">PDL YAML</p>
+web/index.html:269:        <p class="about-text">PDL-Viewer ist ein webbasiertes Tool zur interaktiven Analyse von PDL-YAML-Szenarien als Netzwerkgraph.</p>
+web/index.html:270:        <p class="about-text">Die Anwendung kombiniert Graph-Exploration, Filter, Pfadanalyse und YAML-Inspektion in einer einzigen Oberfläche.</p>
+web/index.html:275:          <p class="about-text">Sichtbarmachen von Abhaengigkeiten, Events und Cascade-Effekten in Lieferketten fuer Forschung und Diskussion.</p>
+web/index.html:287:          <p class="about-text">Open Source unter der MIT License.</p>
+web/styles.css:135:header .eyebrow {
+web/styles.css:222:.validation-block {
+web/styles.css:638:.yaml-actions {
+web/styles.css:645:.yaml-jump {
+web/styles.css:660:.yaml-jump:hover {
+web/styles.css:664:.yaml-jump-icon {
+web/styles.css:705:.about-text {
+web/app.js:91:  tabAbout: document.getElementById("tabAbout"),
+web/app.js:100:  validationStatus: document.getElementById("validationStatus"),
+web/app.js:101:  validationList: document.getElementById("validationList"),
+web/app.js:927:  if (!elements.validationStatus) return;
+web/app.js:928:  elements.validationStatus.textContent = message;
+web/app.js:929:  elements.validationStatus.style.color = isError ? "#b91c1c" : "#4b5563";
+web/app.js:933:  if (!elements.validationList) return;
+web/app.js:934:  elements.validationList.innerHTML = "";
+web/app.js:945:    elements.validationList.appendChild(li);
+web/app.js:951:    elements.validationList.appendChild(li);
+web/app.js:1247:  elements.tabAbout.classList.toggle("active", isAbout);
+web/app.js:1410:function focusNodeFromYaml(nodeId) {
+web/app.js:1954:    if (elements.validationList) {
+web/app.js:1955:      elements.validationList.innerHTML = "";
+web/app.js:2059:  elements.tabAbout.addEventListener("click", () => setActiveTab("about"));

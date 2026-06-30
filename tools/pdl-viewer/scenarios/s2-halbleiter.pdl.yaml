@@ -1,0 +1,1056 @@
+# =============================================================================
+# PDL Szenario: Halbleiter-Lieferkette
+# =============================================================================
+# Beschreibung: Kaskadeneffekte einer Unterbrechung der Halbleiter-Lieferkette
+#               (z.B. Erdbeben Taiwan, geopolitischer Konflikt) auf Automotive,
+#               Medizintechnik, Energietechnik und Maschinenbau in Deutschland
+# Basiert auf: PROVIDER-Szenarien-Dokumentation.md, Szenario 2
+# Historische Referenz: Globale Chipkrise 2021-2022
+# =============================================================================
+
+pdl_version: "1.1"
+
+scenario:
+  id: semiconductor_supply_disruption
+  name: Halbleiter-Lieferkettenkrise
+  sector: technology
+  criticality: high
+  description: >
+    Simulation der Kaskadeneffekte einer Unterbrechung der globalen
+    Halbleiter-Lieferkette. Taiwan (TSMC) kontrolliert ~57% des globalen
+    Foundry-Umsatzes (~44% der installierten Kapazität) und >90% der
+    Advanced Nodes (<7nm). Die deutsche Automobilindustrie war 2021
+    durch den Chipmangel massiv betroffen (Produktionsrückgang vs.
+    2019: ca. -30%). Betroffene Sektoren: Automotive, Medizintechnik,
+    Energietechnik, Maschinenbau, Consumer-Elektronik.
+
+# =============================================================================
+# Entities
+# =============================================================================
+entities:
+  # Rohstoffe und Materialien
+  - id: silicon_wafer_supply
+    type: commodity
+    name: Silizium-Wafer-Versorgung
+    sector: technology
+    vulnerability: 0.5
+    note: "Produktion konzentriert in Japan (Shin-Etsu, SUMCO ~55%) und Deutschland (Siltronic)"
+
+  - id: neon_gas_supply
+    type: commodity
+    name: Neongas-Versorgung (Lithographie)
+    sector: chemistry
+    vulnerability: 0.75
+    note: "Ukraine lieferte ~50% des globalen Neons für Chipfertigung, nach 2022 diversifiziert"
+
+  - id: rare_earth_supply
+    type: commodity
+    name: Seltene Erden
+    sector: mining
+    vulnerability: 0.7
+    note: "China kontrolliert ~60% der Förderung und ~90% der Verarbeitung"
+
+  # Fertigung (Foundries)
+  - id: tsmc_taiwan
+    type: manufacturer
+    name: TSMC (Taiwan Semiconductor Manufacturing Company)
+    sector: technology
+    location: Taiwan
+    vulnerability: 0.8
+    market_share_advanced: 0.92
+    market_share_foundry: 0.57
+    note: ">90% Marktanteil bei Advanced Nodes <7nm"
+
+  - id: samsung_foundry
+    type: manufacturer
+    name: Samsung Foundry
+    sector: technology
+    location: South Korea
+    vulnerability: 0.5
+    market_share_foundry: 0.12
+
+  - id: globalfoundries
+    type: manufacturer
+    name: GlobalFoundries (Mature Nodes)
+    sector: technology
+    location: United States
+    vulnerability: 0.4
+    note: "Spezialisiert auf 12nm+ Nodes, wichtig für Automotive"
+
+  # Equipment
+  - id: asml_netherlands
+    type: manufacturer
+    name: ASML (EUV-Lithographie)
+    sector: technology
+    location: Netherlands
+    vulnerability: 0.3
+    note: "Monopol auf EUV-Lithographiesysteme, Lieferzeit 18-24 Monate"
+
+  # Packaging & Test
+  - id: osat_packaging
+    type: manufacturer
+    name: OSAT Packaging & Test (ASE, Amkor)
+    sector: technology
+    location: Taiwan
+    vulnerability: 0.65
+    note: "Assembly und Test überwiegend in Taiwan und Südostasien"
+
+  # Logistik
+  - id: taiwan_logistics
+    type: infrastructure
+    name: Taiwan Häfen und Luftfracht
+    sector: logistics
+    location: Taiwan
+    vulnerability: 0.7
+
+  # Deutsche Industrie - Automotive
+  - id: bosch_semiconductor
+    type: manufacturer
+    name: Bosch Automotive Halbleiter
+    sector: automotive
+    location: Germany
+    vulnerability: 0.65
+
+  - id: infineon_dresden
+    type: manufacturer
+    name: Infineon Dresden (Power Semiconductors)
+    sector: technology
+    location: Germany
+    vulnerability: 0.55
+    note: "Eigene Fertigung für Power-Halbleiter (SiC, GaN)"
+
+  - id: vw_production
+    type: manufacturer
+    name: VW/Audi Fahrzeugproduktion
+    sector: automotive
+    location: Germany
+    vulnerability: 0.7
+    note: "~1.500 Chips pro Fahrzeug, bis zu 3.000 bei E-Autos"
+
+  - id: bmw_production
+    type: manufacturer
+    name: BMW Fahrzeugproduktion
+    sector: automotive
+    location: Germany
+    vulnerability: 0.65
+
+  - id: zulieferer_cluster
+    type: manufacturer
+    name: Automotive-Zulieferer-Cluster
+    sector: automotive
+    location: Germany
+    vulnerability: 0.75
+    note: "Continental, ZF, Schaeffler — abhängig von OEM-Aufträgen"
+
+  # Deutsche Industrie - Medizintechnik
+  - id: medical_devices_de
+    type: manufacturer
+    name: Medizintechnik Deutschland (Siemens Healthineers, Dräger)
+    sector: healthcare
+    location: Germany
+    vulnerability: 0.6
+
+  # Deutsche Industrie - Energietechnik
+  - id: energy_tech_de
+    type: manufacturer
+    name: Energietechnik (Smart Meter, Wechselrichter, Netzleittechnik)
+    sector: energy
+    location: Germany
+    vulnerability: 0.55
+
+  # Deutsche Industrie - Maschinenbau
+  - id: industrial_equipment_de
+    type: manufacturer
+    name: Maschinenbau (SPS, Antriebstechnik, Robotik)
+    sector: industry
+    location: Germany
+    vulnerability: 0.5
+
+  # Endverbraucher/Gesellschaft
+  - id: automotive_consumers
+    type: region
+    name: Automobilmarkt und Verbraucher
+    sector: automotive
+    location: Germany
+    vulnerability: 0.5
+
+  - id: healthcare_patients
+    type: region
+    name: Patienten und Gesundheitssystem
+    sector: healthcare
+    location: Germany
+    vulnerability: 0.6
+
+  - id: energiewende
+    type: service
+    name: Energiewende (PV, Windkraft, Smart Grid)
+    sector: energy
+    location: Germany
+    vulnerability: 0.45
+
+  # Resilienz-Mechanismen
+  - id: alternative_fabs
+    type: infrastructure
+    name: Alternative Foundries (Samsung, Intel Foundry, UMC)
+    sector: technology
+    location: Global
+    vulnerability: 0.35
+    note: "Qualifikation neuer Foundries dauert 6-18 Monate für Automotive"
+
+  - id: eu_chips_act
+    type: infrastructure
+    name: EU Chips Act Kapazitäten
+    sector: technology
+    location: EU
+    vulnerability: 0.25
+    note: "43 Mrd. EUR Investitionsziel, Intel Magdeburg, TSMC Dresden — Kapazität ab ~2027"
+
+# =============================================================================
+# Supply Chains
+# =============================================================================
+supply_chains:
+  # Hauptkette: Wafer → Foundry → Packaging → OEM
+  - id: semiconductor_main_chain
+    name: Halbleiter-Hauptlieferkette
+    stages:
+      - [silicon_wafer_supply, tsmc_taiwan]
+      - [neon_gas_supply, tsmc_taiwan]
+      - [silicon_wafer_supply, samsung_foundry]
+      - [silicon_wafer_supply, globalfoundries]
+      - [tsmc_taiwan, osat_packaging]
+      - [samsung_foundry, osat_packaging]
+      - [globalfoundries, osat_packaging]
+      - [tsmc_taiwan, taiwan_logistics]
+      - [osat_packaging, bosch_semiconductor]
+      - [osat_packaging, infineon_dresden]
+      - [bosch_semiconductor, vw_production]
+      - [bosch_semiconductor, bmw_production]
+      - [infineon_dresden, vw_production]
+      - [infineon_dresden, energy_tech_de]
+    dependencies:
+      - from: tsmc_taiwan
+        to: silicon_wafer_supply
+        type: input
+        criticality: high
+      - from: tsmc_taiwan
+        to: neon_gas_supply
+        type: input
+        criticality: high
+      - from: tsmc_taiwan
+        to: asml_netherlands
+        type: input
+        criticality: high
+      - from: tsmc_taiwan
+        to: taiwan_logistics
+        type: logistics
+        criticality: high
+      - from: asml_netherlands
+        to: rare_earth_supply
+        type: input
+        criticality: medium
+      - from: osat_packaging
+        to: tsmc_taiwan
+        type: input
+        criticality: high
+      - from: bosch_semiconductor
+        to: osat_packaging
+        type: input
+        criticality: high
+
+  # Automotive-spezifische Kette
+  - id: automotive_chip_chain
+    name: Automotive-Halbleiter-Kette
+    stages:
+      - [vw_production, zulieferer_cluster]
+      - [bmw_production, zulieferer_cluster]
+      - [zulieferer_cluster, automotive_consumers]
+      - [vw_production, automotive_consumers]
+      - [bmw_production, automotive_consumers]
+    dependencies:
+      - from: zulieferer_cluster
+        to: vw_production
+        type: demand
+        criticality: high
+      - from: zulieferer_cluster
+        to: bmw_production
+        type: demand
+        criticality: high
+
+  # Medizintechnik-Kette
+  - id: medical_chip_chain
+    name: Medizintechnik-Halbleiter-Kette
+    stages:
+      - [osat_packaging, medical_devices_de]
+      - [medical_devices_de, healthcare_patients]
+    dependencies:
+      - from: medical_devices_de
+        to: osat_packaging
+        type: input
+        criticality: high
+
+  # Energietechnik-Kette
+  - id: energy_chip_chain
+    name: Energietechnik-Halbleiter-Kette
+    stages:
+      - [infineon_dresden, energy_tech_de]
+      - [energy_tech_de, energiewende]
+      - [osat_packaging, industrial_equipment_de]
+    dependencies:
+      - from: energy_tech_de
+        to: infineon_dresden
+        type: input
+        criticality: high
+
+  # Resilienz- und Feedback-Kette
+  - id: resilience_feedback_chain
+    name: Resilienz- und Feedback-Kette
+    stages:
+      - [alternative_fabs, bosch_semiconductor]
+      - [alternative_fabs, infineon_dresden]
+      - [eu_chips_act, bosch_semiconductor]
+      - [automotive_consumers, zulieferer_cluster]
+    dependencies:
+      - from: bosch_semiconductor
+        to: alternative_fabs
+        type: input
+        criticality: medium
+        note: "Umqualifikation auf alternative Foundries dauert 6-18 Monate"
+      - from: alternative_fabs
+        to: tsmc_taiwan
+        type: substitution
+        substitution_ref: sub_tsmc_alternative_fabs
+        criticality: medium
+        note: "Lieferantensubstitution: Samsung, Intel Foundry, UMC ersetzen TSMC partiell"
+      - from: zulieferer_cluster
+        to: automotive_consumers
+        type: demand
+        criticality: high
+        note: "Nachfragerückgang reduziert Auftragsbestand"
+
+# =============================================================================
+# Substitutions
+# =============================================================================
+substitutions:
+
+  - id: sub_tsmc_alternative_fabs
+    from: tsmc_taiwan
+    to: alternative_fabs
+    type: supplier
+
+    coverage: 0.45        # Max. ersetzbarer Anteil (technisch möglich, qualifikationsabhängig)
+    quality_delta: 0.0    # Gleiche Qualität nach erfolgreicher Automotive-Zertifizierung
+    cost_delta: 0.15      # 15% Mehrkosten durch Umqualifikation und geringere Skaleneffekte
+    ramp_up: 540d         # 6-18 Monate Umqualifikation für Automotive-Zertifizierung
+
+    activation:
+      trigger: "tsmc_production_halt.active"
+      threshold:
+        supply_drop: 0.50  # Substitution greift ab 50% TSMC-Ausfall
+
+    reversible: false      # Qualifikation ist langfristig; kein einfaches Zurückwechseln
+
+    side_effects:
+      - type: capacity_loss
+        target: alternative_fabs
+        magnitude: 0.30
+        description: "Während der Umqualifikationsphase nur ~70% der Zielkapazität erreichbar"
+
+    dependency_overlap: []  # Samsung/Intel Foundry haben keine Taiwan-Abhängigkeit — echte Diversifikation
+
+    reference: "Chipkrise 2021: Automotive-Umqualifikation auf Samsung/UMC dauerte 12-18 Monate; IPC-7711/7721, IATF 16949"
+
+# =============================================================================
+# Events
+# =============================================================================
+events:
+  # Primäre Auslöser
+  - id: taiwan_earthquake
+    name: Erdbeben Taiwan (Hsinchu Science Park)
+    type: natural_disaster
+    trigger:
+      target: tsmc_taiwan
+      probability: 0.08
+    impact:
+      supply: "-80%"
+      duration: 45d
+    causes:
+      - tsmc_production_halt
+      - logistics_disruption_taiwan
+    reference: "Erdbebenrisiko Hsinchu: Magnitude 7.5 — TSMC Fab12/14 betroffen, Recovery 180d"
+
+  - id: geopolitical_crisis_taiwan
+    name: Geopolitische Krise Taiwan-Straße
+    type: geopolitical
+    trigger:
+      target: tsmc_taiwan
+      probability: 0.05
+    impact:
+      supply: "-95%"
+      duration: 180d
+    causes:
+      - tsmc_production_halt
+      - logistics_disruption_taiwan
+    reference: "Blockade/Invasion-Szenario — würde ~57% der globalen Foundry-Produktion stoppen"
+
+  # Produktionsstopp
+  - id: tsmc_production_halt
+    name: TSMC Produktionsstopp
+    type: infrastructure_failure
+    trigger:
+      target: tsmc_taiwan
+      condition: "taiwan_earthquake.active OR geopolitical_crisis_taiwan.active"
+    impact:
+      supply: "-85%"
+      duration: 90d
+    causes:
+      - automotive_chip_shortage
+      - medical_chip_shortage
+      - energy_chip_shortage
+      - industrial_chip_shortage
+      - alternative_sourcing_activated
+    reference: "TSMC ~57% globaler Foundry-Marktanteil, >90% bei Advanced Nodes"
+
+  - id: logistics_disruption_taiwan
+    name: Logistik-Unterbrechung Taiwan
+    type: infrastructure_failure
+    trigger:
+      target: taiwan_logistics
+      condition: "taiwan_earthquake.active OR geopolitical_crisis_taiwan.active"
+    impact:
+      supply: "-70%"
+      duration: 60d
+    causes:
+      - tsmc_production_halt
+    reference: "Häfen und Flughäfen Taiwan — kritisch für Chip-Exporte"
+
+  - id: neon_supply_disruption
+    name: Neongas-Versorgungsunterbrechung
+    type: geopolitical
+    trigger:
+      target: neon_gas_supply
+      probability: 0.1
+    impact:
+      supply: "-50%"
+      price: "+400%"
+      duration: 90d
+    causes:
+      - tsmc_production_halt
+    reference: "Ukraine-Konflikt 2022: Neon-Versorgung kurzzeitig -50%, seitdem diversifiziert"
+
+  # Sektorale Chip-Engpässe
+  - id: automotive_chip_shortage
+    name: Automotive-Chip-Engpass
+    type: infrastructure_failure
+    trigger:
+      target: bosch_semiconductor
+      condition: "tsmc_production_halt.active"
+    impact:
+      supply: "-60%"
+      duration: 180d
+    causes:
+      - automotive_production_cut
+    reference: "Chipkrise 2021: Automotive-MCUs (28-90nm) besonders betroffen"
+
+  - id: medical_chip_shortage
+    name: Medizintechnik-Chip-Engpass
+    type: infrastructure_failure
+    trigger:
+      target: medical_devices_de
+      condition: "tsmc_production_halt.active"
+    impact:
+      supply: "-35%"
+      duration: 120d
+    causes:
+      - medical_device_shortage
+    reference: "Lieferzeit Medizintechnik 2021: +30-50% über 8 Monate"
+
+  - id: energy_chip_shortage
+    name: Energietechnik-Chip-Engpass
+    type: infrastructure_failure
+    trigger:
+      target: energy_tech_de
+      condition: "tsmc_production_halt.active"
+    impact:
+      supply: "-30%"
+      duration: 150d
+    causes:
+      - smart_meter_shortage
+      - energiewende_delay
+    reference: "Smart-Meter-Rollout und PV-Wechselrichter betroffen"
+
+  - id: industrial_chip_shortage
+    name: Maschinenbau-Chip-Engpass
+    type: infrastructure_failure
+    trigger:
+      target: industrial_equipment_de
+      condition: "tsmc_production_halt.active"
+    impact:
+      supply: "-25%"
+      duration: 120d
+    reference: "SPS-Steuerungen, Antriebstechnik, Sensorik betroffen"
+
+  # Automotive-Kaskade
+  - id: automotive_production_cut
+    name: Automotive-Produktionskürzung
+    type: infrastructure_failure
+    trigger:
+      target: vw_production
+      condition: "automotive_chip_shortage.active"
+    impact:
+      supply: "-18%"
+      duration: 180d
+    causes:
+      - kurzarbeit_zulieferer
+      - gebrauchtwagen_preisanstieg
+    reference: "Chipkrise 2021: DE-Autoproduktion ca. -30% vs. 2019, geschätzt 500.000 Fahrzeuge weniger produziert"
+
+  - id: kurzarbeit_zulieferer
+    name: Kurzarbeit Automotive-Zulieferer
+    type: market_shock
+    trigger:
+      target: zulieferer_cluster
+      condition: "automotive_production_cut.active"
+    impact:
+      supply: "-25%"
+      duration: 240d
+    causes:
+      - consumer_spending_reduction
+    reference: "245.000 Arbeitsplätze kurzfristig gefährdet (PROVIDER-Simulation)"
+
+  - id: gebrauchtwagen_preisanstieg
+    name: Gebrauchtwagen-Preisexplosion
+    type: market_shock
+    trigger:
+      target: automotive_consumers
+      condition: "automotive_production_cut.active"
+    impact:
+      price: "+25%"
+      duration: 365d
+    causes:
+      - consumer_spending_reduction
+    reference: "Chipkrise 2021: Gebrauchtwagenpreise DE +25% in 12 Monaten"
+
+  - id: consumer_spending_reduction
+    name: Konsumausgaben-Rückgang
+    type: market_shock
+    trigger:
+      target: automotive_consumers
+      condition: "kurzarbeit_zulieferer.active AND gebrauchtwagen_preisanstieg.active"
+    impact:
+      demand: "-5%"
+      duration: 180d
+    reference: "BIP-Effekt: -0,8% bis -1,2%, Exportrückgang 12-15 Mrd. EUR"
+
+  # Medizintechnik-Kaskade
+  - id: medical_device_shortage
+    name: Medizintechnik-Engpass
+    type: infrastructure_failure
+    trigger:
+      target: medical_devices_de
+      condition: "medical_chip_shortage.active"
+    impact:
+      supply: "-30%"
+      duration: 180d
+    causes:
+      - surgery_delays
+    reference: "Bildgebung (CT, MRT), Patientenmonitoring, Laborautomation betroffen"
+
+  - id: surgery_delays
+    name: Operationsverzögerungen
+    type: infrastructure_failure
+    trigger:
+      target: healthcare_patients
+      condition: "medical_device_shortage.active"
+    impact:
+      supply: "-15%"
+      duration: 120d
+    reference: "6-monatiger Rückstau bei Medizintechnik-Equipment erwartet"
+
+  # Energietechnik-Kaskade
+  - id: smart_meter_shortage
+    name: Smart-Meter-Mangel
+    type: infrastructure_failure
+    trigger:
+      target: energy_tech_de
+      condition: "energy_chip_shortage.active"
+    impact:
+      supply: "-40%"
+      duration: 180d
+    causes:
+      - energiewende_delay
+    reference: "Smart-Meter-Rollout DE: gesetzlich vorgeschrieben, Chip-abhängig"
+
+  - id: energiewende_delay
+    name: Verzögerung Energiewende
+    type: infrastructure_failure
+    trigger:
+      target: energiewende
+      condition: "smart_meter_shortage.active OR energy_chip_shortage.active"
+    impact:
+      supply: "-20%"
+      duration: 365d
+    reference: "PV-Wechselrichter, Windkraft-Steuerung, Netzleittechnik betroffen — 12 Monate Verzögerung"
+
+  # Resilienz-Events
+  - id: alternative_sourcing_activated
+    name: Alternative Foundries aktiviert
+    type: market_shock
+    substitution_ref: sub_tsmc_alternative_fabs
+    trigger:
+      target: alternative_fabs
+      condition: "tsmc_production_halt.active"
+    impact:
+      supply: "-30%"
+      price: "+50%"
+      duration: 270d
+    reference: "Samsung, Intel Foundry, UMC — Umqualifikation für Automotive 6-18 Monate"
+
+  - id: eu_chips_act_acceleration
+    name: EU Chips Act Beschleunigung
+    type: regulatory
+    trigger:
+      target: eu_chips_act
+      condition: "tsmc_production_halt.active"
+    impact:
+      supply: "+5%"
+      duration: 730d
+    reference: "EU Chips Act: 43 Mrd. EUR, Ziel 20% Weltmarktanteil bis 2030 — Intel Magdeburg, TSMC Dresden"
+
+  # Feedback-Loop Events
+  - id: demand_destruction
+    name: Nachfragezerstörung durch Preisanstieg
+    type: market_shock
+    trigger:
+      target: automotive_consumers
+      condition: "gebrauchtwagen_preisanstieg.active AND automotive_production_cut.duration > 90d"
+    impact:
+      demand: "-12%"
+      duration: 180d
+    causes:
+      - kurzarbeit_zulieferer
+    reference: "Preisanstieg → Kaufzurückhaltung → weniger Aufträge → verstärkte Kurzarbeit"
+
+# =============================================================================
+# Cascades
+# =============================================================================
+cascades:
+  # Erdbeben-Kaskade
+  - id: taiwan_earthquake_cascade
+    name: Taiwan-Erdbeben-Kaskade
+    origin: taiwan_earthquake
+    probability: 0.92
+    validation:
+      reference: "Chipkrise 2021, Taiwan-Erdbeben 2024 (Hualien M7.4)"
+      confidence: 0.85
+    timeline:
+      - at: 0d
+        event: taiwan_earthquake
+        impact:
+          sector: technology
+          severity: critical
+        affects:
+          - tsmc_taiwan
+      - at: 0d
+        event: logistics_disruption_taiwan
+        impact:
+          sector: logistics
+          severity: high
+        affects:
+          - taiwan_logistics
+      - at: 3d
+        event: tsmc_production_halt
+        impact:
+          sector: technology
+          severity: critical
+        affects:
+          - tsmc_taiwan
+          - samsung_foundry
+      - at: 5d
+        event: alternative_sourcing_activated
+        impact:
+          sector: technology
+          severity: medium
+        affects:
+          - alternative_fabs
+      - at: 14d
+        event: automotive_chip_shortage
+        impact:
+          sector: automotive
+          severity: critical
+        affects:
+          - bosch_semiconductor
+          - infineon_dresden
+      - at: 14d
+        event: energy_chip_shortage
+        impact:
+          sector: energy
+          severity: high
+        affects:
+          - energy_tech_de
+      - at: 21d
+        event: industrial_chip_shortage
+        impact:
+          sector: industry
+          severity: high
+        affects:
+          - industrial_equipment_de
+      - at: 28d
+        event: automotive_production_cut
+        impact:
+          sector: automotive
+          severity: critical
+        affects:
+          - vw_production
+          - bmw_production
+      - at: 42d
+        event: kurzarbeit_zulieferer
+        impact:
+          sector: automotive
+          severity: high
+        affects:
+          - zulieferer_cluster
+      - at: 56d
+        event: gebrauchtwagen_preisanstieg
+        impact:
+          sector: automotive
+          severity: medium
+        affects:
+          - automotive_consumers
+      - at: 84d
+        event: medical_chip_shortage
+        impact:
+          sector: healthcare
+          severity: high
+        affects:
+          - medical_devices_de
+      - at: 90d
+        event: consumer_spending_reduction
+        impact:
+          sector: retail
+          severity: medium
+        affects:
+          - automotive_consumers
+      - at: 100d
+        event: medical_device_shortage
+        impact:
+          sector: healthcare
+          severity: high
+        affects:
+          - medical_devices_de
+      - at: 112d
+        event: smart_meter_shortage
+        impact:
+          sector: energy
+          severity: medium
+        affects:
+          - energy_tech_de
+      - at: 120d
+        event: surgery_delays
+        impact:
+          sector: healthcare
+          severity: high
+        affects:
+          - healthcare_patients
+      - at: 120d
+        event: demand_destruction
+        impact:
+          sector: automotive
+          severity: medium
+        affects:
+          - automotive_consumers
+      - at: 150d
+        event: energiewende_delay
+        impact:
+          sector: energy
+          severity: medium
+        affects:
+          - energiewende
+      - at: 180d
+        event: eu_chips_act_acceleration
+        impact:
+          sector: technology
+          severity: low
+        affects:
+          - eu_chips_act
+
+  # Geopolitische Krise
+  - id: geopolitical_crisis_cascade
+    name: Geopolitische Krise Taiwan
+    origin: geopolitical_crisis_taiwan
+    probability: 0.6
+    validation:
+      reference: "Hypothetisches Szenario basierend auf Chipkrise 2021"
+      confidence: 0.5
+    timeline:
+      - at: 0d
+        event: geopolitical_crisis_taiwan
+        impact:
+          sector: technology
+          severity: critical
+        affects:
+          - tsmc_taiwan
+          - taiwan_logistics
+      - at: 1d
+        event: logistics_disruption_taiwan
+        impact:
+          sector: logistics
+          severity: critical
+        affects:
+          - taiwan_logistics
+          - osat_packaging
+      - at: 3d
+        event: tsmc_production_halt
+        impact:
+          sector: technology
+          severity: critical
+        affects:
+          - tsmc_taiwan
+      - at: 3d
+        event: alternative_sourcing_activated
+        impact:
+          sector: technology
+          severity: medium
+        affects:
+          - alternative_fabs
+      - at: 7d
+        event: automotive_chip_shortage
+        impact:
+          sector: automotive
+          severity: critical
+        affects:
+          - bosch_semiconductor
+      - at: 7d
+        event: medical_chip_shortage
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - medical_devices_de
+      - at: 7d
+        event: energy_chip_shortage
+        impact:
+          sector: energy
+          severity: high
+        affects:
+          - energy_tech_de
+      - at: 14d
+        event: industrial_chip_shortage
+        impact:
+          sector: industry
+          severity: high
+        affects:
+          - industrial_equipment_de
+      - at: 21d
+        event: automotive_production_cut
+        impact:
+          sector: automotive
+          severity: critical
+        affects:
+          - vw_production
+          - bmw_production
+      - at: 28d
+        event: medical_device_shortage
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - medical_devices_de
+      - at: 35d
+        event: kurzarbeit_zulieferer
+        impact:
+          sector: automotive
+          severity: critical
+        affects:
+          - zulieferer_cluster
+      - at: 42d
+        event: surgery_delays
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - healthcare_patients
+      - at: 42d
+        event: gebrauchtwagen_preisanstieg
+        impact:
+          sector: automotive
+          severity: high
+        affects:
+          - automotive_consumers
+      - at: 56d
+        event: smart_meter_shortage
+        impact:
+          sector: energy
+          severity: high
+        affects:
+          - energy_tech_de
+      - at: 60d
+        event: consumer_spending_reduction
+        impact:
+          sector: retail
+          severity: high
+        affects:
+          - automotive_consumers
+      - at: 90d
+        event: energiewende_delay
+        impact:
+          sector: energy
+          severity: high
+        affects:
+          - energiewende
+      - at: 90d
+        event: demand_destruction
+        impact:
+          sector: automotive
+          severity: high
+        affects:
+          - automotive_consumers
+      - at: 120d
+        event: eu_chips_act_acceleration
+        impact:
+          sector: technology
+          severity: low
+        affects:
+          - eu_chips_act
+
+  # Kombinierte Krise (Erdbeben + Neon-Ausfall)
+  - id: compound_semiconductor_crisis
+    name: Kombinierte Halbleiterkrise
+    origin: taiwan_earthquake
+    probability: 0.15
+    validation:
+      reference: "Hypothetisch: Erdbeben Taiwan + Neongas-Ausfall gleichzeitig"
+      confidence: 0.4
+    timeline:
+      - at: 0d
+        event: taiwan_earthquake
+        impact:
+          sector: technology
+          severity: critical
+        affects:
+          - tsmc_taiwan
+      - at: 0d
+        event: neon_supply_disruption
+        impact:
+          sector: chemistry
+          severity: high
+        affects:
+          - neon_gas_supply
+      - at: 3d
+        event: tsmc_production_halt
+        impact:
+          sector: technology
+          severity: critical
+      - at: 3d
+        event: logistics_disruption_taiwan
+        impact:
+          sector: logistics
+          severity: critical
+        affects:
+          - taiwan_logistics
+      - at: 5d
+        event: alternative_sourcing_activated
+        impact:
+          sector: technology
+          severity: medium
+        affects:
+          - alternative_fabs
+      - at: 7d
+        event: automotive_chip_shortage
+        impact:
+          sector: automotive
+          severity: critical
+        affects:
+          - bosch_semiconductor
+          - infineon_dresden
+      - at: 7d
+        event: medical_chip_shortage
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - medical_devices_de
+      - at: 14d
+        event: energy_chip_shortage
+        impact:
+          sector: energy
+          severity: critical
+        affects:
+          - energy_tech_de
+      - at: 14d
+        event: industrial_chip_shortage
+        impact:
+          sector: industry
+          severity: critical
+        affects:
+          - industrial_equipment_de
+      - at: 21d
+        event: automotive_production_cut
+        impact:
+          sector: automotive
+          severity: critical
+        affects:
+          - vw_production
+          - bmw_production
+      - at: 28d
+        event: medical_device_shortage
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - medical_devices_de
+      - at: 35d
+        event: kurzarbeit_zulieferer
+        impact:
+          sector: automotive
+          severity: critical
+        affects:
+          - zulieferer_cluster
+      - at: 42d
+        event: gebrauchtwagen_preisanstieg
+        impact:
+          sector: automotive
+          severity: high
+        affects:
+          - automotive_consumers
+      - at: 42d
+        event: surgery_delays
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - healthcare_patients
+      - at: 56d
+        event: smart_meter_shortage
+        impact:
+          sector: energy
+          severity: critical
+        affects:
+          - energy_tech_de
+      - at: 60d
+        event: consumer_spending_reduction
+        impact:
+          sector: retail
+          severity: high
+        affects:
+          - automotive_consumers
+      - at: 90d
+        event: energiewende_delay
+        impact:
+          sector: energy
+          severity: critical
+        affects:
+          - energiewende
+      - at: 90d
+        event: demand_destruction
+        impact:
+          sector: automotive
+          severity: high
+        affects:
+          - automotive_consumers
+      - at: 120d
+        event: eu_chips_act_acceleration
+        impact:
+          sector: technology
+          severity: low
+        affects:
+          - eu_chips_act

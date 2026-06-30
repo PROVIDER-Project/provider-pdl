@@ -1,0 +1,1151 @@
+# =============================================================================
+# PDL Szenario: Seltene Erden / Kritische Mineralien
+# =============================================================================
+# Beschreibung: Kaskadeneffekte einer Unterbrechung der Seltene-Erden-
+#               Lieferkette (China-Exportbeschränkung, Myanmar-Minenschließung)
+#               auf E-Mobilität, Windenergie, Medizintechnik und Verteidigung
+# Basiert auf: PROVIDER-Szenarien-Dokumentation.md (erweitert)
+# Historische Referenz: China-Japan Seltene-Erden-Krise 2010,
+#                       China-Exportkontrollen 2023-2024
+# =============================================================================
+
+pdl_version: "1.1"
+
+scenario:
+  id: rare_earth_supply_disruption
+  name: Seltene-Erden-Lieferkettenkrise
+  sector: technology
+  criticality: high
+  description: >
+    Simulation der Kaskadeneffekte einer Unterbrechung der globalen
+    Seltene-Erden-Lieferkette. China kontrolliert ~70% der Förderung
+    und ~90% der Verarbeitung. Bei NdFeB-Permanentmagneten (Neodym-
+    Eisen-Bor) liegt Chinas Produktionsanteil bei ~92%. Die Kaskade
+    trifft E-Mobilität, Windenergie (Energiewende), Medizintechnik
+    (MRT/Gadolinium) und Verteidigung gleichzeitig. Querverbindungen
+    zu S2 (Halbleiter), S4 (Düngemittel/Katalysatoren), S6 (Rechenzentren).
+
+# =============================================================================
+# Entities
+# =============================================================================
+entities:
+  # Rohstoffe und Förderung
+  - id: china_rare_earth_mines
+    type: commodity
+    name: Seltene-Erden-Minen China (Bayan Obo, Sichuan, Jiangxi)
+    sector: mining
+    location: China
+    vulnerability: 0.7
+    market_share: 0.7
+    note: "~68-70% der globalen Förderung (2024), Bayan Obo (Innere Mongolei) größte Lagerstätte"
+
+  - id: myanmar_rare_earth_mines
+    type: commodity
+    name: Seltene-Erden-Minen Myanmar (Kachin State)
+    sector: mining
+    location: Myanmar
+    vulnerability: 0.85
+    market_share: 0.16
+    note: "~16% der globalen Förderung (2024), schwere Seltene Erden (Dysprosium, Terbium); China bezieht ~70% seines schweren SE-Feedstocks aus Myanmar"
+
+  - id: australia_rare_earth_mines
+    type: commodity
+    name: Seltene-Erden-Minen Australien (Mt Weld)
+    sector: mining
+    location: Australia
+    vulnerability: 0.3
+    market_share: 0.06
+    note: "Lynas Rare Earths, Mt Weld — zweitgrößte nicht-chinesische Quelle"
+
+  # Verarbeitung und Raffination
+  - id: china_separation_plants
+    type: manufacturer
+    name: China Seltene-Erden-Separation und Raffination
+    sector: chemistry
+    location: China
+    vulnerability: 0.75
+    market_share: 0.9
+    note: "~90% der globalen Verarbeitung/Separation, Ganzhou (Jiangxi) als Zentrum für schwere SE"
+
+  - id: lynas_malaysia
+    type: manufacturer
+    name: Lynas Rare Earths (Malaysia/Australien)
+    sector: chemistry
+    location: Malaysia
+    vulnerability: 0.4
+    annual_capacity_tonnes: 10500
+    note: "Größter nicht-chinesischer SE-Verarbeiter, Kapazität ~10.500 t REO/Jahr"
+
+  - id: mp_materials_usa
+    type: manufacturer
+    name: MP Materials (Mountain Pass, USA)
+    sector: chemistry
+    location: United States
+    vulnerability: 0.45
+    annual_capacity_tonnes: 45000
+    note: "Mountain Pass Mine: 45.000 t/a REO-Konzentrat, ~1.300 t/a NdPr-Oxid; Magnetproduktion in Texas im Aufbau (Ziel: 1.000-10.000 t/a)"
+
+  # Magnetproduktion
+  - id: ndfeb_magnet_producers
+    type: manufacturer
+    name: NdFeB-Magnetproduzenten (China >90%)
+    sector: technology
+    location: China
+    vulnerability: 0.8
+    market_share: 0.92
+    note: "China produziert >90% der NdFeB-Permanentmagnete, Schlüsselkomponente für E-Motoren und Windturbinen"
+
+  # Deutsche / EU-Industrie
+  - id: ev_motor_producers_de
+    type: manufacturer
+    name: E-Motor-Hersteller Deutschland (Bosch, Vitesco, Nidec)
+    sector: automotive
+    location: Germany
+    vulnerability: 0.7
+    note: "Jeder permanenterregte Synchronmotor benötigt 1-3 kg NdFeB-Magnete"
+
+  - id: wind_turbine_producers
+    type: manufacturer
+    name: Windturbinen-Hersteller (Siemens Gamesa, Vestas, Enercon)
+    sector: energy
+    location: EU
+    vulnerability: 0.6
+    note: "Direct-Drive-Turbinen: ~600 kg NdFeB pro MW; eine 5-MW-Turbine benötigt ~3.000 kg NdFeB"
+
+  - id: mri_producers
+    type: manufacturer
+    name: MRT-Hersteller (Siemens Healthineers, Philips, GE)
+    sector: healthcare
+    location: Germany
+    vulnerability: 0.55
+    note: "Hauptabhängigkeit: Gadolinium (Kontrastmittel, China-dominiert) + Niob/Helium (Supraleiter); NdFeB in Subsystemen"
+
+  - id: defense_industry_de
+    type: manufacturer
+    name: Verteidigungsindustrie (Rheinmetall, MBDA, Hensoldt)
+    sector: defense
+    location: Germany
+    vulnerability: 0.5
+    note: "Präzisionswaffen, Sensorik, Triebwerke — kritische NdFeB-Abhängigkeit"
+
+  - id: automotive_oem_de
+    type: manufacturer
+    name: Automotive OEMs Deutschland (VW, BMW, Mercedes)
+    sector: automotive
+    location: Germany
+    vulnerability: 0.65
+    note: "Elektrifizierungsstrategie massiv abhängig von Permanentmagnet-Motoren"
+
+  - id: katalysatoren_produktion
+    type: manufacturer
+    name: Katalysatoren-Produktion (Cer, Lanthan)
+    sector: chemistry
+    location: EU
+    vulnerability: 0.5
+    note: "Autoabgaskatalysatoren, Petroleumkatalysatoren — Cer-basiert"
+
+  # Endverbraucher und Gesellschaft
+  - id: energiewende_wind
+    type: service
+    name: Energiewende Windkraft-Ausbau
+    sector: energy
+    location: Germany
+    vulnerability: 0.55
+    note: "Ziel: 115 GW Onshore + 30 GW Offshore bis 2030, aktuell ~70 GW gesamt"
+
+  - id: ev_market_de
+    type: region
+    name: E-Fahrzeug-Markt Deutschland
+    sector: automotive
+    location: Germany
+    vulnerability: 0.5
+
+  - id: patients_diagnostic
+    type: region
+    name: Patienten (MRT-Diagnostik)
+    sector: healthcare
+    location: Germany
+    vulnerability: 0.6
+    note: "~15 Mio. MRT-Untersuchungen/Jahr in Deutschland"
+
+  - id: bundeswehr_readiness
+    type: service
+    name: Bundeswehr Einsatzbereitschaft
+    sector: defense
+    location: Germany
+    vulnerability: 0.4
+
+  # Resilienz-Mechanismen
+  - id: recycling_infrastructure
+    type: infrastructure
+    name: Seltene-Erden-Recycling (Urban Mining)
+    sector: technology
+    location: EU
+    vulnerability: 0.3
+    note: "Aktuelle Recyclingquote <1%, theoretisches Potenzial 15-25% des Bedarfs"
+
+  - id: alternative_magnet_tech
+    type: infrastructure
+    name: Alternative Magnettechnologien
+    sector: technology
+    location: EU
+    vulnerability: 0.25
+    note: "Ferrit-Magnete, Reluktanzmotoren, axiale Flussmotoren — 10-20% Effizienzverlust"
+
+  - id: eu_crma
+    type: infrastructure
+    name: EU Critical Raw Materials Act
+    sector: technology
+    location: EU
+    vulnerability: 0.2
+    note: "Ziele bis 2030: 10% EU-Förderung, 40% EU-Verarbeitung, 25% Recycling"
+
+# =============================================================================
+# Supply Chains
+# =============================================================================
+supply_chains:
+  # Hauptkette: Mine → Separation → Magnet → Endprodukt
+  - id: rare_earth_main_chain
+    name: Seltene-Erden-Hauptlieferkette
+    stages:
+      - [china_rare_earth_mines, china_separation_plants]
+      - [myanmar_rare_earth_mines, china_separation_plants]
+      - [australia_rare_earth_mines, lynas_malaysia]
+      - [china_separation_plants, ndfeb_magnet_producers]
+      - [china_separation_plants, katalysatoren_produktion]
+      - [ndfeb_magnet_producers, ev_motor_producers_de]
+      - [ndfeb_magnet_producers, wind_turbine_producers]
+      - [ndfeb_magnet_producers, mri_producers]
+      - [ndfeb_magnet_producers, defense_industry_de]
+    dependencies:
+      - from: china_separation_plants
+        to: china_rare_earth_mines
+        type: input
+        criticality: high
+      - from: china_separation_plants
+        to: myanmar_rare_earth_mines
+        type: input
+        criticality: high
+        note: "Myanmar-Erze werden überwiegend in China verarbeitet"
+      - from: ndfeb_magnet_producers
+        to: china_separation_plants
+        type: input
+        criticality: high
+
+  # Automotive/E-Mobilität-Kette
+  - id: ev_mobility_chain
+    name: E-Mobilität-Lieferkette
+    stages:
+      - [ev_motor_producers_de, automotive_oem_de]
+      - [automotive_oem_de, ev_market_de]
+    dependencies:
+      - from: automotive_oem_de
+        to: ev_motor_producers_de
+        type: input
+        criticality: high
+      - from: ev_motor_producers_de
+        to: ndfeb_magnet_producers
+        type: input
+        criticality: high
+
+  # Windenergie-Kette
+  - id: wind_energy_chain
+    name: Windenergie-Lieferkette
+    stages:
+      - [wind_turbine_producers, energiewende_wind]
+    dependencies:
+      - from: energiewende_wind
+        to: wind_turbine_producers
+        type: input
+        criticality: high
+
+  # Medizintechnik-Kette
+  - id: medical_imaging_chain
+    name: Medizintechnik-Bildgebungskette
+    stages:
+      - [mri_producers, patients_diagnostic]
+    dependencies:
+      - from: patients_diagnostic
+        to: mri_producers
+        type: input
+        criticality: high
+
+  # Resilienz- und Feedback-Kette
+  - id: resilience_feedback_chain
+    name: Resilienz- und Feedback-Kette
+    stages:
+      - [lynas_malaysia, ndfeb_magnet_producers]
+      - [mp_materials_usa, ndfeb_magnet_producers]
+      - [recycling_infrastructure, ndfeb_magnet_producers]
+      - [alternative_magnet_tech, ev_motor_producers_de]
+      - [alternative_magnet_tech, wind_turbine_producers]
+      - [ev_market_de, automotive_oem_de]
+      - [eu_crma, recycling_infrastructure]
+      - [eu_crma, alternative_magnet_tech]
+      - [defense_industry_de, bundeswehr_readiness]
+    dependencies:
+      - from: ndfeb_magnet_producers
+        to: lynas_malaysia
+        type: input
+        criticality: medium
+        note: "Lynas-Oxide müssen noch zu Magneten verarbeitet werden — meist in China"
+      - from: ndfeb_magnet_producers
+        to: lynas_malaysia
+        type: substitution
+        substitution_ref: sub_alt_sourcing
+        criticality: medium
+        note: "Lieferantensubstitution: China-Verarbeitung → Lynas/MP Materials (max. 9% Deckung)"
+      - from: ev_motor_producers_de
+        to: alternative_magnet_tech
+        type: substitution
+        substitution_ref: sub_alt_magnet_tech
+        criticality: medium
+        note: "Technologiesubstitution: NdFeB-Magnete → Ferrit/Reluktanz (80% Deckung, -15% Effizienz, 730d Ramp-up)"
+      - from: ndfeb_magnet_producers
+        to: recycling_infrastructure
+        type: substitution
+        substitution_ref: sub_recycling_buffer
+        criticality: low
+        note: "Buffer-Substitution: Urban Mining / SE-Recycling (3% Deckung, 365d Ramp-up, strukturell irreversibel)"
+      - from: wind_turbine_producers
+        to: alternative_magnet_tech
+        type: substitution
+        substitution_ref: sub_alt_magnet_tech
+        criticality: medium
+        note: "Technologiesubstitution Windkraft: elektrisch erregte Generatoren statt NdFeB-Direct-Drive"
+      - from: automotive_oem_de
+        to: ev_market_de
+        type: demand
+        criticality: high
+        note: "Nachfragerückgang E-Autos reduziert Auftragsbestand"
+      - from: ev_motor_producers_de
+        to: alternative_magnet_tech
+        type: input
+        criticality: medium
+        note: "Umrüstung auf Reluktanzmotoren dauert 12-24 Monate"
+      - from: recycling_infrastructure
+        to: eu_crma
+        type: input
+        criticality: medium
+      - from: bundeswehr_readiness
+        to: defense_industry_de
+        type: input
+        criticality: high
+
+# =============================================================================
+# Substitutions
+# =============================================================================
+substitutions:
+
+  # 1. Lieferantensubstitution: China-Förderung/Verarbeitung → Lynas + MP Materials
+  - id: sub_alt_sourcing
+    from: china_separation_plants
+    to: lynas_malaysia
+    type: supplier
+    coverage: 0.09
+    quality_delta: 0.0
+    cost_delta: 0.80
+    ramp_up: 365d
+
+    activation:
+      trigger: "china_export_restriction.active"
+      threshold:
+        supply_drop: 0.50
+
+    reversible: true
+
+    side_effects:
+      - type: correlated_risk
+        target: ndfeb_magnet_producers
+        magnitude: 0.70
+        description: "Lynas-Oxide werden überwiegend in China zu Magneten verarbeitet — Verarbeitungsmonopol bleibt bestehen"
+      - type: price_pressure
+        target: lynas_malaysia
+        magnitude: 0.80
+        description: "Nachfragesprung durch China-Ausfall treibt Lynas/MP-Materials-Preise stark in die Höhe"
+
+    dependency_overlap:
+      - china_separation_plants
+
+    reference: "Lynas ~10.500 t NdPr-Oxid/Jahr + MP Materials ~1.300 t NdPr-Oxid/Jahr = zusammen <10% des Weltbedarfs (2024)"
+
+  # 2. Technologiesubstitution: NdFeB-Magnete → Ferrit-Magnete / Reluktanzmotoren
+  - id: sub_alt_magnet_tech
+    from: ndfeb_magnet_producers
+    to: alternative_magnet_tech
+    type: technology
+    coverage: 0.80
+    quality_delta: -0.15
+    cost_delta: 0.25
+    ramp_up: 730d
+
+    activation:
+      trigger: "ev_motor_shortage.active"
+      threshold:
+        supply_drop: 0.40
+
+    reversible: true
+
+    side_effects:
+      - type: efficiency_loss
+        target: ev_motor_producers_de
+        magnitude: 0.15
+        description: "Reluktanz- und Ferritmotoren haben 10–20% Effizienzverlust gegenüber NdFeB-Permanentmagnetmotoren"
+      - type: efficiency_loss
+        target: wind_turbine_producers
+        magnitude: 0.12
+        description: "Alternative Generatorkonzepte (elektrisch erregt) erfordern Umkonstruktion und haben höhere Kupferverluste"
+
+    dependency_overlap: []
+
+    reference: "Ferrit-Magnete, Reluktanzmotoren, axiale Flussmotoren — technisch für ~80% der Anwendungen realisierbar; Umrüstung 12–24 Monate"
+
+  # 3. Kreislaufwirtschaft: Recycling als struktureller Buffer
+  - id: sub_recycling_buffer
+    from: ndfeb_magnet_producers
+    to: recycling_infrastructure
+    type: buffer
+    coverage: 0.03
+    quality_delta: 0.0
+    cost_delta: 0.60
+    ramp_up: 365d
+
+    activation:
+      trigger: "ndfeb_magnet_shortage.active"
+      threshold:
+        supply_drop: 0.50
+
+    reversible: false
+
+    side_effects: []
+
+    reference: "Aktuelle Recyclingquote <1%; mit Hochlauf und Urban-Mining-Ausbau Potenzial ~3% kurzfristig, 15–25% langfristig (EU CRMA-Ziel: 25% bis 2030)"
+
+# =============================================================================
+# Events
+# =============================================================================
+events:
+  # Primäre Auslöser
+  - id: china_export_restriction
+    name: China Seltene-Erden-Exportbeschränkung
+    type: regulatory
+    trigger:
+      target: china_separation_plants
+      probability: 0.1
+    impact:
+      supply: "-70%"
+      duration: 180d
+    causes:
+      - separation_bottleneck
+      - magnet_price_spike
+      - alternative_sourcing_activated
+      - eu_crma_acceleration
+    reference: "China-Japan-Krise 2010: Neodymoxid von ~90 auf ~2.377 USD/kg (26-fach in 31 Monaten)"
+
+  - id: myanmar_mine_closure
+    name: Myanmar-Minen geschlossen (Kachin-Konflikt)
+    type: geopolitical
+    trigger:
+      target: myanmar_rare_earth_mines
+      probability: 0.2
+    impact:
+      supply: "-90%"
+      duration: 120d
+    causes:
+      - separation_bottleneck
+    reference: "Kachin-Konflikt, Umweltschäden — China bezieht ~70% seiner schweren SE aus Myanmar"
+
+  # Verarbeitungskette
+  - id: separation_bottleneck
+    name: Verarbeitungsengpass Seltene Erden
+    type: infrastructure_failure
+    trigger:
+      target: china_separation_plants
+      condition: "china_export_restriction.active OR myanmar_mine_closure.active"
+    impact:
+      supply: "-65%"
+      duration: 120d
+    causes:
+      - ndfeb_magnet_shortage
+    reference: "Separation und Raffination: China ~90% der Kapazität, Alternativen brauchen 2-3 Jahre Aufbau"
+
+  - id: ndfeb_magnet_shortage
+    name: NdFeB-Permanentmagnet-Mangel
+    type: infrastructure_failure
+    trigger:
+      target: ndfeb_magnet_producers
+      condition: "separation_bottleneck.active"
+    impact:
+      supply: "-70%"
+      duration: 180d
+    causes:
+      - ev_motor_shortage
+      - wind_turbine_delay
+      - mri_production_halt
+      - defense_component_shortage
+    reference: "China >90% der NdFeB-Produktion, keine kurzfristige Alternative"
+
+  - id: magnet_price_spike
+    name: Seltene-Erden-Preisexplosion
+    type: market_shock
+    trigger:
+      target: ndfeb_magnet_producers
+      condition: "china_export_restriction.active"
+    impact:
+      price: "+300%"
+      duration: 365d
+    causes:
+      - ev_price_increase
+      - demand_destruction
+    reference: "2010-2011: Neodymoxid von ~90 auf ~2.377 USD/kg (26-fach), Dysprosium von ~250 auf ~2.800 USD/kg"
+
+  # Sektorale Kaskaden — E-Mobilität
+  - id: ev_motor_shortage
+    name: E-Motor-Engpass
+    type: infrastructure_failure
+    trigger:
+      target: ev_motor_producers_de
+      condition: "ndfeb_magnet_shortage.active"
+    impact:
+      supply: "-55%"
+      duration: 180d
+    causes:
+      - ev_production_cut
+      - alternative_motor_development
+    reference: "Permanenterregte Synchronmotoren benötigen 1-3 kg NdFeB pro Motor"
+
+  - id: ev_production_cut
+    name: E-Fahrzeug-Produktionskürzung
+    type: infrastructure_failure
+    trigger:
+      target: automotive_oem_de
+      condition: "ev_motor_shortage.active"
+    impact:
+      supply: "-40%"
+      duration: 180d
+    causes:
+      - ev_price_increase
+      - ice_demand_surge
+    reference: "VW, BMW, Mercedes — Elektrifizierungsstrategie abhängig von SE-Verfügbarkeit"
+
+  - id: ev_price_increase
+    name: E-Fahrzeug-Preisanstieg
+    type: market_shock
+    trigger:
+      target: ev_market_de
+      condition: "ev_production_cut.active OR magnet_price_spike.active"
+    impact:
+      price: "+15%"
+      duration: 270d
+    causes:
+      - ice_demand_surge
+    reference: "Magnetkosten ~5-10% der E-Motor-Kosten, aber Angebotsverknappung treibt Gesamtpreis"
+
+  - id: ice_demand_surge
+    name: Rückverlagerung auf Verbrenner-Fahrzeuge
+    type: market_shock
+    trigger:
+      target: ev_market_de
+      condition: "ev_price_increase.active"
+    impact:
+      demand: "-25%"
+      duration: 365d
+    causes:
+      - emission_targets_missed
+      - katalysator_engpass
+    reference: "Feedback: E-Auto-Preisanstieg → Verbrenner-Nachfrage steigt → mehr Katalysator-Bedarf"
+
+  # Sektorale Kaskaden — Windenergie
+  - id: wind_turbine_delay
+    name: Windturbinen-Produktionsverzögerung
+    type: infrastructure_failure
+    trigger:
+      target: wind_turbine_producers
+      condition: "ndfeb_magnet_shortage.active"
+    impact:
+      supply: "-35%"
+      duration: 270d
+    causes:
+      - energiewende_slowdown
+    reference: "Direct-Drive-Turbinen: ~600 kg NdFeB/MW; eine 5-MW-Turbine (Siemens Gamesa) benötigt ~3.000 kg"
+
+  - id: energiewende_slowdown
+    name: Energiewende-Verzögerung Windkraft
+    type: infrastructure_failure
+    trigger:
+      target: energiewende_wind
+      condition: "wind_turbine_delay.active"
+    impact:
+      supply: "-30%"
+      duration: 365d
+    causes:
+      - emission_targets_missed
+    reference: "Ziel: 115 GW Onshore + 30 GW Offshore bis 2030, jede Verzögerung gefährdet Klimaziele"
+
+  - id: emission_targets_missed
+    name: Emissionsziele verfehlt
+    type: regulatory
+    trigger:
+      target: energiewende_wind
+      condition: "energiewende_slowdown.active AND ice_demand_surge.active"
+    impact:
+      supply: "-10%"
+      duration: 730d
+    reference: "Doppeleffekt: weniger Windkraft + mehr Verbrenner → CO2-Ziele 2030 nicht erreichbar"
+
+  # Sektorale Kaskaden — Medizintechnik
+  - id: mri_production_halt
+    name: MRT-Produktionsverzögerung
+    type: infrastructure_failure
+    trigger:
+      target: mri_producers
+      condition: "ndfeb_magnet_shortage.active"
+    impact:
+      supply: "-25%"
+      duration: 180d
+    causes:
+      - mri_waiting_times
+    reference: "MRT-Abhängigkeit: Gadolinium (Kontrastmittel, China-dominiert), Niob/Helium (Supraleiter), NdFeB in Subsystemen"
+
+  - id: mri_waiting_times
+    name: Verlängerte MRT-Wartezeiten
+    type: infrastructure_failure
+    trigger:
+      target: patients_diagnostic
+      condition: "mri_production_halt.active"
+    impact:
+      supply: "-20%"
+      duration: 270d
+    reference: "~15 Mio. MRT-Untersuchungen/Jahr in DE, Wartezeiten aktuell 2-6 Wochen"
+
+  # Sektorale Kaskaden — Verteidigung
+  - id: defense_component_shortage
+    name: Verteidigungstechnik-Komponentenmangel
+    type: infrastructure_failure
+    trigger:
+      target: defense_industry_de
+      condition: "ndfeb_magnet_shortage.active"
+    impact:
+      supply: "-20%"
+      duration: 180d
+    causes:
+      - bundeswehr_readiness_reduction
+    reference: "Lenkwaffen, Drohnen, Sensorik, Triebwerke — NdFeB-kritisch"
+
+  - id: bundeswehr_readiness_reduction
+    name: Bundeswehr Einsatzbereitschaft reduziert
+    type: infrastructure_failure
+    trigger:
+      target: bundeswehr_readiness
+      condition: "defense_component_shortage.active"
+    impact:
+      supply: "-15%"
+      duration: 365d
+    reference: "Zeitenwende-Kontext: Abhängigkeit von chinesischen Materialien für Verteidigungsfähigkeit"
+
+  # Feedback-Events
+  - id: katalysator_engpass
+    name: Katalysatoren-Engpass (Cer, Lanthan)
+    type: infrastructure_failure
+    trigger:
+      target: katalysatoren_produktion
+      condition: "china_export_restriction.active AND ice_demand_surge.active"
+    impact:
+      supply: "-30%"
+      duration: 120d
+    reference: "Feedback: Verbrenner-Nachfrage steigt + SE-Export gestoppt → Katalysator-Mangel"
+
+  - id: demand_destruction
+    name: Nachfragezerstörung durch Preisexplosion
+    type: market_shock
+    trigger:
+      target: ev_market_de
+      condition: "magnet_price_spike.active AND magnet_price_spike.duration > 90d"
+    impact:
+      demand: "-15%"
+      duration: 270d
+    causes:
+      - mining_investment_collapse
+    reference: "2011: Preisexplosion → Substitution und Einsparung → Nachfrage -30% in 24 Monaten"
+
+  - id: mining_investment_collapse
+    name: Bergbau-Investitionsrückgang
+    type: market_shock
+    trigger:
+      target: australia_rare_earth_mines
+      condition: "demand_destruction.active"
+    impact:
+      supply: "-20%"
+      duration: 730d
+    reference: "2012-2015: Nach Preiskollaps fielen >400 SE-Projekte weltweit weg"
+
+  # Resilienz-Events
+  - id: alternative_sourcing_activated
+    name: Alternative Quellen aktiviert (Lynas, MP Materials)
+    type: market_shock
+    substitution_ref: sub_alt_sourcing
+    trigger:
+      target: lynas_malaysia
+      condition: "china_export_restriction.active"
+    impact:
+      supply: "-20%"
+      price: "+80%"
+      duration: 365d
+    reference: "Lynas ~10.500 t NdPr-Oxid/Jahr, MP Materials ~1.300 t NdPr-Oxid — zusammen <10% des Weltbedarfs"
+
+  - id: alternative_motor_development
+    name: Alternative Motortechnologie beschleunigt
+    type: regulatory
+    substitution_ref: sub_alt_magnet_tech
+    trigger:
+      target: alternative_magnet_tech
+      condition: "ev_motor_shortage.active AND ev_motor_shortage.duration > 60d"
+    impact:
+      supply: "+10%"
+      duration: 730d
+    reference: "Reluktanzmotoren, axiale Flussmotoren — 10-20% Effizienzverlust, aber SE-frei"
+
+  - id: recycling_rampup
+    name: SE-Recycling beschleunigt
+    type: regulatory
+    substitution_ref: sub_recycling_buffer
+    trigger:
+      target: recycling_infrastructure
+      condition: "ndfeb_magnet_shortage.active"
+    impact:
+      supply: "+3%"
+      duration: 365d
+    reference: "Aktuelle Recyclingquote <1%, theoretisches Potenzial 15-25% — Ramp-up dauert Jahre"
+
+  - id: eu_crma_acceleration
+    name: EU Critical Raw Materials Act beschleunigt
+    type: regulatory
+    trigger:
+      target: eu_crma
+      condition: "china_export_restriction.active"
+    impact:
+      supply: "+5%"
+      duration: 1095d
+    reference: "EU CRMA: 10% EU-Förderung, 40% EU-Verarbeitung, 25% Recycling bis 2030"
+
+# =============================================================================
+# Cascades
+# =============================================================================
+cascades:
+  # China-Exportbeschränkung — Hauptkaskade
+  - id: export_restriction_cascade
+    name: China-Exportbeschränkung-Kaskade
+    origin: china_export_restriction
+    probability: 0.85
+    validation:
+      reference: "China-Japan SE-Krise 2010, Exportkontrollen Ga/Ge 2023, SE-Kontrollen 2024"
+      confidence: 0.8
+    timeline:
+      - at: 0d
+        event: china_export_restriction
+        impact:
+          sector: mining
+          severity: critical
+        affects:
+          - china_separation_plants
+          - china_rare_earth_mines
+      - at: 7d
+        event: magnet_price_spike
+        impact:
+          sector: technology
+          severity: high
+        affects:
+          - ndfeb_magnet_producers
+      - at: 7d
+        event: alternative_sourcing_activated
+        impact:
+          sector: mining
+          severity: medium
+        affects:
+          - lynas_malaysia
+          - mp_materials_usa
+      - at: 14d
+        event: separation_bottleneck
+        impact:
+          sector: chemistry
+          severity: critical
+        affects:
+          - china_separation_plants
+      - at: 30d
+        event: ndfeb_magnet_shortage
+        impact:
+          sector: technology
+          severity: critical
+        affects:
+          - ndfeb_magnet_producers
+      - at: 30d
+        event: recycling_rampup
+        impact:
+          sector: technology
+          severity: low
+        affects:
+          - recycling_infrastructure
+      - at: 45d
+        event: ev_motor_shortage
+        impact:
+          sector: automotive
+          severity: critical
+        affects:
+          - ev_motor_producers_de
+      - at: 45d
+        event: wind_turbine_delay
+        impact:
+          sector: energy
+          severity: high
+        affects:
+          - wind_turbine_producers
+      - at: 60d
+        event: mri_production_halt
+        impact:
+          sector: healthcare
+          severity: high
+        affects:
+          - mri_producers
+      - at: 60d
+        event: defense_component_shortage
+        impact:
+          sector: defense
+          severity: high
+        affects:
+          - defense_industry_de
+      - at: 75d
+        event: ev_production_cut
+        impact:
+          sector: automotive
+          severity: critical
+        affects:
+          - automotive_oem_de
+      - at: 90d
+        event: ev_price_increase
+        impact:
+          sector: automotive
+          severity: high
+        affects:
+          - ev_market_de
+      - at: 90d
+        event: mri_waiting_times
+        impact:
+          sector: healthcare
+          severity: medium
+        affects:
+          - patients_diagnostic
+      - at: 90d
+        event: bundeswehr_readiness_reduction
+        impact:
+          sector: defense
+          severity: medium
+        affects:
+          - bundeswehr_readiness
+      - at: 105d
+        event: alternative_motor_development
+        impact:
+          sector: technology
+          severity: low
+        affects:
+          - alternative_magnet_tech
+      - at: 120d
+        event: energiewende_slowdown
+        impact:
+          sector: energy
+          severity: high
+        affects:
+          - energiewende_wind
+      - at: 120d
+        event: ice_demand_surge
+        impact:
+          sector: automotive
+          severity: medium
+        affects:
+          - ev_market_de
+      - at: 120d
+        event: demand_destruction
+        impact:
+          sector: technology
+          severity: medium
+        affects:
+          - ev_market_de
+      - at: 150d
+        event: katalysator_engpass
+        impact:
+          sector: chemistry
+          severity: medium
+        affects:
+          - katalysatoren_produktion
+      - at: 180d
+        event: emission_targets_missed
+        impact:
+          sector: energy
+          severity: medium
+        affects:
+          - energiewende_wind
+      - at: 180d
+        event: eu_crma_acceleration
+        impact:
+          sector: technology
+          severity: low
+        affects:
+          - eu_crma
+      - at: 365d
+        event: mining_investment_collapse
+        impact:
+          sector: mining
+          severity: medium
+        affects:
+          - australia_rare_earth_mines
+
+  # Myanmar-Krise (milder, betrifft vor allem schwere SE)
+  - id: myanmar_crisis_cascade
+    name: Myanmar-Minenschließung-Kaskade
+    origin: myanmar_mine_closure
+    probability: 0.7
+    validation:
+      reference: "Kachin-Konflikt 2023, China-Import-Abhängigkeit von Myanmar für schwere SE"
+      confidence: 0.65
+    timeline:
+      - at: 0d
+        event: myanmar_mine_closure
+        impact:
+          sector: mining
+          severity: high
+        affects:
+          - myanmar_rare_earth_mines
+      - at: 14d
+        event: separation_bottleneck
+        impact:
+          sector: chemistry
+          severity: high
+        affects:
+          - china_separation_plants
+      - at: 30d
+        event: ndfeb_magnet_shortage
+        impact:
+          sector: technology
+          severity: high
+        affects:
+          - ndfeb_magnet_producers
+      - at: 45d
+        event: wind_turbine_delay
+        impact:
+          sector: energy
+          severity: high
+        affects:
+          - wind_turbine_producers
+      - at: 45d
+        event: defense_component_shortage
+        impact:
+          sector: defense
+          severity: high
+        affects:
+          - defense_industry_de
+      - at: 60d
+        event: ev_motor_shortage
+        impact:
+          sector: automotive
+          severity: medium
+        affects:
+          - ev_motor_producers_de
+      - at: 75d
+        event: mri_production_halt
+        impact:
+          sector: healthcare
+          severity: medium
+        affects:
+          - mri_producers
+      - at: 90d
+        event: ev_production_cut
+        impact:
+          sector: automotive
+          severity: medium
+        affects:
+          - automotive_oem_de
+      - at: 90d
+        event: bundeswehr_readiness_reduction
+        impact:
+          sector: defense
+          severity: medium
+        affects:
+          - bundeswehr_readiness
+      - at: 120d
+        event: energiewende_slowdown
+        impact:
+          sector: energy
+          severity: medium
+        affects:
+          - energiewende_wind
+
+  # Worst-Case: Export-Stopp + Myanmar gleichzeitig
+  - id: compound_rare_earth_crisis
+    name: Kombinierte Seltene-Erden-Krise
+    origin: china_export_restriction
+    probability: 0.15
+    validation:
+      reference: "Hypothetisch: China-Exportbeschränkung + Myanmar-Schließung gleichzeitig"
+      confidence: 0.4
+    timeline:
+      - at: 0d
+        event: china_export_restriction
+        impact:
+          sector: mining
+          severity: critical
+        affects:
+          - china_separation_plants
+      - at: 0d
+        event: myanmar_mine_closure
+        impact:
+          sector: mining
+          severity: critical
+        affects:
+          - myanmar_rare_earth_mines
+      - at: 3d
+        event: magnet_price_spike
+        impact:
+          sector: technology
+          severity: critical
+        affects:
+          - ndfeb_magnet_producers
+      - at: 3d
+        event: alternative_sourcing_activated
+        impact:
+          sector: mining
+          severity: medium
+        affects:
+          - lynas_malaysia
+          - mp_materials_usa
+      - at: 7d
+        event: separation_bottleneck
+        impact:
+          sector: chemistry
+          severity: critical
+        affects:
+          - china_separation_plants
+      - at: 14d
+        event: ndfeb_magnet_shortage
+        impact:
+          sector: technology
+          severity: critical
+        affects:
+          - ndfeb_magnet_producers
+      - at: 14d
+        event: recycling_rampup
+        impact:
+          sector: technology
+          severity: low
+        affects:
+          - recycling_infrastructure
+      - at: 21d
+        event: ev_motor_shortage
+        impact:
+          sector: automotive
+          severity: critical
+        affects:
+          - ev_motor_producers_de
+      - at: 21d
+        event: wind_turbine_delay
+        impact:
+          sector: energy
+          severity: critical
+        affects:
+          - wind_turbine_producers
+      - at: 28d
+        event: mri_production_halt
+        impact:
+          sector: healthcare
+          severity: critical
+        affects:
+          - mri_producers
+      - at: 28d
+        event: defense_component_shortage
+        impact:
+          sector: defense
+          severity: critical
+        affects:
+          - defense_industry_de
+      - at: 42d
+        event: ev_production_cut
+        impact:
+          sector: automotive
+          severity: critical
+        affects:
+          - automotive_oem_de
+      - at: 42d
+        event: mri_waiting_times
+        impact:
+          sector: healthcare
+          severity: high
+        affects:
+          - patients_diagnostic
+      - at: 42d
+        event: bundeswehr_readiness_reduction
+        impact:
+          sector: defense
+          severity: high
+        affects:
+          - bundeswehr_readiness
+      - at: 56d
+        event: ev_price_increase
+        impact:
+          sector: automotive
+          severity: critical
+        affects:
+          - ev_market_de
+      - at: 56d
+        event: alternative_motor_development
+        impact:
+          sector: technology
+          severity: low
+        affects:
+          - alternative_magnet_tech
+      - at: 75d
+        event: energiewende_slowdown
+        impact:
+          sector: energy
+          severity: critical
+        affects:
+          - energiewende_wind
+      - at: 75d
+        event: ice_demand_surge
+        impact:
+          sector: automotive
+          severity: high
+        affects:
+          - ev_market_de
+      - at: 75d
+        event: demand_destruction
+        impact:
+          sector: technology
+          severity: high
+        affects:
+          - ev_market_de
+      - at: 90d
+        event: katalysator_engpass
+        impact:
+          sector: chemistry
+          severity: high
+        affects:
+          - katalysatoren_produktion
+      - at: 120d
+        event: emission_targets_missed
+        impact:
+          sector: energy
+          severity: critical
+        affects:
+          - energiewende_wind
+      - at: 120d
+        event: eu_crma_acceleration
+        impact:
+          sector: technology
+          severity: low
+        affects:
+          - eu_crma
+      - at: 270d
+        event: mining_investment_collapse
+        impact:
+          sector: mining
+          severity: high
+        affects:
+          - australia_rare_earth_mines

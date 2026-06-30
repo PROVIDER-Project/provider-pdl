@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PDL-Viewer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/vis-network@9.1.2/styles/vis-network.min.css" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://unpkg.com/vis-network@9.1.2/standalone/umd/vis-network.min.js"></script>
+  <script src="./vendor/ajv/ajv-browser.js"></script>
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <div id="splashScreen" class="splash-screen" role="dialog" aria-modal="true" aria-label="Willkommen im PDL-Viewer">
+    <div class="splash-card">
+      <p class="splash-kicker">Supply Chain Graph Explorer</p>
+      <h1 class="splash-title">PDL-Viewer</h1>
+      <p class="splash-subtitle">Interaktive Analyse von PDL-YAML Szenarien.</p>
+      <div class="splash-network" aria-hidden="true">
+        <span class="splash-link splash-link-1"></span>
+        <span class="splash-link splash-link-2"></span>
+        <span class="splash-link splash-link-3"></span>
+        <span class="splash-link splash-link-4"></span>
+        <span class="splash-node splash-node-1"></span>
+        <span class="splash-node splash-node-2"></span>
+        <span class="splash-node splash-node-3"></span>
+        <span class="splash-node splash-node-4"></span>
+        <span class="splash-node splash-node-5"></span>
+      </div>
+      <div class="splash-chips">
+        <span class="splash-chip">YAML laden</span>
+        <span class="splash-chip">Graph erkunden</span>
+        <span class="splash-chip">Kaskaden verstehen</span>
+      </div>
+      <div class="splash-actions">
+        <button id="splashStartBtn" type="button">Starten</button>
+      </div>
+    </div>
+  </div>
+  <div class="topbar">
+    <div class="tabs">
+      <button id="tabGraph" class="tab active" type="button">Graph</button>
+      <button id="tabYaml" class="tab" type="button">YAML Viewer</button>
+      <button id="tabOntology" class="tab" type="button">Ontologie</button>
+      <button id="tabAbout" class="tab" type="button">About</button>
+    </div>
+    <div class="topbar-right">
+      <div id="fileLabel" class="file-label">Keine Datei geladen</div>
+      <button id="tutorialBtn" class="ghost tiny" type="button">Tutorial</button>
+      <div class="topbar-menu">
+        <button id="analysisMenuToggle" class="ghost tiny" type="button">Analyse</button>
+        <div id="analysisMenu" class="menu-panel hidden">
+          <div class="menu-header">
+            <span class="stat-title">Analyse</span>
+          </div>
+          <div class="analysis-grid">
+            <label>
+              <span>Start</span>
+              <input id="analysisStart" type="text" list="nodeOptions" placeholder="Knoten-ID oder Label" />
+            </label>
+            <label>
+              <span>Ziel</span>
+              <input id="analysisTarget" type="text" list="nodeOptions" placeholder="Knoten-ID oder Label" />
+            </label>
+          </div>
+          <datalist id="nodeOptions"></datalist>
+          <div class="graph-actions">
+            <button id="analysisFind" type="button">Pfad finden</button>
+            <button id="analysisToggle" class="ghost" type="button" disabled>Pfad hervorheben</button>
+            <button id="analysisClear" class="ghost" type="button" disabled>Zurücksetzen</button>
+          </div>
+          <p id="analysisResult" class="status">Noch keine Analyse.</p>
+          <div class="analysis-presets">
+            <span class="stat-title">Presets</span>
+            <div id="analysisPresets" class="preset-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="graphView" class="view active">
+    <div class="app">
+    <aside class="panel panel-left">
+      <header>
+        <h1>PDL-Viewer</h1>
+        <p class="subtitle">Interaktive Visualisierung von PDL-YAML Szenarien als Netzwerkgraph.</p>
+      </header>
+
+      <section class="card">
+        <h2>Datei laden</h2>
+        <label class="file-input">
+          <input id="fileInput" type="file" accept=".yaml,.yml" />
+          <span>YAML hochladen</span>
+        </label>
+        <div class="scenario-loader">
+          <label for="exampleScenarioSelect">Szenario aus <code>scenarios/</code></label>
+          <select id="exampleScenarioSelect" class="scenario-select">
+            <option value="s1-soja.pdl.yaml">s1-soja.pdl.yaml</option>
+            <option value="s2-halbleiter.pdl.yaml">s2-halbleiter.pdl.yaml</option>
+            <option value="s3-pharma.pdl.yaml">s3-pharma.pdl.yaml</option>
+            <option value="s4-duengemittel-adblue.pdl.yaml">s4-duengemittel-adblue.pdl.yaml</option>
+            <option value="s5-wasseraufbereitung.pdl.yaml">s5-wasseraufbereitung.pdl.yaml</option>
+            <option value="s6-rechenzentren.pdl.yaml">s6-rechenzentren.pdl.yaml</option>
+            <option value="s7-seltene-erden.pdl.yaml">s7-seltene-erden.pdl.yaml</option>
+            <option value="s8-seefracht.pdl.yaml">s8-seefracht.pdl.yaml</option>
+            <option value="s9-unterwasserkabel.pdl.yaml">s9-unterwasserkabel.pdl.yaml</option>
+          </select>
+          <button id="exampleBtn" class="ghost" type="button">Ausgewähltes Szenario laden</button>
+        </div>
+        <p id="status" class="status">Noch keine Datei geladen.</p>
+      </section>
+
+      <section class="card collapsible-card">
+        <details class="card-toggle" id="filterCardToggle">
+          <summary><span class="card-toggle-title">Filter</span><span class="card-toggle-icon" aria-hidden="true"></span></summary>
+          <div class="card-toggle-content">
+        <label class="mode-toggle">
+          <input id="conflictMode" type="checkbox" />
+          Nur Konfliktkette (Events + Cascades)
+        </label>
+
+        <div class="filter-group">
+          <div class="filter-header">
+            <h3>Knotentypen</h3>
+            <div class="filter-actions">
+              <button class="tiny" data-action="select-all" data-target="nodeTypeFilters">Alle</button>
+              <button class="tiny" data-action="select-none" data-target="nodeTypeFilters">Keine</button>
+            </div>
+          </div>
+          <div id="nodeTypeFilters" class="filter-list"></div>
+        </div>
+
+        <div id="sectorFilterBlock" class="filter-group hidden">
+          <div class="filter-header">
+            <h3>Sector</h3>
+            <div class="filter-actions">
+              <button class="tiny" data-action="select-all" data-target="sectorFilters">Alle</button>
+              <button class="tiny" data-action="select-none" data-target="sectorFilters">Keine</button>
+            </div>
+          </div>
+          <div id="sectorFilters" class="filter-list"></div>
+        </div>
+
+        <div id="locationFilterBlock" class="filter-group hidden">
+          <div class="filter-header">
+            <h3>Location</h3>
+            <div class="filter-actions">
+              <button class="tiny" data-action="select-all" data-target="locationFilters">Alle</button>
+              <button class="tiny" data-action="select-none" data-target="locationFilters">Keine</button>
+            </div>
+          </div>
+          <div id="locationFilters" class="filter-list"></div>
+        </div>
+
+        <div id="criticalityFilterBlock" class="filter-group hidden">
+          <div class="filter-header">
+            <h3>Criticality</h3>
+            <div class="filter-actions">
+              <button class="tiny" data-action="select-all" data-target="criticalityFilters">Alle</button>
+              <button class="tiny" data-action="select-none" data-target="criticalityFilters">Keine</button>
+            </div>
+          </div>
+          <div id="criticalityFilters" class="filter-list"></div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-header">
+            <h3>Kantentypen</h3>
+            <div class="filter-actions">
+              <button class="tiny" data-action="select-all" data-target="edgeTypeFilters">Alle</button>
+              <button class="tiny" data-action="select-none" data-target="edgeTypeFilters">Keine</button>
+            </div>
+          </div>
+          <div id="edgeTypeFilters" class="filter-list"></div>
+        </div>
+
+        <div id="entitySubtypeBlock" class="filter-group hidden">
+          <div class="filter-header">
+            <h3>Entity-Subtypen</h3>
+            <div class="filter-actions">
+              <button class="tiny" data-action="select-all" data-target="entitySubtypeFilters">Alle</button>
+              <button class="tiny" data-action="select-none" data-target="entitySubtypeFilters">Keine</button>
+            </div>
+          </div>
+          <div id="entitySubtypeFilters" class="filter-list"></div>
+        </div>
+
+        <div id="eventSubtypeBlock" class="filter-group hidden">
+          <div class="filter-header">
+            <h3>Event-Subtypen</h3>
+            <div class="filter-actions">
+              <button class="tiny" data-action="select-all" data-target="eventSubtypeFilters">Alle</button>
+              <button class="tiny" data-action="select-none" data-target="eventSubtypeFilters">Keine</button>
+            </div>
+          </div>
+          <div id="eventSubtypeFilters" class="filter-list"></div>
+        </div>
+          </div>
+        </details>
+      </section>
+
+      <section class="card collapsible-card">
+        <details class="card-toggle" id="graphCardToggle">
+          <summary><span class="card-toggle-title">Graph</span><span class="card-toggle-icon" aria-hidden="true"></span></summary>
+          <div class="card-toggle-content">
+        <div class="stats" id="stats"></div>
+        <div class="graph-actions">
+          <button id="fitBtn">Ansicht zentrieren</button>
+          <button id="stabilizeBtn" class="ghost">Layout neu berechnen</button>
+          <button id="exportJson" class="ghost" type="button">Export JSON</button>
+          <button id="exportYaml" class="ghost" type="button">Export YAML</button>
+          <button id="exportPng" class="ghost" type="button">Export PNG</button>
+        </div>
+        <p id="exportStatus" class="status"></p>
+          </div>
+        </details>
+      </section>
+
+    </aside>
+
+    <main class="canvas">
+      <div id="graph" aria-label="Graph Visualisierung"></div>
+      <div id="graphScenarioTitle" class="graph-scenario-title hidden"></div>
+      <div class="hint">
+        <p>Zoom mit Mausrad · Knoten ziehen · Doppelklick für Fokus</p>
+      </div>
+    </main>
+
+    <aside class="panel panel-right">
+      <section class="card">
+        <h2>Details</h2>
+        <div class="details-header">
+          <div>
+            <p id="detailsType" class="details-type">—</p>
+            <h3 id="detailsTitle" class="details-title">Klick auf einen Knoten oder eine Kante</h3>
+          </div>
+          <button id="detailsToggle" class="tiny ghost" type="button">JSON</button>
+        </div>
+        <div id="detailsContent" class="details-content">
+          <p class="details-empty">Wähle ein Element im Graphen aus, um Details zu sehen.</p>
+        </div>
+        <pre id="detailsRaw" class="details hidden"></pre>
+      </section>
+
+      <section class="card">
+        <h2>Supply-Chain Fokus</h2>
+        <p id="supplyStatus" class="status">Kein Entity ausgewählt.</p>
+        <label class="focus-toggle">
+          <input id="supplyDim" type="checkbox" checked />
+          Rest abdunkeln
+        </label>
+        <div class="supply-actions">
+          <button class="tiny" data-supply="upstream" type="button">Upstream</button>
+          <button class="tiny" data-supply="downstream" type="button">Downstream</button>
+          <button class="tiny" data-supply="both" type="button">Beides</button>
+          <button class="tiny ghost" data-supply="off" type="button">Aus</button>
+        </div>
+      </section>
+
+      <section class="card validation-block">
+        <div class="validation-header">
+          <h2>Validierung</h2>
+          <button id="validationRun" class="tiny ghost" type="button">Neu prüfen</button>
+        </div>
+        <p id="validationStatus" class="status">Keine Datei geladen.</p>
+        <ul id="validationList" class="validation-list"></ul>
+      </section>
+
+      <section class="card">
+        <h2>Legende</h2>
+        <ul class="legend" id="legend"></ul>
+      </section>
+    </aside>
+    </div>
+  </div>
+
+  <div id="yamlView" class="view">
+    <div class="yaml-layout">
+      <aside class="panel panel-left">
+        <header>
+          <p class="eyebrow">PDL YAML</p>
+          <h1>YAML Viewer</h1>
+          <p class="subtitle">Ausklappbare Strukturansicht der geladenen Datei.</p>
+        </header>
+
+        <section class="card">
+          <h2>Ansicht</h2>
+          <div class="search">
+            <input id="yamlSearch" type="search" placeholder="Suche nach Schlüssel oder Wert" />
+          </div>
+          <div id="yamlSearchPanel" class="yaml-search-panel hidden">
+            <div class="yaml-search-toolbar">
+              <span id="yamlSearchCount" class="yaml-search-count">0 Treffer</span>
+              <div class="yaml-search-nav">
+                <button id="yamlSearchPrev" class="tiny ghost" type="button" disabled>Zurück</button>
+                <button id="yamlSearchNext" class="tiny ghost" type="button" disabled>Weiter</button>
+              </div>
+            </div>
+            <ul id="yamlSearchList" class="yaml-search-list"></ul>
+          </div>
+          <p id="yamlStatus" class="status">Noch keine Datei geladen.</p>
+          <div class="graph-actions">
+            <button id="yamlExpand">Alles aufklappen</button>
+            <button id="yamlCollapse" class="ghost">Alles zuklappen</button>
+          </div>
+        </section>
+      </aside>
+
+      <main class="yaml-canvas">
+        <div class="card yaml-card">
+          <div id="yamlTree" class="yaml-tree">
+            <p class="details-empty">Noch keine Datei geladen.</p>
+          </div>
+        </div>
+      </main>
+
+      <aside class="panel panel-right ontology-panel">
+        <section class="card ontology-card">
+          <h2>PDL Ontologie</h2>
+          <p class="status">Schnelle Orientierung über Klassen und Beziehungen.</p>
+
+          <div class="ontology-block">
+            <h3>Instanzen im YAML</h3>
+            <ul id="ontologyStats" class="ontology-stats"></ul>
+          </div>
+
+          <div class="ontology-block">
+            <h3>Kernklassen</h3>
+            <ul class="ontology-list">
+              <li><code>Scenario</code> mit Metadaten und Sammlungen</li>
+              <li><code>Entity</code>: manufacturer, commodity, infrastructure, service, region</li>
+              <li><code>SupplyChain</code> mit <code>stages</code> und <code>dependencies</code></li>
+              <li><code>Event</code> mit <code>trigger</code>, <code>impact</code>, <code>causes</code></li>
+              <li><code>Substitution</code> mit <code>activation</code>, <code>side_effects</code>, <code>dependency_overlap</code></li>
+              <li><code>Cascade</code> mit <code>origin</code> und <code>timeline</code></li>
+            </ul>
+          </div>
+
+          <div class="ontology-block">
+            <h3>Wichtige Relationen</h3>
+            <ul class="ontology-list">
+              <li><code>fromEntity</code> → <code>toEntity</code> (Supply Flows)</li>
+              <li><code>triggers</code> (Event betrifft Entity)</li>
+              <li><code>causes</code> (Event triggert Event)</li>
+              <li><code>substitution_ref</code> und <code>activation</code> (Event/Dependency → Substitution)</li>
+              <li><code>side_effect</code> und <code>dependency_overlap</code> (Substitution-Folgen)</li>
+              <li><code>originEvent</code> (Cascade Start)</li>
+              <li><code>timelineEvent</code> und <code>affects</code> (Cascade Verlauf)</li>
+            </ul>
+          </div>
+
+          <div class="ontology-block">
+            <h3>Impact-Felder</h3>
+            <ul id="ontologyImpactStats" class="ontology-stats"></ul>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <div id="ontologyView" class="view">
+    <div class="onto-layout">
+      <aside class="panel panel-left onto-sidebar">
+        <section class="card">
+          <h2>Filter</h2>
+          <div class="onto-filter-group">
+            <button class="onto-filter active" data-filter="all" type="button">Alle</button>
+            <button class="onto-filter" data-filter="coypu" type="button">Nur CoyPu</button>
+            <button class="onto-filter" data-filter="inherited" type="button">PDL geerbt</button>
+            <button class="onto-filter" data-filter="new" type="button">PDL-Erweiterungen</button>
+          </div>
+        </section>
+        <section class="card">
+          <h2>Statistik</h2>
+          <ul id="ontoStats" class="ontology-stats"></ul>
+        </section>
+        <section class="card">
+          <h2>Legende</h2>
+          <ul class="ontology-stats">
+            <li><span class="onto-dot onto-dot-coypu"></span> CoyPu-Basisklassen</li>
+            <li><span class="onto-dot onto-dot-inherited"></span> PDL geerbt (subClassOf)</li>
+            <li><span class="onto-dot onto-dot-equiv"></span> PDL equivalentClass</li>
+            <li><span class="onto-dot onto-dot-new"></span> PDL-Neuerungen</li>
+            <li><span class="onto-dot onto-dot-enum"></span> PDL-Enumerationen</li>
+          </ul>
+        </section>
+      </aside>
+      <main class="onto-canvas">
+        <div id="ontoSubTabs" class="onto-sub-tabs">
+          <button id="ontoTabGraph" class="onto-sub-tab active" type="button">Graph</button>
+          <button id="ontoTabCards" class="onto-sub-tab" type="button">Klassen</button>
+        </div>
+        <div id="ontoNetwork" aria-label="Ontologie-Graph"></div>
+        <div id="ontoCardsView" class="onto-cards-view" style="display:none">
+          <div id="ontoCardsGrid" class="onto-cards-grid"></div>
+        </div>
+      </main>
+      <aside class="panel panel-right onto-details-panel">
+        <section class="card" id="ontoDetailsCard">
+          <h2>Details</h2>
+          <p class="muted" id="ontoDetailsEmpty">Klasse anklicken…</p>
+          <div id="ontoDetailsContent" class="onto-details-content" style="display:none"></div>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <div id="aboutView" class="view">
+    <main class="about-layout">
+      <section class="card about-hero">
+        <h1>About PDL-Viewer</h1>
+        <p class="about-text">PDL-Viewer ist ein webbasiertes Tool zur interaktiven Analyse von PDL-YAML-Szenarien als Netzwerkgraph.</p>
+        <p class="about-text">Die Anwendung kombiniert Graph-Exploration, Filter, Pfadanalyse und YAML-Inspektion in einer einzigen Oberfläche.</p>
+      </section>
+      <section class="about-grid">
+        <article class="card about-card">
+          <h2>Zweck</h2>
+          <p class="about-text">Sichtbarmachen von Abhaengigkeiten, Events und Cascade-Effekten in Lieferketten fuer Forschung und Diskussion.</p>
+        </article>
+        <article class="card about-card">
+          <h2>Funktionen</h2>
+          <ul class="about-list">
+            <li>Graph-Ansicht mit Filtern, Fokus und Pfadanalyse</li>
+            <li>YAML-Strukturansicht mit Suche und Navigation</li>
+            <li>Export als JSON, YAML und PNG</li>
+          </ul>
+        </article>
+        <article class="card about-card">
+          <h2>Lizenz</h2>
+          <p class="about-text">Open Source unter der MIT License.</p>
+          <p class="about-text">Repository: <a class="about-link" href="https://github.com/implisense" target="_blank" rel="noopener noreferrer">github.com/implisense</a></p>
+        </article>
+      </section>
+    </main>
+  </div>
+
+<div id="tutorialOverlay" class="tutorial-overlay hidden">
+  <div class="tutorial-modal">
+    <div class="tutorial-header">
+      <h2 id="tutorialTitle">PDL Simulation verstehen</h2>
+      <button id="tutorialClose" class="tutorial-close" type="button">&times;</button>
+    </div>
+    <div class="tutorial-progress">
+      <span class="tutorial-dot"></span>
+      <span class="tutorial-dot"></span>
+      <span class="tutorial-dot"></span>
+      <span class="tutorial-dot"></span>
+      <span class="tutorial-dot"></span>
+      <span class="tutorial-dot"></span>
+    </div>
+    <div id="tutorialBody" class="tutorial-body"></div>
+    <div class="tutorial-footer">
+      <button id="tutorialPrev" class="ghost" type="button">Zur&uuml;ck</button>
+      <span id="tutorialStep" class="tutorial-step-label">1 / 6</span>
+      <button id="tutorialNext" type="button">Weiter</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

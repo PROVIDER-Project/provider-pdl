@@ -1,0 +1,897 @@
+# =============================================================================
+# PDL to RDF/Turtle Export
+# =============================================================================
+# Generated: 2026-02-04T19:39:05.041Z
+# Ontology: https://provider-project.org/ontology/pdl
+# Extends: https://schema.coypu.org/global/2.3 (CoyPu Ontology)
+# =============================================================================
+
+@prefix pdl: <https://provider-project.org/ontology/pdl#> .
+@prefix pdlr: <https://provider-project.org/resource/> .
+@prefix coy: <https://schema.coypu.org/global#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+
+# Ontology Import
+<https://provider-project.org/resource/export> a owl:Ontology ;
+    owl:imports <https://provider-project.org/ontology/pdl> ;
+    owl:imports <https://schema.coypu.org/global/2.3> ;
+    dcterms:created "2026-02-04"^^xsd:date .
+
+# =============================================================================
+# Scenario: Wasseraufbereitung und Chemieindustrie
+# =============================================================================
+
+pdlr:scenario_water_treatment_disruption a pdl:Scenario ;
+    dcterms:identifier "water_treatment_disruption" ;
+    rdfs:label "Wasseraufbereitung und Chemieindustrie" ;
+    pdl:sector "water" ;
+    pdl:criticality pdl:Criticality_high ;
+    dcterms:description "Simulation der Auswirkungen eines Chlorproduktionsstopps durch Strompreisexplosion auf die deutsche Trinkwasserversorgung. Chlor-Alkali-Elektrolyse benötigt 2.400-3.000 kWh/t Chlor. Bei Strompreisen >400 EUR/MWh werden Produktionen eingestellt.\n" ;
+    pdl:pdlVersion "1.1" .
+
+# =============================================================================
+# Entities
+# =============================================================================
+
+pdlr:entity_electricity_grid a pdl:Infrastructure, coy:Infrastructure ;
+    dcterms:identifier "electricity_grid" ;
+    rdfs:label "Stromversorgung Deutschland" ;
+    pdl:entityType "infrastructure" ;
+    pdl:sector "energy" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.4"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:entity_basf_ludwigshafen a pdl:Manufacturer, coy:Company ;
+    dcterms:identifier "basf_ludwigshafen" ;
+    rdfs:label "BASF Ludwigshafen" ;
+    pdl:entityType "manufacturer" ;
+    pdl:sector "chemistry" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.7"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:entity_covestro_leverkusen a pdl:Manufacturer, coy:Company ;
+    dcterms:identifier "covestro_leverkusen" ;
+    rdfs:label "Covestro Leverkusen" ;
+    pdl:entityType "manufacturer" ;
+    pdl:sector "chemistry" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.7"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:entity_evonik_marl a pdl:Manufacturer, coy:Company ;
+    dcterms:identifier "evonik_marl" ;
+    rdfs:label "Evonik Marl" ;
+    pdl:entityType "manufacturer" ;
+    pdl:sector "chemistry" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.7"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:entity_dow_stade a pdl:Manufacturer, coy:Company ;
+    dcterms:identifier "dow_stade" ;
+    rdfs:label "Dow Stade" ;
+    pdl:entityType "manufacturer" ;
+    pdl:sector "chemistry" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.7"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:entity_vinnolit_gendorf a pdl:Manufacturer, coy:Company ;
+    dcterms:identifier "vinnolit_gendorf" ;
+    rdfs:label "Vinnolit Gendorf" ;
+    pdl:entityType "manufacturer" ;
+    pdl:sector "chemistry" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.65"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:entity_inovyn_rheinberg a pdl:Manufacturer, coy:Company ;
+    dcterms:identifier "inovyn_rheinberg" ;
+    rdfs:label "INOVYN Rheinberg" ;
+    pdl:entityType "manufacturer" ;
+    pdl:sector "chemistry" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.65"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:entity_chlorine_supply a pdl:Commodity, coy:Commodity ;
+    dcterms:identifier "chlorine_supply" ;
+    rdfs:label "Chlorversorgung" ;
+    pdl:entityType "commodity" ;
+    pdl:sector "chemistry" ;
+    pdl:vulnerability "0.8"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:entity_sodium_hydroxide_supply a pdl:Commodity, coy:Commodity ;
+    dcterms:identifier "sodium_hydroxide_supply" ;
+    rdfs:label "Natronlauge-Versorgung" ;
+    pdl:entityType "commodity" ;
+    pdl:sector "chemistry" ;
+    pdl:vulnerability "0.6"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:entity_small_rural_utilities a pdl:Service ;
+    dcterms:identifier "small_rural_utilities" ;
+    rdfs:label "Kleine ländliche Wasserversorger (<1.000 Einw.)" ;
+    pdl:entityType "service" ;
+    pdl:sector "water" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.9"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:entity_small_urban_utilities a pdl:Service ;
+    dcterms:identifier "small_urban_utilities" ;
+    rdfs:label "Kleine städtische Wasserversorger (1.000-10.000 Einw.)" ;
+    pdl:entityType "service" ;
+    pdl:sector "water" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.75"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:entity_medium_utilities a pdl:Service ;
+    dcterms:identifier "medium_utilities" ;
+    rdfs:label "Mittlere Wasserversorger (10.000-100.000 Einw.)" ;
+    pdl:entityType "service" ;
+    pdl:sector "water" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.5"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:entity_large_utilities a pdl:Service ;
+    dcterms:identifier "large_utilities" ;
+    rdfs:label "Große Wasserversorger (>100.000 Einw.)" ;
+    pdl:entityType "service" ;
+    pdl:sector "water" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.3"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:entity_hospitals a pdl:Infrastructure, coy:Infrastructure ;
+    dcterms:identifier "hospitals" ;
+    rdfs:label "Krankenhäuser" ;
+    pdl:entityType "infrastructure" ;
+    pdl:sector "health" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.6"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:entity_food_industry a pdl:Manufacturer, coy:Company ;
+    dcterms:identifier "food_industry" ;
+    rdfs:label "Lebensmittelindustrie" ;
+    pdl:entityType "manufacturer" ;
+    pdl:sector "food" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.7"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:entity_pharma_industry a pdl:Manufacturer, coy:Company ;
+    dcterms:identifier "pharma_industry" ;
+    rdfs:label "Pharmaindustrie" ;
+    pdl:entityType "manufacturer" ;
+    pdl:sector "health" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.65"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:entity_paper_industry a pdl:Manufacturer, coy:Company ;
+    dcterms:identifier "paper_industry" ;
+    rdfs:label "Papierindustrie" ;
+    pdl:entityType "manufacturer" ;
+    pdl:sector "manufacturing" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.5"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:entity_population_rural a pdl:Region, coy:Region ;
+    dcterms:identifier "population_rural" ;
+    rdfs:label "Ländliche Bevölkerung" ;
+    pdl:entityType "region" ;
+    pdl:sector "society" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.8"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:entity_population_urban a pdl:Region, coy:Region ;
+    dcterms:identifier "population_urban" ;
+    rdfs:label "Städtische Bevölkerung" ;
+    pdl:entityType "region" ;
+    pdl:sector "society" ;
+    pdl:location "Germany" ;
+    pdl:vulnerability "0.5"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+# =============================================================================
+# Supply Chains
+# =============================================================================
+
+pdlr:chain_chlorine_water_main a pdl:SupplyChain ;
+    dcterms:identifier "chlorine_water_main" ;
+    rdfs:label "Chlor-Wasserversorgungs-Kette" ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:connection_chlorine_water_main_1 a pdl:SupplyChainConnection ;
+    pdl:sequence 1 ;
+    pdl:fromEntity pdlr:entity_electricity_grid ;
+    pdl:toEntity pdlr:entity_basf_ludwigshafen ;
+    pdl:belongsToChain pdlr:chain_chlorine_water_main .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_basf_ludwigshafen coy:hasSupplier pdlr:entity_electricity_grid .
+pdlr:entity_electricity_grid coy:hasCustomer pdlr:entity_basf_ludwigshafen .
+
+pdlr:connection_chlorine_water_main_2 a pdl:SupplyChainConnection ;
+    pdl:sequence 2 ;
+    pdl:fromEntity pdlr:entity_electricity_grid ;
+    pdl:toEntity pdlr:entity_covestro_leverkusen ;
+    pdl:belongsToChain pdlr:chain_chlorine_water_main .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_covestro_leverkusen coy:hasSupplier pdlr:entity_electricity_grid .
+pdlr:entity_electricity_grid coy:hasCustomer pdlr:entity_covestro_leverkusen .
+
+pdlr:connection_chlorine_water_main_3 a pdl:SupplyChainConnection ;
+    pdl:sequence 3 ;
+    pdl:fromEntity pdlr:entity_electricity_grid ;
+    pdl:toEntity pdlr:entity_evonik_marl ;
+    pdl:belongsToChain pdlr:chain_chlorine_water_main .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_evonik_marl coy:hasSupplier pdlr:entity_electricity_grid .
+pdlr:entity_electricity_grid coy:hasCustomer pdlr:entity_evonik_marl .
+
+pdlr:connection_chlorine_water_main_4 a pdl:SupplyChainConnection ;
+    pdl:sequence 4 ;
+    pdl:fromEntity pdlr:entity_electricity_grid ;
+    pdl:toEntity pdlr:entity_dow_stade ;
+    pdl:belongsToChain pdlr:chain_chlorine_water_main .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_dow_stade coy:hasSupplier pdlr:entity_electricity_grid .
+pdlr:entity_electricity_grid coy:hasCustomer pdlr:entity_dow_stade .
+
+pdlr:connection_chlorine_water_main_5 a pdl:SupplyChainConnection ;
+    pdl:sequence 5 ;
+    pdl:fromEntity pdlr:entity_basf_ludwigshafen ;
+    pdl:toEntity pdlr:entity_chlorine_supply ;
+    pdl:belongsToChain pdlr:chain_chlorine_water_main .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_chlorine_supply coy:hasSupplier pdlr:entity_basf_ludwigshafen .
+pdlr:entity_basf_ludwigshafen coy:hasCustomer pdlr:entity_chlorine_supply .
+
+pdlr:connection_chlorine_water_main_6 a pdl:SupplyChainConnection ;
+    pdl:sequence 6 ;
+    pdl:fromEntity pdlr:entity_covestro_leverkusen ;
+    pdl:toEntity pdlr:entity_chlorine_supply ;
+    pdl:belongsToChain pdlr:chain_chlorine_water_main .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_chlorine_supply coy:hasSupplier pdlr:entity_covestro_leverkusen .
+pdlr:entity_covestro_leverkusen coy:hasCustomer pdlr:entity_chlorine_supply .
+
+pdlr:connection_chlorine_water_main_7 a pdl:SupplyChainConnection ;
+    pdl:sequence 7 ;
+    pdl:fromEntity pdlr:entity_evonik_marl ;
+    pdl:toEntity pdlr:entity_chlorine_supply ;
+    pdl:belongsToChain pdlr:chain_chlorine_water_main .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_chlorine_supply coy:hasSupplier pdlr:entity_evonik_marl .
+pdlr:entity_evonik_marl coy:hasCustomer pdlr:entity_chlorine_supply .
+
+pdlr:connection_chlorine_water_main_8 a pdl:SupplyChainConnection ;
+    pdl:sequence 8 ;
+    pdl:fromEntity pdlr:entity_dow_stade ;
+    pdl:toEntity pdlr:entity_chlorine_supply ;
+    pdl:belongsToChain pdlr:chain_chlorine_water_main .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_chlorine_supply coy:hasSupplier pdlr:entity_dow_stade .
+pdlr:entity_dow_stade coy:hasCustomer pdlr:entity_chlorine_supply .
+
+pdlr:connection_chlorine_water_main_9 a pdl:SupplyChainConnection ;
+    pdl:sequence 9 ;
+    pdl:fromEntity pdlr:entity_chlorine_supply ;
+    pdl:toEntity pdlr:entity_small_rural_utilities ;
+    pdl:belongsToChain pdlr:chain_chlorine_water_main .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_small_rural_utilities coy:hasSupplier pdlr:entity_chlorine_supply .
+pdlr:entity_chlorine_supply coy:hasCustomer pdlr:entity_small_rural_utilities .
+
+pdlr:connection_chlorine_water_main_10 a pdl:SupplyChainConnection ;
+    pdl:sequence 10 ;
+    pdl:fromEntity pdlr:entity_chlorine_supply ;
+    pdl:toEntity pdlr:entity_small_urban_utilities ;
+    pdl:belongsToChain pdlr:chain_chlorine_water_main .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_small_urban_utilities coy:hasSupplier pdlr:entity_chlorine_supply .
+pdlr:entity_chlorine_supply coy:hasCustomer pdlr:entity_small_urban_utilities .
+
+pdlr:connection_chlorine_water_main_11 a pdl:SupplyChainConnection ;
+    pdl:sequence 11 ;
+    pdl:fromEntity pdlr:entity_chlorine_supply ;
+    pdl:toEntity pdlr:entity_medium_utilities ;
+    pdl:belongsToChain pdlr:chain_chlorine_water_main .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_medium_utilities coy:hasSupplier pdlr:entity_chlorine_supply .
+pdlr:entity_chlorine_supply coy:hasCustomer pdlr:entity_medium_utilities .
+
+pdlr:connection_chlorine_water_main_12 a pdl:SupplyChainConnection ;
+    pdl:sequence 12 ;
+    pdl:fromEntity pdlr:entity_chlorine_supply ;
+    pdl:toEntity pdlr:entity_large_utilities ;
+    pdl:belongsToChain pdlr:chain_chlorine_water_main .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_large_utilities coy:hasSupplier pdlr:entity_chlorine_supply .
+pdlr:entity_chlorine_supply coy:hasCustomer pdlr:entity_large_utilities .
+
+pdlr:dependency_chlorine_water_main_1 a pdl:Dependency ;
+    pdl:fromEntity pdlr:entity_basf_ludwigshafen ;
+    pdl:toEntity pdlr:entity_electricity_grid ;
+    pdl:dependencyType "energy" ;
+    pdl:dependencyTypeRef pdl:DependencyType_energy ;
+    pdl:criticality pdl:Criticality_high ;
+    pdl:belongsToChain pdlr:chain_chlorine_water_main .
+
+# Direct dependency relationship
+pdlr:entity_basf_ludwigshafen pdl:dependsOn pdlr:entity_electricity_grid .
+
+pdlr:dependency_chlorine_water_main_2 a pdl:Dependency ;
+    pdl:fromEntity pdlr:entity_covestro_leverkusen ;
+    pdl:toEntity pdlr:entity_electricity_grid ;
+    pdl:dependencyType "energy" ;
+    pdl:dependencyTypeRef pdl:DependencyType_energy ;
+    pdl:criticality pdl:Criticality_high ;
+    pdl:belongsToChain pdlr:chain_chlorine_water_main .
+
+# Direct dependency relationship
+pdlr:entity_covestro_leverkusen pdl:dependsOn pdlr:entity_electricity_grid .
+
+pdlr:chain_sodium_hydroxide_chain a pdl:SupplyChain ;
+    dcterms:identifier "sodium_hydroxide_chain" ;
+    rdfs:label "Natronlauge-Lieferkette" ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:connection_sodium_hydroxide_chain_1 a pdl:SupplyChainConnection ;
+    pdl:sequence 1 ;
+    pdl:fromEntity pdlr:entity_basf_ludwigshafen ;
+    pdl:toEntity pdlr:entity_sodium_hydroxide_supply ;
+    pdl:belongsToChain pdlr:chain_sodium_hydroxide_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_sodium_hydroxide_supply coy:hasSupplier pdlr:entity_basf_ludwigshafen .
+pdlr:entity_basf_ludwigshafen coy:hasCustomer pdlr:entity_sodium_hydroxide_supply .
+
+pdlr:connection_sodium_hydroxide_chain_2 a pdl:SupplyChainConnection ;
+    pdl:sequence 2 ;
+    pdl:fromEntity pdlr:entity_covestro_leverkusen ;
+    pdl:toEntity pdlr:entity_sodium_hydroxide_supply ;
+    pdl:belongsToChain pdlr:chain_sodium_hydroxide_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_sodium_hydroxide_supply coy:hasSupplier pdlr:entity_covestro_leverkusen .
+pdlr:entity_covestro_leverkusen coy:hasCustomer pdlr:entity_sodium_hydroxide_supply .
+
+pdlr:connection_sodium_hydroxide_chain_3 a pdl:SupplyChainConnection ;
+    pdl:sequence 3 ;
+    pdl:fromEntity pdlr:entity_sodium_hydroxide_supply ;
+    pdl:toEntity pdlr:entity_paper_industry ;
+    pdl:belongsToChain pdlr:chain_sodium_hydroxide_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_paper_industry coy:hasSupplier pdlr:entity_sodium_hydroxide_supply .
+pdlr:entity_sodium_hydroxide_supply coy:hasCustomer pdlr:entity_paper_industry .
+
+pdlr:connection_sodium_hydroxide_chain_4 a pdl:SupplyChainConnection ;
+    pdl:sequence 4 ;
+    pdl:fromEntity pdlr:entity_sodium_hydroxide_supply ;
+    pdl:toEntity pdlr:entity_food_industry ;
+    pdl:belongsToChain pdlr:chain_sodium_hydroxide_chain .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_food_industry coy:hasSupplier pdlr:entity_sodium_hydroxide_supply .
+pdlr:entity_sodium_hydroxide_supply coy:hasCustomer pdlr:entity_food_industry .
+
+pdlr:chain_water_to_consumers a pdl:SupplyChain ;
+    dcterms:identifier "water_to_consumers" ;
+    rdfs:label "Trinkwasser-Verteilung" ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:connection_water_to_consumers_1 a pdl:SupplyChainConnection ;
+    pdl:sequence 1 ;
+    pdl:fromEntity pdlr:entity_small_rural_utilities ;
+    pdl:toEntity pdlr:entity_population_rural ;
+    pdl:belongsToChain pdlr:chain_water_to_consumers .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_population_rural coy:hasSupplier pdlr:entity_small_rural_utilities .
+pdlr:entity_small_rural_utilities coy:hasCustomer pdlr:entity_population_rural .
+
+pdlr:connection_water_to_consumers_2 a pdl:SupplyChainConnection ;
+    pdl:sequence 2 ;
+    pdl:fromEntity pdlr:entity_small_urban_utilities ;
+    pdl:toEntity pdlr:entity_population_urban ;
+    pdl:belongsToChain pdlr:chain_water_to_consumers .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_population_urban coy:hasSupplier pdlr:entity_small_urban_utilities .
+pdlr:entity_small_urban_utilities coy:hasCustomer pdlr:entity_population_urban .
+
+pdlr:connection_water_to_consumers_3 a pdl:SupplyChainConnection ;
+    pdl:sequence 3 ;
+    pdl:fromEntity pdlr:entity_medium_utilities ;
+    pdl:toEntity pdlr:entity_hospitals ;
+    pdl:belongsToChain pdlr:chain_water_to_consumers .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_hospitals coy:hasSupplier pdlr:entity_medium_utilities .
+pdlr:entity_medium_utilities coy:hasCustomer pdlr:entity_hospitals .
+
+pdlr:connection_water_to_consumers_4 a pdl:SupplyChainConnection ;
+    pdl:sequence 4 ;
+    pdl:fromEntity pdlr:entity_medium_utilities ;
+    pdl:toEntity pdlr:entity_food_industry ;
+    pdl:belongsToChain pdlr:chain_water_to_consumers .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_food_industry coy:hasSupplier pdlr:entity_medium_utilities .
+pdlr:entity_medium_utilities coy:hasCustomer pdlr:entity_food_industry .
+
+pdlr:connection_water_to_consumers_5 a pdl:SupplyChainConnection ;
+    pdl:sequence 5 ;
+    pdl:fromEntity pdlr:entity_large_utilities ;
+    pdl:toEntity pdlr:entity_pharma_industry ;
+    pdl:belongsToChain pdlr:chain_water_to_consumers .
+
+# CoyPu-compatible supplier relationship
+pdlr:entity_pharma_industry coy:hasSupplier pdlr:entity_large_utilities .
+pdlr:entity_large_utilities coy:hasCustomer pdlr:entity_pharma_industry .
+
+pdlr:dependency_water_to_consumers_1 a pdl:Dependency ;
+    pdl:fromEntity pdlr:entity_hospitals ;
+    pdl:toEntity pdlr:entity_medium_utilities ;
+    pdl:dependencyType "input" ;
+    pdl:dependencyTypeRef pdl:DependencyType_input ;
+    pdl:criticality pdl:Criticality_high ;
+    pdl:belongsToChain pdlr:chain_water_to_consumers .
+
+# Direct dependency relationship
+pdlr:entity_hospitals pdl:dependsOn pdlr:entity_medium_utilities .
+
+pdlr:dependency_water_to_consumers_2 a pdl:Dependency ;
+    pdl:fromEntity pdlr:entity_pharma_industry ;
+    pdl:toEntity pdlr:entity_large_utilities ;
+    pdl:dependencyType "input" ;
+    pdl:dependencyTypeRef pdl:DependencyType_input ;
+    pdl:criticality pdl:Criticality_high ;
+    pdl:belongsToChain pdlr:chain_water_to_consumers .
+
+# Direct dependency relationship
+pdlr:entity_pharma_industry pdl:dependsOn pdlr:entity_large_utilities .
+
+# =============================================================================
+# Events
+# =============================================================================
+
+pdlr:event_electricity_price_spike a pdl:Event, pdl:Event_MarketShock ;
+    dcterms:identifier "electricity_price_spike" ;
+    rdfs:label "Strompreisexplosion" ;
+    pdl:eventType "market_shock" ;
+    pdl:triggerTarget pdlr:entity_electricity_grid ;
+    coy:hasImpactOn pdlr:entity_electricity_grid ;
+    pdl:triggerProbability "0.15"^^xsd:decimal ;
+    pdl:impactPrice "+300%" ;
+    pdl:impactDuration "45d" ;
+    pdl:causes pdlr:event_chlorine_production_halt ;
+    dcterms:source "Strompreis >400 EUR/MWh führt zu Produktionsstopps" ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:event_chlorine_production_halt a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "chlorine_production_halt" ;
+    rdfs:label "Chlorproduktionsstopp" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_basf_ludwigshafen ;
+    coy:hasImpactOn pdlr:entity_basf_ludwigshafen ;
+    pdl:triggerCondition "electricity_price_spike.active" ;
+    pdl:impactSupply "-85%" ;
+    pdl:impactDuration "45d" ;
+    pdl:causes pdlr:event_chlorine_delivery_stop ;
+    dcterms:source "Chlorproduktion Deutschland ~4,5 Mio. t/Jahr stoppt bei hohen Strompreisen" ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:event_chlorine_delivery_stop a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "chlorine_delivery_stop" ;
+    rdfs:label "Chlorlieferungen gestoppt" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_chlorine_supply ;
+    coy:hasImpactOn pdlr:entity_chlorine_supply ;
+    pdl:triggerCondition "chlorine_production_halt.active" ;
+    pdl:impactSupply "-90%" ;
+    pdl:impactDuration "60d" ;
+    pdl:causes pdlr:event_small_utility_shortage, pdlr:event_medium_utility_shortage ;
+    dcterms:source "Chlor nur begrenzt lagerfähig (Gefahrgut)" ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:event_small_utility_shortage a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "small_utility_shortage" ;
+    rdfs:label "Kleine Wasserversorger - Vorräte erschöpft" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_small_rural_utilities ;
+    coy:hasImpactOn pdlr:entity_small_rural_utilities ;
+    pdl:triggerCondition "chlorine_delivery_stop.active" ;
+    pdl:impactSupply "-80%" ;
+    pdl:impactDuration "30d" ;
+    pdl:causes pdlr:event_disinfection_stopped ;
+    dcterms:source "Kleine Versorger: Lagerkapazität oft <7 Tage" ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:event_medium_utility_shortage a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "medium_utility_shortage" ;
+    rdfs:label "Mittlere Wasserversorger - Engpass" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_medium_utilities ;
+    coy:hasImpactOn pdlr:entity_medium_utilities ;
+    pdl:triggerCondition "chlorine_delivery_stop.active" ;
+    pdl:impactSupply "-40%" ;
+    pdl:impactDuration "21d" ;
+    dcterms:source "Mittlere Versorger: 10-14 Tage Vorräte" ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:event_disinfection_stopped a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "disinfection_stopped" ;
+    rdfs:label "Desinfektion eingestellt" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_small_rural_utilities ;
+    coy:hasImpactOn pdlr:entity_small_rural_utilities ;
+    pdl:triggerCondition "small_utility_shortage.active" ;
+    pdl:impactSupply "-100%" ;
+    pdl:impactDuration "21d" ;
+    pdl:causes pdlr:event_water_contamination, pdlr:event_boil_water_advisory ;
+    dcterms:source "60% der Wasserversorger nutzen Chlor/Hypochlorit" ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:event_boil_water_advisory a pdl:Event, pdl:Event_Regulatory ;
+    dcterms:identifier "boil_water_advisory" ;
+    rdfs:label "Abkochgebot" ;
+    pdl:eventType "regulatory" ;
+    pdl:triggerTarget pdlr:entity_population_rural ;
+    coy:hasImpactOn pdlr:entity_population_rural ;
+    pdl:triggerCondition "disinfection_stopped.active" ;
+    pdl:impactDemand "+50%" ;
+    pdl:impactDuration "30d" ;
+    dcterms:source "Erste Abkochgebote ab Tag 5" ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:event_water_contamination a pdl:Event, pdl:Event_NaturalDisaster, coy:Disaster ;
+    dcterms:identifier "water_contamination" ;
+    rdfs:label "Mikrobiologische Kontamination" ;
+    pdl:eventType "natural_disaster" ;
+    pdl:triggerTarget pdlr:entity_small_rural_utilities ;
+    coy:hasImpactOn pdlr:entity_small_rural_utilities ;
+    pdl:triggerCondition "disinfection_stopped.active" ;
+    pdl:impactSupply "-100%" ;
+    pdl:impactDuration "14d" ;
+    pdl:causes pdlr:event_gastrointestinal_outbreak ;
+    dcterms:source "Kontamination nach 10-14 Tagen ohne Desinfektion" ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:event_gastrointestinal_outbreak a pdl:Event, pdl:Event_Pandemic ;
+    dcterms:identifier "gastrointestinal_outbreak" ;
+    rdfs:label "Durchfallerkrankungen" ;
+    pdl:eventType "pandemic" ;
+    pdl:triggerTarget pdlr:entity_population_rural ;
+    coy:hasImpactOn pdlr:entity_population_rural ;
+    pdl:triggerCondition "water_contamination.active" ;
+    pdl:impactDemand "+200%" ;
+    pdl:impactDuration "21d" ;
+    pdl:causes pdlr:event_hospital_capacity_strain ;
+    dcterms:source "Durchfallerkrankungen ab Tag 14" ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:event_hospital_capacity_strain a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "hospital_capacity_strain" ;
+    rdfs:label "Krankenhauskapazität überlastet" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_hospitals ;
+    coy:hasImpactOn pdlr:entity_hospitals ;
+    pdl:triggerCondition "gastrointestinal_outbreak.active" ;
+    pdl:impactSupply "-30%" ;
+    pdl:impactDuration "28d" ;
+    dcterms:source "Krankenhauseinweisungen ab Tag 21" ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:event_food_production_halt a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "food_production_halt" ;
+    rdfs:label "Lebensmittelproduktion gestoppt" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_food_industry ;
+    coy:hasImpactOn pdlr:entity_food_industry ;
+    pdl:triggerCondition "medium_utility_shortage.active" ;
+    pdl:impactSupply "-60%" ;
+    pdl:impactDuration "21d" ;
+    dcterms:source "Prozesswasser für Lebensmittelproduktion ab Tag 10" ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:event_pharma_production_halt a pdl:Event, pdl:Event_InfrastructureFailure ;
+    dcterms:identifier "pharma_production_halt" ;
+    rdfs:label "Pharmaproduktion eingeschränkt" ;
+    pdl:eventType "infrastructure_failure" ;
+    pdl:triggerTarget pdlr:entity_pharma_industry ;
+    coy:hasImpactOn pdlr:entity_pharma_industry ;
+    pdl:triggerCondition "chlorine_delivery_stop.active" ;
+    pdl:impactSupply "-40%" ;
+    pdl:impactDuration "14d" ;
+    dcterms:source "Reinstwasser für Pharmaproduktion ab Tag 7" ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+# CoyPu-compatible inverse impact relationships
+pdlr:entity_electricity_grid coy:isImpactedBy pdlr:event_electricity_price_spike .
+pdlr:entity_basf_ludwigshafen coy:isImpactedBy pdlr:event_chlorine_production_halt .
+pdlr:entity_chlorine_supply coy:isImpactedBy pdlr:event_chlorine_delivery_stop .
+pdlr:entity_small_rural_utilities coy:isImpactedBy pdlr:event_small_utility_shortage .
+pdlr:entity_medium_utilities coy:isImpactedBy pdlr:event_medium_utility_shortage .
+pdlr:entity_small_rural_utilities coy:isImpactedBy pdlr:event_disinfection_stopped .
+pdlr:entity_population_rural coy:isImpactedBy pdlr:event_boil_water_advisory .
+pdlr:entity_small_rural_utilities coy:isImpactedBy pdlr:event_water_contamination .
+pdlr:entity_population_rural coy:isImpactedBy pdlr:event_gastrointestinal_outbreak .
+pdlr:entity_hospitals coy:isImpactedBy pdlr:event_hospital_capacity_strain .
+pdlr:entity_food_industry coy:isImpactedBy pdlr:event_food_production_halt .
+pdlr:entity_pharma_industry coy:isImpactedBy pdlr:event_pharma_production_halt .
+
+# =============================================================================
+# Cascades
+# =============================================================================
+
+pdlr:cascade_chlorine_crisis_cascade a pdl:Cascade ;
+    dcterms:identifier "chlorine_crisis_cascade" ;
+    rdfs:label "Chlor-Wasser-Gesundheits-Kaskade" ;
+    pdl:originEvent pdlr:event_electricity_price_spike ;
+    pdl:probability "0.85"^^xsd:decimal ;
+    dcterms:source "Basiert auf PROVIDER-Szenarien-Dokumentation, Szenario 5" ;
+    pdl:validationConfidence "0.8"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:timeline_chlorine_crisis_cascade_1 a pdl:TimelineEntry ;
+    pdl:sequence 1 ;
+    pdl:atTime "0d" ;
+    pdl:timelineEvent pdlr:event_electricity_price_spike ;
+    pdl:belongsToCascade pdlr:cascade_chlorine_crisis_cascade ;
+    pdl:impactSector "energy" ;
+    pdl:impactSeverity pdl:Severity_high .
+
+pdlr:timeline_chlorine_crisis_cascade_2 a pdl:TimelineEntry ;
+    pdl:sequence 2 ;
+    pdl:atTime "1d" ;
+    pdl:timelineEvent pdlr:event_chlorine_production_halt ;
+    pdl:belongsToCascade pdlr:cascade_chlorine_crisis_cascade ;
+    pdl:impactSector "chemistry" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_basf_ludwigshafen, pdlr:entity_covestro_leverkusen, pdlr:entity_evonik_marl, pdlr:entity_dow_stade .
+
+pdlr:timeline_chlorine_crisis_cascade_3 a pdl:TimelineEntry ;
+    pdl:sequence 3 ;
+    pdl:atTime "3d" ;
+    pdl:timelineEvent pdlr:event_chlorine_delivery_stop ;
+    pdl:belongsToCascade pdlr:cascade_chlorine_crisis_cascade ;
+    pdl:impactSector "chemistry" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_chlorine_supply .
+
+pdlr:timeline_chlorine_crisis_cascade_4 a pdl:TimelineEntry ;
+    pdl:sequence 4 ;
+    pdl:atTime "5d" ;
+    pdl:timelineEvent pdlr:event_small_utility_shortage ;
+    pdl:belongsToCascade pdlr:cascade_chlorine_crisis_cascade ;
+    pdl:impactSector "water" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_small_rural_utilities, pdlr:entity_small_urban_utilities .
+
+pdlr:timeline_chlorine_crisis_cascade_5 a pdl:TimelineEntry ;
+    pdl:sequence 5 ;
+    pdl:atTime "7d" ;
+    pdl:timelineEvent pdlr:event_pharma_production_halt ;
+    pdl:belongsToCascade pdlr:cascade_chlorine_crisis_cascade ;
+    pdl:impactSector "health" ;
+    pdl:impactSeverity pdl:Severity_high ;
+    pdl:affects pdlr:entity_pharma_industry .
+
+pdlr:timeline_chlorine_crisis_cascade_6 a pdl:TimelineEntry ;
+    pdl:sequence 6 ;
+    pdl:atTime "10d" ;
+    pdl:timelineEvent pdlr:event_disinfection_stopped ;
+    pdl:belongsToCascade pdlr:cascade_chlorine_crisis_cascade ;
+    pdl:impactSector "water" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_small_rural_utilities .
+
+pdlr:timeline_chlorine_crisis_cascade_7 a pdl:TimelineEntry ;
+    pdl:sequence 7 ;
+    pdl:atTime "10d" ;
+    pdl:timelineEvent pdlr:event_food_production_halt ;
+    pdl:belongsToCascade pdlr:cascade_chlorine_crisis_cascade ;
+    pdl:impactSector "food" ;
+    pdl:impactSeverity pdl:Severity_high ;
+    pdl:affects pdlr:entity_food_industry .
+
+pdlr:timeline_chlorine_crisis_cascade_8 a pdl:TimelineEntry ;
+    pdl:sequence 8 ;
+    pdl:atTime "10d" ;
+    pdl:timelineEvent pdlr:event_boil_water_advisory ;
+    pdl:belongsToCascade pdlr:cascade_chlorine_crisis_cascade ;
+    pdl:impactSector "society" ;
+    pdl:impactSeverity pdl:Severity_medium ;
+    pdl:affects pdlr:entity_population_rural .
+
+pdlr:timeline_chlorine_crisis_cascade_9 a pdl:TimelineEntry ;
+    pdl:sequence 9 ;
+    pdl:atTime "14d" ;
+    pdl:timelineEvent pdlr:event_water_contamination ;
+    pdl:belongsToCascade pdlr:cascade_chlorine_crisis_cascade ;
+    pdl:impactSector "water" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_small_rural_utilities .
+
+pdlr:timeline_chlorine_crisis_cascade_10 a pdl:TimelineEntry ;
+    pdl:sequence 10 ;
+    pdl:atTime "14d" ;
+    pdl:timelineEvent pdlr:event_medium_utility_shortage ;
+    pdl:belongsToCascade pdlr:cascade_chlorine_crisis_cascade ;
+    pdl:impactSector "water" ;
+    pdl:impactSeverity pdl:Severity_high ;
+    pdl:affects pdlr:entity_medium_utilities .
+
+pdlr:timeline_chlorine_crisis_cascade_11 a pdl:TimelineEntry ;
+    pdl:sequence 11 ;
+    pdl:atTime "18d" ;
+    pdl:timelineEvent pdlr:event_gastrointestinal_outbreak ;
+    pdl:belongsToCascade pdlr:cascade_chlorine_crisis_cascade ;
+    pdl:impactSector "health" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_population_rural, pdlr:entity_population_urban .
+
+pdlr:timeline_chlorine_crisis_cascade_12 a pdl:TimelineEntry ;
+    pdl:sequence 12 ;
+    pdl:atTime "21d" ;
+    pdl:timelineEvent pdlr:event_hospital_capacity_strain ;
+    pdl:belongsToCascade pdlr:cascade_chlorine_crisis_cascade ;
+    pdl:impactSector "health" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_hospitals .
+
+pdlr:cascade_industrial_cascade a pdl:Cascade ;
+    dcterms:identifier "industrial_cascade" ;
+    rdfs:label "Industrie-Kaskade" ;
+    pdl:originEvent pdlr:event_chlorine_production_halt ;
+    pdl:probability "0.9"^^xsd:decimal ;
+    dcterms:source "Chlor und NaOH als Koppelprodukte der Elektrolyse" ;
+    pdl:validationConfidence "0.85"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:timeline_industrial_cascade_1 a pdl:TimelineEntry ;
+    pdl:sequence 1 ;
+    pdl:atTime "0d" ;
+    pdl:timelineEvent pdlr:event_chlorine_production_halt ;
+    pdl:belongsToCascade pdlr:cascade_industrial_cascade ;
+    pdl:impactSector "chemistry" ;
+    pdl:impactSeverity pdl:Severity_critical .
+
+pdlr:timeline_industrial_cascade_2 a pdl:TimelineEntry ;
+    pdl:sequence 2 ;
+    pdl:atTime "7d" ;
+    pdl:timelineEvent pdlr:event_pharma_production_halt ;
+    pdl:belongsToCascade pdlr:cascade_industrial_cascade ;
+    pdl:impactSector "health" ;
+    pdl:impactSeverity pdl:Severity_high ;
+    pdl:affects pdlr:entity_pharma_industry .
+
+pdlr:timeline_industrial_cascade_3 a pdl:TimelineEntry ;
+    pdl:sequence 3 ;
+    pdl:atTime "10d" ;
+    pdl:timelineEvent pdlr:event_food_production_halt ;
+    pdl:belongsToCascade pdlr:cascade_industrial_cascade ;
+    pdl:impactSector "food" ;
+    pdl:impactSeverity pdl:Severity_high ;
+    pdl:affects pdlr:entity_food_industry .
+
+pdlr:timeline_industrial_cascade_4 a pdl:TimelineEntry ;
+    pdl:sequence 4 ;
+    pdl:atTime "14d" ;
+    pdl:timelineEvent pdlr:event_hospital_capacity_strain ;
+    pdl:belongsToCascade pdlr:cascade_industrial_cascade ;
+    pdl:impactSector "health" ;
+    pdl:impactSeverity pdl:Severity_medium ;
+    pdl:affects pdlr:entity_hospitals .
+
+pdlr:cascade_worst_case_cascade a pdl:Cascade ;
+    dcterms:identifier "worst_case_cascade" ;
+    rdfs:label "Worst-Case Szenario" ;
+    pdl:originEvent pdlr:event_electricity_price_spike ;
+    pdl:probability "0.3"^^xsd:decimal ;
+    dcterms:source "Kombination aller Effekte bei längerem Strompreisschock" ;
+    pdl:validationConfidence "0.6"^^xsd:decimal ;
+    pdl:partOfScenario pdlr:scenario_water_treatment_disruption .
+
+pdlr:timeline_worst_case_cascade_1 a pdl:TimelineEntry ;
+    pdl:sequence 1 ;
+    pdl:atTime "0d" ;
+    pdl:timelineEvent pdlr:event_electricity_price_spike ;
+    pdl:belongsToCascade pdlr:cascade_worst_case_cascade ;
+    pdl:impactSector "energy" ;
+    pdl:impactSeverity pdl:Severity_critical .
+
+pdlr:timeline_worst_case_cascade_2 a pdl:TimelineEntry ;
+    pdl:sequence 2 ;
+    pdl:atTime "3d" ;
+    pdl:timelineEvent pdlr:event_chlorine_production_halt ;
+    pdl:belongsToCascade pdlr:cascade_worst_case_cascade ;
+    pdl:impactSector "chemistry" ;
+    pdl:impactSeverity pdl:Severity_critical .
+
+pdlr:timeline_worst_case_cascade_3 a pdl:TimelineEntry ;
+    pdl:sequence 3 ;
+    pdl:atTime "7d" ;
+    pdl:timelineEvent pdlr:event_chlorine_delivery_stop ;
+    pdl:belongsToCascade pdlr:cascade_worst_case_cascade ;
+    pdl:impactSector "chemistry" ;
+    pdl:impactSeverity pdl:Severity_critical .
+
+pdlr:timeline_worst_case_cascade_4 a pdl:TimelineEntry ;
+    pdl:sequence 4 ;
+    pdl:atTime "10d" ;
+    pdl:timelineEvent pdlr:event_small_utility_shortage ;
+    pdl:belongsToCascade pdlr:cascade_worst_case_cascade ;
+    pdl:impactSector "water" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_small_rural_utilities, pdlr:entity_small_urban_utilities .
+
+pdlr:timeline_worst_case_cascade_5 a pdl:TimelineEntry ;
+    pdl:sequence 5 ;
+    pdl:atTime "14d" ;
+    pdl:timelineEvent pdlr:event_disinfection_stopped ;
+    pdl:belongsToCascade pdlr:cascade_worst_case_cascade ;
+    pdl:impactSector "water" ;
+    pdl:impactSeverity pdl:Severity_critical .
+
+pdlr:timeline_worst_case_cascade_6 a pdl:TimelineEntry ;
+    pdl:sequence 6 ;
+    pdl:atTime "21d" ;
+    pdl:timelineEvent pdlr:event_water_contamination ;
+    pdl:belongsToCascade pdlr:cascade_worst_case_cascade ;
+    pdl:impactSector "water" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_small_rural_utilities, pdlr:entity_medium_utilities .
+
+pdlr:timeline_worst_case_cascade_7 a pdl:TimelineEntry ;
+    pdl:sequence 7 ;
+    pdl:atTime "28d" ;
+    pdl:timelineEvent pdlr:event_gastrointestinal_outbreak ;
+    pdl:belongsToCascade pdlr:cascade_worst_case_cascade ;
+    pdl:impactSector "health" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_population_rural, pdlr:entity_population_urban .
+
+pdlr:timeline_worst_case_cascade_8 a pdl:TimelineEntry ;
+    pdl:sequence 8 ;
+    pdl:atTime "35d" ;
+    pdl:timelineEvent pdlr:event_hospital_capacity_strain ;
+    pdl:belongsToCascade pdlr:cascade_worst_case_cascade ;
+    pdl:impactSector "health" ;
+    pdl:impactSeverity pdl:Severity_critical ;
+    pdl:affects pdlr:entity_hospitals .
+
+
+# =============================================================================
+# End of Export
+# =============================================================================

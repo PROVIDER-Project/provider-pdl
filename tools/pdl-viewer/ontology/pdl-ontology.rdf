@@ -1,0 +1,955 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+  xmlns:owl="http://www.w3.org/2002/07/owl#"
+  xmlns:pdl="https://provider-project.org/ontology/pdl#"
+  xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xmlns:dcterms="http://purl.org/dc/terms/"
+  xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#affects">
+    <rdfs:label xml:lang="en">affects</rdfs:label>
+    <rdfs:comment xml:lang="en">Links a timeline entry to entities affected at that point.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#TimelineEntry"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+    <rdfs:subPropertyOf rdf:resource="https://schema.coypu.org/global#hasImpactOn"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#substitutionDirectionRef">
+    <rdfs:label xml:lang="en">substitution direction</rdfs:label>
+    <rdfs:comment xml:lang="en">Indicates whether this substitution acts on supply side (default) or demand side.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Substitution"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#SubstitutionDirection"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#hasDependencyOverlap">
+    <rdfs:label xml:lang="en">has dependency overlap</rdfs:label>
+    <rdfs:comment xml:lang="en">Shared upstream dependency between original and substitute. Indicates pseudo-diversification: a shock to this shared entity disables both simultaneously.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Substitution"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+    <skos:note xml:lang="en">Critical for compound crisis analysis. Example: both soy and rapeseed depend on fertilizer_supply → drought + fertilizer shock eliminates both supply options.</skos:note>
+    <skos:note xml:lang="en">Shared upstream dependencies map to CoyPu's supplier network; overlap indicates correlated risk in the supply graph.</skos:note>
+    <rdfs:subPropertyOf rdf:resource="https://schema.coypu.org/global#hasSupplier"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#substitutionRef">
+    <rdfs:label xml:lang="en">substitution reference</rdfs:label>
+    <rdfs:comment xml:lang="en">Bidirectional link from an Event or Dependency to the Substitution it activates or implements.</rdfs:comment>
+    <rdfs:domain>
+      <rdf:Description rdf:nodeID="n226490bce32047b3acd9ab64bf9a4b41b18">
+        <owl:unionOf rdf:parseType="Collection">
+          <rdf:Description rdf:about="https://provider-project.org/ontology/pdl#Event"/>
+          <rdf:Description rdf:about="https://provider-project.org/ontology/pdl#Dependency"/>
+        </owl:unionOf>
+      </rdf:Description>
+    </rdfs:domain>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Substitution"/>
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#substitutionActivatedBy">
+        <rdfs:label xml:lang="en">substitution activated by</rdfs:label>
+        <rdfs:comment xml:lang="en">Links a substitution to the event or dependency that activates it.</rdfs:comment>
+        <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Substitution"/>
+        <rdfs:range>
+          <rdf:Description rdf:nodeID="n226490bce32047b3acd9ab64bf9a4b41b21">
+            <owl:unionOf rdf:parseType="Collection">
+              <rdf:Description rdf:about="https://provider-project.org/ontology/pdl#Event"/>
+              <rdf:Description rdf:about="https://provider-project.org/ontology/pdl#Dependency"/>
+            </owl:unionOf>
+          </rdf:Description>
+        </rdfs:range>
+      </owl:ObjectProperty>
+    </owl:inverseOf>
+  </owl:ObjectProperty>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#Event_InfrastructureFailure">
+    <rdfs:subClassOf rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+    <rdfs:label xml:lang="en">Infrastructure Failure Event</rdfs:label>
+    <rdfs:comment xml:lang="en">Events caused by infrastructure problems: equipment failure, capacity issues, maintenance.</rdfs:comment>
+  </owl:Class>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#causes">
+    <rdfs:label xml:lang="en">causes</rdfs:label>
+    <rdfs:comment xml:lang="en">Links an event to other events it triggers (causal chain).</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#causedBy">
+        <rdfs:label xml:lang="en">caused by</rdfs:label>
+        <rdfs:comment xml:lang="en">Links an event to the event that caused it.</rdfs:comment>
+        <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+        <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+      </owl:ObjectProperty>
+    </owl:inverseOf>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#hasEvent">
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#hasScenarioElement">
+        <rdfs:label xml:lang="en">has scenario element</rdfs:label>
+        <rdfs:comment xml:lang="en">Links a scenario to its contained elements.</rdfs:comment>
+        <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Scenario"/>
+      </owl:ObjectProperty>
+    </rdfs:subPropertyOf>
+    <rdfs:label xml:lang="en">has event</rdfs:label>
+    <rdfs:comment xml:lang="en">Links a scenario to an event.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Scenario"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#hasDependency">
+    <rdfs:label xml:lang="en">has dependency</rdfs:label>
+    <rdfs:comment xml:lang="en">Links an entity to a dependency relationship.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Dependency"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#impactSeverity">
+    <rdfs:label xml:lang="en">impact severity</rdfs:label>
+    <rdfs:comment xml:lang="en">The severity level of an impact or timeline entry.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#TimelineEntry"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Severity"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#toEntity">
+    <rdfs:label xml:lang="en">to entity</rdfs:label>
+    <rdfs:comment xml:lang="en">The target entity of a connection or dependency.</rdfs:comment>
+    <rdfs:domain>
+      <rdf:Description rdf:nodeID="n226490bce32047b3acd9ab64bf9a4b41b12">
+        <owl:unionOf rdf:parseType="Collection">
+          <rdf:Description rdf:about="https://provider-project.org/ontology/pdl#SupplyChainConnection"/>
+          <rdf:Description rdf:about="https://provider-project.org/ontology/pdl#Dependency"/>
+        </owl:unionOf>
+      </rdf:Description>
+    </rdfs:domain>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+    <rdfs:subPropertyOf rdf:resource="https://schema.coypu.org/global#hasCustomer"/>
+    <skos:note xml:lang="en">Maps to CoyPu's customer relationship for interoperability.</skos:note>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#originEvent">
+    <rdfs:label xml:lang="en">origin event</rdfs:label>
+    <rdfs:comment xml:lang="en">The event that initiates a cascade.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Cascade"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+  </owl:ObjectProperty>
+  <pdl:SubstitutionType rdf:about="https://provider-project.org/ontology/pdl#SubstitutionType_mode">
+    <rdfs:label xml:lang="en">Transport Mode Substitution</rdfs:label>
+    <rdfs:comment xml:lang="en">Switching from one transport mode to another (sea/rail/air/road). Cost and capacity differ significantly.</rdfs:comment>
+    <skos:example xml:lang="de">S8: Bahnfracht statt Seefracht (8,5% Volumen, +40% Kosten); S9: Satellit statt Kabel (&lt;1% Kapazität)</skos:example>
+    <skos:scopeNote xml:lang="en">
+Scenarios: S8 (Bahn 8,5% Volumen/+40%, Luftfracht 2%/+500%), S9 (Satellit &lt;1%/+200%).
+Key insight: mode substitution shows extreme cost/coverage tradeoffs.
+Coverage is structurally limited by infrastructure capacity, not just availability.
+</skos:scopeNote>
+  </pdl:SubstitutionType>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#hasSubstitution">
+    <rdfs:subPropertyOf rdf:resource="https://provider-project.org/ontology/pdl#hasScenarioElement"/>
+    <rdfs:label xml:lang="en">has substitution</rdfs:label>
+    <rdfs:comment xml:lang="en">Links a scenario to a substitution definition.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Scenario"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Substitution"/>
+  </owl:ObjectProperty>
+  <pdl:SubstitutionType rdf:about="https://provider-project.org/ontology/pdl#SubstitutionType_buffer">
+    <rdfs:label xml:lang="en">Buffer Substitution</rdfs:label>
+    <rdfs:comment xml:lang="en">Temporary use of reserves or fallback capacity. Limited by duration_max; non-renewable in the short term.</rdfs:comment>
+    <skos:example xml:lang="de">S1: Strategische Futtermittellager (45d); S6: CDN Edge Cache (12h); S7: Recycling-Infrastruktur</skos:example>
+    <skos:scopeNote xml:lang="en">
+Scenarios: S1 (Futtermittellager 45d), S5 (THW Notversorgung 30d), S6 (CDN Cache 12h, Akkus 6h),
+S7 (Recycling).
+Key insight: buffer substitution is strictly time-limited (duration_max) and non-reversible
+in the sense that replenishment requires additional time/cost. Buffer depletion is itself a cascade trigger.
+</skos:scopeNote>
+  </pdl:SubstitutionType>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#vulnerability">
+    <rdfs:label xml:lang="en">vulnerability</rdfs:label>
+    <rdfs:comment xml:lang="en">Vulnerability score of an entity (0.0 = resilient, 1.0 = highly vulnerable).</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    <skos:note xml:lang="en">Similar to CoyPu's risk properties (hasVulnerability, hasSusceptibility) but specific to supply chain simulation.</skos:note>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#pdlVersion">
+    <rdfs:label xml:lang="en">PDL version</rdfs:label>
+    <rdfs:comment xml:lang="en">The PDL specification version used for this scenario.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Scenario"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <pdl:SideEffectType rdf:about="https://provider-project.org/ontology/pdl#SideEffectType_depletion">
+    <rdfs:label xml:lang="en">Depletion</rdfs:label>
+    <rdfs:comment xml:lang="en">Buffer substitutions are exhausted after duration_max and must be replenished, often at higher cost.</rdfs:comment>
+    <skos:example xml:lang="de">S1: Futtermittellager nach 45d erschöpft; S6: Mobilfunk-Akkus nach 6h leer</skos:example>
+  </pdl:SideEffectType>
+  <pdl:DependencyType rdf:about="https://provider-project.org/ontology/pdl#DependencyType_demand">
+    <rdfs:label xml:lang="en">Demand Dependency</rdfs:label>
+    <rdfs:comment xml:lang="en">Dependency representing a demand-side relationship (e.g., consumer pulls from retailer).</rdfs:comment>
+  </pdl:DependencyType>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#Region">
+    <rdfs:subClassOf rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+    <rdfs:subClassOf rdf:resource="https://schema.coypu.org/global#Region"/>
+    <rdfs:label xml:lang="en">Region</rdfs:label>
+    <rdfs:comment xml:lang="en">A geographic region representing production or consumption areas. Mapped to coy:Region.</rdfs:comment>
+    <owl:equivalentClass>
+      <owl:Restriction rdf:nodeID="n226490bce32047b3acd9ab64bf9a4b41b5">
+        <owl:onProperty rdf:resource="https://provider-project.org/ontology/pdl#entityType"/>
+        <owl:hasValue>region</owl:hasValue>
+      </owl:Restriction>
+    </owl:equivalentClass>
+    <skos:mappingRelation rdf:resource="https://schema.coypu.org/global#Region"/>
+    <skos:note xml:lang="en">CoyPu Region includes: AdministrativeRegion. Parent Location includes: City, Continent, Country, River.</skos:note>
+  </owl:Class>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#Event_Geopolitical">
+    <rdfs:subClassOf rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+    <rdfs:subClassOf rdf:resource="https://schema.coypu.org/global#SocioPoliticalEvent"/>
+    <rdfs:label xml:lang="en">Geopolitical Event</rdfs:label>
+    <rdfs:comment xml:lang="en">Events caused by political factors: conflicts, sanctions, diplomatic tensions. Mapped to coy:SocioPoliticalEvent.</rdfs:comment>
+    <skos:mappingRelation rdf:resource="https://schema.coypu.org/global#SocioPoliticalEvent"/>
+    <skos:note xml:lang="en">CoyPu has detailed conflict hierarchy: Demonstration, Protest, Riot, Battle, etc.</skos:note>
+  </owl:Class>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#isImpactedBy">
+    <rdfs:label xml:lang="en">is impacted by</rdfs:label>
+    <rdfs:comment xml:lang="en">Links an entity to events that affect it.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+    <owl:equivalentProperty rdf:resource="https://schema.coypu.org/global#isImpactedBy"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#hasTimelineEntry">
+    <rdfs:label xml:lang="en">has timeline entry</rdfs:label>
+    <rdfs:comment xml:lang="en">Links a cascade to its timeline entries.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Cascade"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#TimelineEntry"/>
+    <owl:inverseOf>
+      <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#belongsToCascade">
+        <rdfs:label xml:lang="en">belongs to cascade</rdfs:label>
+        <rdfs:comment xml:lang="en">Links a timeline entry to its cascade.</rdfs:comment>
+        <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#TimelineEntry"/>
+        <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Cascade"/>
+      </owl:ObjectProperty>
+    </owl:inverseOf>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#impactSupply">
+    <rdfs:label xml:lang="en">supply impact</rdfs:label>
+    <rdfs:comment xml:lang="en">Impact on supply as percentage (e.g., '-40%' for 40% reduction).</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <skos:note xml:lang="en">Stored as string to preserve sign and percentage format from PDL YAML.</skos:note>
+  </owl:DatatypeProperty>
+  <owl:Ontology rdf:about="https://provider-project.org/ontology/pdl">
+    <owl:versionInfo>1.1</owl:versionInfo>
+    <dcterms:title xml:lang="en">PROVIDER Domain Language (PDL) Ontology</dcterms:title>
+    <dcterms:description xml:lang="en">A semantic model for supply chain disruption scenarios. PDL extends the CoyPu ontology to enable modeling of entities, supply chains, disruption events, cascade effects, and substitution mechanisms for simulation and analysis.</dcterms:description>
+    <dcterms:creator>PROVIDER Project</dcterms:creator>
+    <dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2026-02-04</dcterms:created>
+    <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2026-02-23</dcterms:modified>
+    <dcterms:license rdf:resource="https://creativecommons.org/licenses/by/4.0/"/>
+    <owl:imports rdf:resource="https://schema.coypu.org/global/2.3"/>
+    <rdfs:seeAlso rdf:resource="https://schema.coypu.org/global/2.3"/>
+    <skos:changeNote xml:lang="en">v1.1: Added Substitution module (classes, properties, enumerations) derived from empirical analysis of 9 PROVIDER supply chain scenarios.</skos:changeNote>
+  </owl:Ontology>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#Service">
+    <rdfs:subClassOf rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+    <rdfs:label xml:lang="en">Service</rdfs:label>
+    <rdfs:comment xml:lang="en">A service provider such as logistics, financial services, or data services.</rdfs:comment>
+    <owl:equivalentClass>
+      <owl:Restriction rdf:nodeID="n226490bce32047b3acd9ab64bf9a4b41b4">
+        <owl:onProperty rdf:resource="https://provider-project.org/ontology/pdl#entityType"/>
+        <owl:hasValue>service</owl:hasValue>
+      </owl:Restriction>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#dependsOn">
+    <rdfs:label xml:lang="en">depends on</rdfs:label>
+    <rdfs:comment xml:lang="en">Direct link from one entity to another it depends on.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#hasSideEffect">
+    <rdfs:label xml:lang="en">has side effect</rdfs:label>
+    <rdfs:comment xml:lang="en">Links a substitution to its secondary consequences.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Substitution"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#SubstitutionSideEffect"/>
+    <rdfs:subPropertyOf rdf:resource="https://schema.coypu.org/global#hasImpactOn"/>
+    <skos:note xml:lang="en">Side effects are a form of impact relationship, extending CoyPu's impact model with substitution-specific consequences.</skos:note>
+  </owl:ObjectProperty>
+  <pdl:SubstitutionType rdf:about="https://provider-project.org/ontology/pdl#SubstitutionType_product">
+    <rdfs:label xml:lang="en">Product Substitution</rdfs:label>
+    <rdfs:comment xml:lang="en">Replacing one product/commodity with a functionally equivalent alternative (e.g., rapeseed meal for soy meal, ampicillin for amoxicillin).</rdfs:comment>
+    <skos:example xml:lang="de">S1 Soja: Rapsschrot statt Sojaschrot; S3 Pharma: Ampicillin statt Amoxicillin</skos:example>
+    <skos:scopeNote xml:lang="en">
+Scenarios: S1 (Rapsschrot/Erbsenprotein, Fleischsubstitution), S3 (Antibiotika-Äquivalente),
+S4 (biogenes CO2), S5 (UV/Ozon-Desinfektion).
+Key insight: product substitution often involves quality_delta &lt; 0 and
+activates endogenously via price thresholds.
+</skos:scopeNote>
+  </pdl:SubstitutionType>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#substitutionPotential">
+    <rdfs:label xml:lang="en">substitution potential</rdfs:label>
+    <rdfs:comment xml:lang="en">Shorthand scalar on an Entity indicating its overall substitutability (0.0 = not substitutable, 1.0 = fully substitutable). Use pdl:Substitution for detailed modeling.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    <skos:note xml:lang="en">Corresponds to the YAML field 'substitution_potential' on entity level. Kept for backwards compatibility; detailed modeling uses the pdl:Substitution class.</skos:note>
+  </owl:DatatypeProperty>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#hasEntity">
+    <rdfs:subPropertyOf rdf:resource="https://provider-project.org/ontology/pdl#hasScenarioElement"/>
+    <rdfs:label xml:lang="en">has entity</rdfs:label>
+    <rdfs:comment xml:lang="en">Links a scenario to an entity.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Scenario"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#substitutionBy">
+    <rdfs:label xml:lang="en">substitution by</rdfs:label>
+    <rdfs:comment xml:lang="en">The substitute entity that takes over from the original.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Substitution"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+    <rdfs:subPropertyOf rdf:resource="https://schema.coypu.org/global#hasSupplier"/>
+    <skos:note xml:lang="en">For supplier substitutions, pdl:substitutionBy points to the alternative supplier, also mapping to CoyPu's supply relationship.</skos:note>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#reversible">
+    <rdfs:label xml:lang="en">reversible</rdfs:label>
+    <rdfs:comment xml:lang="en">Whether the substitution can be reversed after activation (e.g., returning to original supplier when disruption ends).</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Substitution"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    <skos:note xml:lang="en">False indicates structural commitment: once activated, switching back is not feasible in the short term (e.g., EU-Produktionsaufbau, Foundry-Qualifikation).</skos:note>
+  </owl:DatatypeProperty>
+  <pdl:SideEffectType rdf:about="https://provider-project.org/ontology/pdl#SideEffectType_correlated_risk">
+    <rdfs:label xml:lang="en">Correlated Risk (Pseudo-Diversification)</rdfs:label>
+    <rdfs:comment xml:lang="en">The substitute shares upstream dependencies with the original, meaning a shock can disable both simultaneously. Key risk: apparent diversification that fails under compound crises.</rdfs:comment>
+    <skos:example xml:lang="de">S3: Indien-Sourcing ist Pseudo-Alternative, da Indien zu 70% von chinesischen Intermediaten abhängt; S1: Argentinien bei La-Niña-Dürre gleichzeitig betroffen</skos:example>
+    <skos:scopeNote xml:lang="en">
+Most critical side effect type for compound crisis scenarios. Identified in:
+- S1: Argentinien/Brasilien both affected by La Niña (climate correlation)
+- S3: Indien/China share API intermediates (supply chain correlation)
+- S4: All EU ammonia producers affected by same gas price shock (energy correlation)
+- S7: Lynas oxides still processed in China (geographic concentration)
+- S9: Terrestrial routes via Russia (geopolitical correlation)
+SPARQL query recommendation: always check hasDependencyOverlap when evaluating substitution resilience.
+</skos:scopeNote>
+  </pdl:SideEffectType>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#coverage">
+    <rdfs:label xml:lang="en">coverage</rdfs:label>
+    <rdfs:comment xml:lang="en">Maximum share of original supply/demand that the substitute can cover (0.0 to 1.0). Reflects structural capacity limits, not just short-term availability.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Substitution"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    <skos:example xml:lang="de">0.20 (Rapsschrot ersetzt max. 20% des Sojaschrot-Bedarfs); 0.01 (Satellit ersetzt &lt;1% der Kabelkapazität)</skos:example>
+    <rdfs:subPropertyOf rdf:resource="https://schema.coypu.org/global#hasQuantity"/>
+    <skos:note xml:lang="en">Coverage as a share (0-1) maps to CoyPu's quantity properties for trade flow modeling.</skos:note>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#activationThresholdPriceIncrease">
+    <rdfs:label xml:lang="en">activation threshold: price increase</rdfs:label>
+    <rdfs:comment xml:lang="en">Minimum relative price increase required to activate the substitution (e.g., 0.25 = substitution activates when price rises &gt;25%).</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#ActivationCondition"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#triggerProbability">
+    <rdfs:subPropertyOf>
+      <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#probability">
+        <rdfs:label xml:lang="en">probability</rdfs:label>
+        <rdfs:comment xml:lang="en">Probability of occurrence (0.0 to 1.0).</rdfs:comment>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+      </owl:DatatypeProperty>
+    </rdfs:subPropertyOf>
+    <rdfs:label xml:lang="en">trigger probability</rdfs:label>
+    <rdfs:comment xml:lang="en">Probability of an event being triggered (0.0 to 1.0).</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+  </owl:DatatypeProperty>
+  <pdl:SubstitutionDirection rdf:about="https://provider-project.org/ontology/pdl#SubstitutionDirection_demand">
+    <rdfs:label xml:lang="en">Demand-side Substitution</rdfs:label>
+    <rdfs:comment xml:lang="en">The substitution acts on the demand side: consumers shift to alternatives, reducing demand for the original product.</rdfs:comment>
+    <skos:example xml:lang="de">S1: Verbraucher wechseln zu pflanzlichen Produkten (-8% Fleischnachfrage)</skos:example>
+  </pdl:SubstitutionDirection>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#validationConfidence">
+    <rdfs:subPropertyOf rdf:resource="https://provider-project.org/ontology/pdl#probability"/>
+    <rdfs:label xml:lang="en">validation confidence</rdfs:label>
+    <rdfs:comment xml:lang="en">Confidence level in cascade validation (0.0 to 1.0).</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Cascade"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#activationTrigger">
+    <rdfs:label xml:lang="en">activation trigger</rdfs:label>
+    <rdfs:comment xml:lang="en">Event condition expression that triggers substitution activation (PDL condition syntax, e.g., 'feed_price_spike.active').</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#ActivationCondition"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#Event_MarketShock">
+    <rdfs:subClassOf rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+    <rdfs:label xml:lang="en">Market Shock Event</rdfs:label>
+    <rdfs:comment xml:lang="en">Events caused by market dynamics: price spikes, demand surges, supply shortages.</rdfs:comment>
+  </owl:Class>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#sideEffectTypeRef">
+    <rdfs:label xml:lang="en">side effect type</rdfs:label>
+    <rdfs:comment xml:lang="en">Classification of this side effect.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#SubstitutionSideEffect"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#SideEffectType"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#impactSector">
+    <rdfs:subPropertyOf>
+      <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#sector">
+        <rdfs:label xml:lang="en">sector</rdfs:label>
+        <rdfs:comment xml:lang="en">Business or industry sector (e.g., 'agriculture', 'logistics', 'energy').</rdfs:comment>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+        <rdfs:subPropertyOf rdf:resource="https://schema.coypu.org/global#hasIndustry"/>
+        <skos:note xml:lang="en">String-based for flexibility; can be linked to coy:Industry instances.</skos:note>
+      </owl:DatatypeProperty>
+    </rdfs:subPropertyOf>
+    <rdfs:label xml:lang="en">impact sector</rdfs:label>
+    <rdfs:comment xml:lang="en">The sector affected by a timeline entry.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#TimelineEntry"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#impactPrice">
+    <rdfs:label xml:lang="en">price impact</rdfs:label>
+    <rdfs:comment xml:lang="en">Impact on price as percentage (e.g., '+60%' for 60% price increase).</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#impactDuration">
+    <rdfs:label xml:lang="en">impact duration</rdfs:label>
+    <rdfs:comment xml:lang="en">Duration of impact (e.g., '90d' for 90 days, '6m' for 6 months).</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:subPropertyOf rdf:resource="https://schema.coypu.org/global#hasTimespan"/>
+    <skos:note xml:lang="en">Uses PDL duration format: number + unit (d=days, h=hours, w=weeks, m=months, y=years).</skos:note>
+  </owl:DatatypeProperty>
+  <pdl:DependencyType rdf:about="https://provider-project.org/ontology/pdl#DependencyType_substitution">
+    <rdfs:label xml:lang="en">Substitution Dependency</rdfs:label>
+    <rdfs:comment xml:lang="en">Dependency representing a substitution relationship: the source can replace the target under defined conditions.</rdfs:comment>
+  </pdl:DependencyType>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#qualityDelta">
+    <rdfs:label xml:lang="en">quality delta</rdfs:label>
+    <rdfs:comment xml:lang="en">Relative change in quality or performance of the substitute compared to the original. Negative values indicate degradation (e.g., -0.15 = 15% performance loss).</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Substitution"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    <skos:example xml:lang="de">-0.15 (Reluktanzmotor 15% weniger effizient); -0.50 (Satellit-Internetqualität stark eingeschränkt)</skos:example>
+  </owl:DatatypeProperty>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#hasActivationCondition">
+    <rdfs:label xml:lang="en">has activation condition</rdfs:label>
+    <rdfs:comment xml:lang="en">Links a substitution to its activation condition, specifying when it is triggered.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Substitution"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#ActivationCondition"/>
+  </owl:ObjectProperty>
+  <pdl:DependencyType rdf:about="https://provider-project.org/ontology/pdl#DependencyType_input">
+    <rdfs:label xml:lang="en">Input Dependency</rdfs:label>
+    <rdfs:comment xml:lang="en">Dependency on raw materials or intermediate products.</rdfs:comment>
+  </pdl:DependencyType>
+  <pdl:SideEffectType rdf:about="https://provider-project.org/ontology/pdl#SideEffectType_resistance_risk">
+    <rdfs:label xml:lang="en">Resistance Risk</rdfs:label>
+    <rdfs:comment xml:lang="en">Product substitution in pharmaceuticals may promote antimicrobial resistance through cross-resistance or sub-therapeutic dosing.</rdfs:comment>
+    <skos:example xml:lang="de">S3: Substitution Ciprofloxacin → Levofloxacin erhöht Kreuzresistenz-Risiko</skos:example>
+  </pdl:SideEffectType>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#Event_NaturalDisaster">
+    <rdfs:subClassOf rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+    <rdfs:subClassOf rdf:resource="https://schema.coypu.org/global#Disaster"/>
+    <rdfs:label xml:lang="en">Natural Disaster Event</rdfs:label>
+    <rdfs:comment xml:lang="en">Events caused by natural phenomena: droughts, floods, earthquakes, storms. Mapped to coy:Disaster.</rdfs:comment>
+    <skos:mappingRelation rdf:resource="https://schema.coypu.org/global#Disaster"/>
+    <skos:note xml:lang="en">CoyPu imports EM-DAT disaster ontology for detailed disaster classification.</skos:note>
+  </owl:Class>
+  <pdl:SubstitutionType rdf:about="https://provider-project.org/ontology/pdl#SubstitutionType_route">
+    <rdfs:label xml:lang="en">Route Substitution</rdfs:label>
+    <rdfs:comment xml:lang="en">Replacing one transport route with an alternative path. Typically involves increased cost and transit time.</rdfs:comment>
+    <skos:example xml:lang="de">S1: Paranaguá statt Santos; S8: Kap der Guten Hoffnung statt Suez; S9: Landroute statt Unterwasserkabel</skos:example>
+    <skos:scopeNote xml:lang="en">
+Scenarios: S1 (Paranaguá statt Santos), S5 (Chlor-Importe), S8 (Kap der Guten Hoffnung), S9 (Landrouten).
+Key insight: route substitution often has coverage = 1.0 (all cargo can be rerouted)
+but significant cost_delta and side_effect capacity_loss (longer routes bind more capacity).
+</skos:scopeNote>
+  </pdl:SubstitutionType>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#hasSupplyChain">
+    <rdfs:subPropertyOf rdf:resource="https://provider-project.org/ontology/pdl#hasScenarioElement"/>
+    <rdfs:label xml:lang="en">has supply chain</rdfs:label>
+    <rdfs:comment xml:lang="en">Links a scenario to a supply chain.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Scenario"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#SupplyChain"/>
+  </owl:ObjectProperty>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#Event_Pandemic">
+    <rdfs:subClassOf rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+    <rdfs:label xml:lang="en">Pandemic Event</rdfs:label>
+    <rdfs:comment xml:lang="en">Events caused by disease outbreaks affecting workforce, logistics, or demand.</rdfs:comment>
+  </owl:Class>
+  <pdl:SubstitutionDirection rdf:about="https://provider-project.org/ontology/pdl#SubstitutionDirection_supply">
+    <rdfs:label xml:lang="en">Supply-side Substitution</rdfs:label>
+    <rdfs:comment xml:lang="en">The substitution replaces a supply source (default for most substitution types).</rdfs:comment>
+  </pdl:SubstitutionDirection>
+  <pdl:SideEffectType rdf:about="https://provider-project.org/ontology/pdl#SideEffectType_efficiency_loss">
+    <rdfs:label xml:lang="en">Efficiency Loss</rdfs:label>
+    <rdfs:comment xml:lang="en">Technology substitutions involve reduced technical efficiency or output performance.</rdfs:comment>
+    <skos:example xml:lang="de">S7: Reluktanzmotoren haben 10-20% geringeren Wirkungsgrad als NdFeB-Magnetmotoren</skos:example>
+  </pdl:SideEffectType>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#criticality">
+    <rdfs:label xml:lang="en">criticality</rdfs:label>
+    <rdfs:comment xml:lang="en">The criticality level of a scenario, dependency, or entity.</rdfs:comment>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Criticality"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#timelineEvent">
+    <rdfs:label xml:lang="en">timeline event</rdfs:label>
+    <rdfs:comment xml:lang="en">Links a timeline entry to its associated event.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#TimelineEntry"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#durationMax">
+    <rdfs:label xml:lang="en">maximum duration</rdfs:label>
+    <rdfs:comment xml:lang="en">For buffer substitutions: the maximum duration before the buffer is exhausted. After this period, the substitution is no longer available without replenishment.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Substitution"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <skos:example xml:lang="de">'45d' (Futtermittellager 30-45 Tage); '12h' (CDN Edge Cache); '6h' (Akkupuffer Mobilfunkmast)</skos:example>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#sideEffectMagnitude">
+    <rdfs:label xml:lang="en">side effect magnitude</rdfs:label>
+    <rdfs:comment xml:lang="en">Relative strength of the side effect (e.g., 0.20 = 20% price increase in the target entity).</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#SubstitutionSideEffect"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#eventType">
+    <rdfs:label xml:lang="en">event type</rdfs:label>
+    <rdfs:comment xml:lang="en">The type classification of an event (natural_disaster, market_shock, etc.).</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <pdl:Severity rdf:about="https://provider-project.org/ontology/pdl#Severity_low">
+    <rdfs:label xml:lang="en">Low Severity</rdfs:label>
+  </pdl:Severity>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#activationThresholdSupplyDrop">
+    <rdfs:label xml:lang="en">activation threshold: supply drop</rdfs:label>
+    <rdfs:comment xml:lang="en">Minimum relative supply reduction required to activate the substitution (e.g., 0.50 = activates when supply drops &gt;50%).</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#ActivationCondition"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+  </owl:DatatypeProperty>
+  <pdl:Severity rdf:about="https://provider-project.org/ontology/pdl#Severity_critical">
+    <rdfs:label xml:lang="en">Critical Severity</rdfs:label>
+  </pdl:Severity>
+  <pdl:SubstitutionType rdf:about="https://provider-project.org/ontology/pdl#SubstitutionType_supplier">
+    <rdfs:label xml:lang="en">Supplier Substitution</rdfs:label>
+    <rdfs:comment xml:lang="en">Replacing one supplier with an alternative supplier for the same product. Risk of correlated_risk if suppliers share upstream dependencies.</rdfs:comment>
+    <skos:example xml:lang="de">S1: Argentinien/USA statt Brasilien; S2: Samsung/UMC statt TSMC; S7: Lynas statt China</skos:example>
+    <skos:scopeNote xml:lang="en">
+Scenarios: S1 (AR/USA statt BR), S2 (Samsung/UMC statt TSMC), S3 (Indien statt China),
+S4 (Ammoniak-Importe), S5 (Chlor-Importe NL/BE/FR), S7 (Lynas/MP Materials statt China), S8 (Nearshoring).
+Key insight: dependency_overlap is critical -- S3 Indien and S7 Lynas show pseudo-diversification
+where substitute shares same upstream (China intermediates, China processing).
+</skos:scopeNote>
+  </pdl:SubstitutionType>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#activationThresholdDurationMin">
+    <rdfs:label xml:lang="en">activation threshold: minimum duration</rdfs:label>
+    <rdfs:comment xml:lang="en">Minimum duration of the triggering event before substitution activates (e.g., '30d' = only activates if disruption persists &gt;30 days).</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#ActivationCondition"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#fromEntity">
+    <rdfs:label xml:lang="en">from entity</rdfs:label>
+    <rdfs:comment xml:lang="en">The source entity of a connection or dependency.</rdfs:comment>
+    <rdfs:domain>
+      <rdf:Description rdf:nodeID="n226490bce32047b3acd9ab64bf9a4b41b9">
+        <owl:unionOf rdf:parseType="Collection">
+          <rdf:Description rdf:about="https://provider-project.org/ontology/pdl#SupplyChainConnection"/>
+          <rdf:Description rdf:about="https://provider-project.org/ontology/pdl#Dependency"/>
+        </owl:unionOf>
+      </rdf:Description>
+    </rdfs:domain>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+    <rdfs:subPropertyOf rdf:resource="https://schema.coypu.org/global#hasSupplier"/>
+    <skos:note xml:lang="en">Maps to CoyPu's supplier relationship for interoperability.</skos:note>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#impactDemand">
+    <rdfs:label xml:lang="en">demand impact</rdfs:label>
+    <rdfs:comment xml:lang="en">Impact on demand as percentage (e.g., '+40%' for 40% increase).</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <pdl:Criticality rdf:about="https://provider-project.org/ontology/pdl#Criticality_medium">
+    <rdfs:label xml:lang="en">Medium Criticality</rdfs:label>
+  </pdl:Criticality>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#substitutionFor">
+    <rdfs:label xml:lang="en">substitution for</rdfs:label>
+    <rdfs:comment xml:lang="en">The original entity (product, supplier, route, technology) that this substitution replaces.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Substitution"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+    <skos:note xml:lang="en">Analogous to coy:hasSupplier from the perspective of the alternative chain.</skos:note>
+    <skos:note xml:lang="en">For supplier substitutions, pdl:substitutionFor points to the original supplier entity, mapping to CoyPu's supply relationship.</skos:note>
+    <rdfs:subPropertyOf rdf:resource="https://schema.coypu.org/global#hasSupplier"/>
+  </owl:ObjectProperty>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#Infrastructure">
+    <rdfs:subClassOf rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+    <rdfs:subClassOf rdf:resource="https://schema.coypu.org/global#Infrastructure"/>
+    <rdfs:label xml:lang="en">Infrastructure</rdfs:label>
+    <rdfs:comment xml:lang="en">Physical infrastructure such as ports, pipelines, or terminals. Mapped to coy:Infrastructure.</rdfs:comment>
+    <owl:equivalentClass>
+      <owl:Restriction rdf:nodeID="n226490bce32047b3acd9ab64bf9a4b41b3">
+        <owl:onProperty rdf:resource="https://provider-project.org/ontology/pdl#entityType"/>
+        <owl:hasValue>infrastructure</owl:hasValue>
+      </owl:Restriction>
+    </owl:equivalentClass>
+    <skos:mappingRelation rdf:resource="https://schema.coypu.org/global#Infrastructure"/>
+    <skos:note xml:lang="en">CoyPu Infrastructure includes: Airport, Factory, Mine, Pipeline, Port, Powerplant, RailwaySegment, Terminal, TrainStation.</skos:note>
+  </owl:Class>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#Manufacturer">
+    <rdfs:subClassOf rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+    <rdfs:subClassOf rdf:resource="https://schema.coypu.org/global#Company"/>
+    <rdfs:label xml:lang="en">Manufacturer</rdfs:label>
+    <rdfs:comment xml:lang="en">A producing entity such as a factory, mill, or farm. Mapped to coy:Company.</rdfs:comment>
+    <owl:equivalentClass>
+      <owl:Restriction rdf:nodeID="n226490bce32047b3acd9ab64bf9a4b41b1">
+        <owl:onProperty rdf:resource="https://provider-project.org/ontology/pdl#entityType"/>
+        <owl:hasValue>manufacturer</owl:hasValue>
+      </owl:Restriction>
+    </owl:equivalentClass>
+    <owl:equivalentClass>
+      <owl:Class rdf:nodeID="n226490bce32047b3acd9ab64bf9a4b41b24">
+        <owl:intersectionOf rdf:parseType="Collection">
+          <rdf:Description rdf:about="https://schema.coypu.org/global#Company"/>
+          <owl:Restriction rdf:nodeID="n226490bce32047b3acd9ab64bf9a4b41b25">
+            <owl:onProperty>
+              <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#entityType">
+                <rdfs:label xml:lang="en">entity type</rdfs:label>
+                <rdfs:comment xml:lang="en">The type classification of an entity (manufacturer, commodity, infrastructure, service, region).</rdfs:comment>
+                <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+                <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+              </owl:DatatypeProperty>
+            </owl:onProperty>
+            <owl:hasValue>manufacturer</owl:hasValue>
+          </owl:Restriction>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#atTime">
+    <rdfs:label xml:lang="en">at time</rdfs:label>
+    <rdfs:comment xml:lang="en">Time offset from cascade origin for a timeline entry (e.g., '14d').</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#TimelineEntry"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#substitutionTypeRef">
+    <rdfs:label xml:lang="en">substitution type</rdfs:label>
+    <rdfs:comment xml:lang="en">Links a substitution to its type classification.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Substitution"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#SubstitutionType"/>
+  </owl:ObjectProperty>
+  <pdl:SideEffectType rdf:about="https://provider-project.org/ontology/pdl#SideEffectType_latency_increase">
+    <rdfs:label xml:lang="en">Latency Increase</rdfs:label>
+    <rdfs:comment xml:lang="en">Route or mode substitutions introduce additional time delays (transit time, processing latency).</rdfs:comment>
+    <skos:example xml:lang="de">S6: Cloud-Failover nach Dublin +20-40ms; S9: Terrestrische Route +30-50ms</skos:example>
+  </pdl:SideEffectType>
+  <pdl:DependencyType rdf:about="https://provider-project.org/ontology/pdl#DependencyType_logistics">
+    <rdfs:label xml:lang="en">Logistics Dependency</rdfs:label>
+    <rdfs:comment xml:lang="en">Dependency on transportation and logistics services.</rdfs:comment>
+  </pdl:DependencyType>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#partOfScenario">
+    <rdfs:label xml:lang="en">part of scenario</rdfs:label>
+    <rdfs:comment xml:lang="en">Links an entity, supply chain, event, or cascade to its containing scenario.</rdfs:comment>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Scenario"/>
+    <owl:inverseOf rdf:resource="https://provider-project.org/ontology/pdl#hasScenarioElement"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#triggerCondition">
+    <rdfs:label xml:lang="en">trigger condition</rdfs:label>
+    <rdfs:comment xml:lang="en">Conditional expression for event triggering (e.g., 'brazil_drought.active').</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#hasCountryLocation">
+    <rdfs:subPropertyOf>
+      <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#hasLocation">
+        <rdfs:label xml:lang="en">has location</rdfs:label>
+        <rdfs:comment xml:lang="en">Links an entity to its geographic location.</rdfs:comment>
+        <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+        <rdfs:range rdf:resource="https://schema.coypu.org/global#Location"/>
+        <owl:equivalentProperty rdf:resource="https://schema.coypu.org/global#hasLocation"/>
+      </owl:ObjectProperty>
+    </rdfs:subPropertyOf>
+    <rdfs:label xml:lang="en">has country location</rdfs:label>
+    <rdfs:comment xml:lang="en">Links an entity to its country.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+    <rdfs:range rdf:resource="https://schema.coypu.org/global#Country"/>
+    <owl:equivalentProperty rdf:resource="https://schema.coypu.org/global#hasCountryLocation"/>
+  </owl:ObjectProperty>
+  <pdl:SubstitutionType rdf:about="https://provider-project.org/ontology/pdl#SubstitutionType_technology">
+    <rdfs:label xml:lang="en">Technology Substitution</rdfs:label>
+    <rdfs:comment xml:lang="en">Replacing one technology or process with an alternative. Often involves quality_delta (efficiency loss) and long ramp_up.</rdfs:comment>
+    <skos:example xml:lang="de">S5: UV/Ozon statt Chlor-Desinfektion; S7: Ferrit-Magnete statt NdFeB-Magnete</skos:example>
+    <skos:scopeNote xml:lang="en">
+Scenarios: S5 (UV/Ozon statt Chlor, nur Großversorger), S7 (Ferrit/Reluktanzmotoren statt NdFeB).
+Key insight: technology substitution is typically irreversible (capital investment) with
+long ramp_up and efficiency_loss. Coverage varies strongly by actor size (S5: 40% large utilities vs. 0% small).
+</skos:scopeNote>
+  </pdl:SubstitutionType>
+  <pdl:Criticality rdf:about="https://provider-project.org/ontology/pdl#Criticality_high">
+    <rdfs:label xml:lang="en">High Criticality</rdfs:label>
+  </pdl:Criticality>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#location">
+    <rdfs:label xml:lang="en">location</rdfs:label>
+    <rdfs:comment xml:lang="en">Geographic location as string (e.g., 'Brazil', 'EU', 'Germany').</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <skos:note xml:lang="en">String-based for flexibility; use pdl:hasLocation for typed location references.</skos:note>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#dependencyType">
+    <rdfs:label xml:lang="en">dependency type</rdfs:label>
+    <rdfs:comment xml:lang="en">Type of dependency relationship (energy, input, logistics, data, substitution, demand).</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Dependency"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#costDelta">
+    <rdfs:label xml:lang="en">cost delta</rdfs:label>
+    <rdfs:comment xml:lang="en">Relative cost increase of the substitute compared to the original (e.g., 0.40 = 40% more expensive).</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Substitution"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    <skos:example xml:lang="de">5.0 (Luftfracht 500% teurer als Seefracht); 0.08 (Paranaguá nur marginal teurer als Santos)</skos:example>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#rampUp">
+    <rdfs:label xml:lang="en">ramp-up duration</rdfs:label>
+    <rdfs:comment xml:lang="en">Time until the substitution reaches its full coverage. Uses PDL duration format (e.g., '30d', '540d', '0d'). During ramp-up, effective coverage scales from 0 to the target value.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Substitution"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:subPropertyOf rdf:resource="https://schema.coypu.org/global#hasTimespan"/>
+    <skos:example xml:lang="de">'540d' (Foundry-Umqualifikation 6-18 Monate); '730d' (Magnetmotor-Umrüstung 2 Jahre); '0d' (CDN-Cache sofort aktiv)</skos:example>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://provider-project.org/ontology/pdl#sequence">
+    <rdfs:label xml:lang="en">sequence</rdfs:label>
+    <rdfs:comment xml:lang="en">Sequence number indicating order in a chain or timeline.</rdfs:comment>
+    <rdfs:domain>
+      <rdf:Description rdf:nodeID="n226490bce32047b3acd9ab64bf9a4b41b15">
+        <owl:unionOf rdf:parseType="Collection">
+          <rdf:Description rdf:about="https://provider-project.org/ontology/pdl#SupplyChainConnection"/>
+          <rdf:Description rdf:about="https://provider-project.org/ontology/pdl#TimelineEntry"/>
+        </owl:unionOf>
+      </rdf:Description>
+    </rdfs:domain>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+  </owl:DatatypeProperty>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#Event_CyberAttack">
+    <rdfs:subClassOf rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+    <rdfs:label xml:lang="en">Cyber Attack Event</rdfs:label>
+    <rdfs:comment xml:lang="en">Events caused by cyber security incidents: ransomware, data breaches, system failures.</rdfs:comment>
+  </owl:Class>
+  <pdl:SideEffectType rdf:about="https://provider-project.org/ontology/pdl#SideEffectType_capacity_loss">
+    <rdfs:label xml:lang="en">Capacity Loss</rdfs:label>
+    <rdfs:comment xml:lang="en">During ramp-up or transition, available capacity is reduced below the target coverage level.</rdfs:comment>
+    <skos:example xml:lang="de">S2: Während Foundry-Umqualifikation nur ~70% der Zielkapazität erreichbar</skos:example>
+  </pdl:SideEffectType>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#dependencyTypeRef">
+    <rdfs:label xml:lang="en">dependency type reference</rdfs:label>
+    <rdfs:comment xml:lang="en">Links a dependency to its type classification.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Dependency"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#DependencyType"/>
+  </owl:ObjectProperty>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#Commodity">
+    <rdfs:subClassOf rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+    <rdfs:subClassOf rdf:resource="https://schema.coypu.org/global#Commodity"/>
+    <rdfs:label xml:lang="en">Commodity</rdfs:label>
+    <rdfs:comment xml:lang="en">A tradeable resource or raw material. Mapped to coy:Commodity.</rdfs:comment>
+    <owl:equivalentClass>
+      <owl:Restriction rdf:nodeID="n226490bce32047b3acd9ab64bf9a4b41b2">
+        <owl:onProperty rdf:resource="https://provider-project.org/ontology/pdl#entityType"/>
+        <owl:hasValue>commodity</owl:hasValue>
+      </owl:Restriction>
+    </owl:equivalentClass>
+  </owl:Class>
+  <pdl:SideEffectType rdf:about="https://provider-project.org/ontology/pdl#SideEffectType_quality_loss">
+    <rdfs:label xml:lang="en">Quality Loss</rdfs:label>
+    <rdfs:comment xml:lang="en">The substitute provides lower quality or performance than the original.</rdfs:comment>
+    <skos:example xml:lang="de">S1: Rapsschrot hat ~12% geringeren Proteingehalt als Sojaschrot</skos:example>
+  </pdl:SideEffectType>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#triggerTarget">
+    <owl:equivalentProperty>
+      <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#triggers">
+        <rdfs:label xml:lang="en">triggers</rdfs:label>
+        <rdfs:comment xml:lang="en">Links an event to the entity it directly affects.</rdfs:comment>
+        <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+        <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+        <rdfs:subPropertyOf rdf:resource="https://schema.coypu.org/global#hasImpactOn"/>
+        <skos:note xml:lang="en">Uses CoyPu's impact relationship as base.</skos:note>
+      </owl:ObjectProperty>
+    </owl:equivalentProperty>
+    <rdfs:label xml:lang="en">trigger target</rdfs:label>
+    <rdfs:comment xml:lang="en">Alias for triggers, matching PDL YAML syntax.</rdfs:comment>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#sideEffectTarget">
+    <rdfs:label xml:lang="en">side effect target</rdfs:label>
+    <rdfs:comment xml:lang="en">The entity that bears the side effect (may differ from the substitution target).</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#SubstitutionSideEffect"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Entity"/>
+  </owl:ObjectProperty>
+  <pdl:Severity rdf:about="https://provider-project.org/ontology/pdl#Severity_high">
+    <rdfs:label xml:lang="en">High Severity</rdfs:label>
+  </pdl:Severity>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#hasCascade">
+    <rdfs:subPropertyOf rdf:resource="https://provider-project.org/ontology/pdl#hasScenarioElement"/>
+    <rdfs:label xml:lang="en">has cascade</rdfs:label>
+    <rdfs:comment xml:lang="en">Links a scenario to a cascade.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#Scenario"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Cascade"/>
+  </owl:ObjectProperty>
+  <pdl:Criticality rdf:about="https://provider-project.org/ontology/pdl#Criticality_low">
+    <rdfs:label xml:lang="en">Low Criticality</rdfs:label>
+  </pdl:Criticality>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#activationEvent">
+    <rdfs:label xml:lang="en">activation event</rdfs:label>
+    <rdfs:comment xml:lang="en">The event whose activation triggers this substitution.</rdfs:comment>
+    <rdfs:domain rdf:resource="https://provider-project.org/ontology/pdl#ActivationCondition"/>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://provider-project.org/ontology/pdl#belongsToChain">
+    <rdfs:label xml:lang="en">belongs to chain</rdfs:label>
+    <rdfs:comment xml:lang="en">Links a connection or dependency to its supply chain.</rdfs:comment>
+    <rdfs:domain>
+      <rdf:Description rdf:nodeID="n226490bce32047b3acd9ab64bf9a4b41b6">
+        <owl:unionOf rdf:parseType="Collection">
+          <rdf:Description rdf:about="https://provider-project.org/ontology/pdl#SupplyChainConnection"/>
+          <rdf:Description rdf:about="https://provider-project.org/ontology/pdl#Dependency"/>
+        </owl:unionOf>
+      </rdf:Description>
+    </rdfs:domain>
+    <rdfs:range rdf:resource="https://provider-project.org/ontology/pdl#SupplyChain"/>
+  </owl:ObjectProperty>
+  <pdl:DependencyType rdf:about="https://provider-project.org/ontology/pdl#DependencyType_data">
+    <rdfs:label xml:lang="en">Data Dependency</rdfs:label>
+    <rdfs:comment xml:lang="en">Dependency on data services or IT infrastructure.</rdfs:comment>
+  </pdl:DependencyType>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#Event_Regulatory">
+    <rdfs:subClassOf rdf:resource="https://provider-project.org/ontology/pdl#Event"/>
+    <rdfs:label xml:lang="en">Regulatory Event</rdfs:label>
+    <rdfs:comment xml:lang="en">Events caused by regulatory changes: new laws, trade restrictions, compliance requirements.</rdfs:comment>
+  </owl:Class>
+  <pdl:SideEffectType rdf:about="https://provider-project.org/ontology/pdl#SideEffectType_price_pressure">
+    <rdfs:label xml:lang="en">Price Pressure</rdfs:label>
+    <rdfs:comment xml:lang="en">Activation of substitution increases demand for the substitute, driving up its price.</rdfs:comment>
+    <skos:example xml:lang="de">S1: Mehrnachfrage nach Rapsschrot treibt dessen Preis (+20%)</skos:example>
+  </pdl:SideEffectType>
+  <pdl:Severity rdf:about="https://provider-project.org/ontology/pdl#Severity_medium">
+    <rdfs:label xml:lang="en">Medium Severity</rdfs:label>
+  </pdl:Severity>
+  <pdl:DependencyType rdf:about="https://provider-project.org/ontology/pdl#DependencyType_energy">
+    <rdfs:label xml:lang="en">Energy Dependency</rdfs:label>
+    <rdfs:comment xml:lang="en">Dependency on energy supply (electricity, gas, fuel).</rdfs:comment>
+  </pdl:DependencyType>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#Entity">
+    <rdfs:label xml:lang="en">Entity</rdfs:label>
+    <rdfs:comment xml:lang="en">Base class for all network nodes in a supply chain scenario: actors, resources, and infrastructure.</rdfs:comment>
+    <skos:definition xml:lang="en">An entity is any discrete element that participates in a supply chain, can be affected by disruptions, or serves as a dependency for other entities.</skos:definition>
+  </owl:Class>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#SupplyChain">
+    <rdfs:label xml:lang="en">Supply Chain</rdfs:label>
+    <rdfs:comment xml:lang="en">A value chain connecting entities through sequential stages and cross-dependencies.</rdfs:comment>
+    <skos:definition xml:lang="en">A supply chain represents the flow of goods or services from source to destination, including all intermediate processing steps and external dependencies.</skos:definition>
+    <skos:note xml:lang="en">CoyPu models supplier/customer relationships directly via coy:hasSupplier/coy:hasCustomer. PDL adds explicit supply chain objects for scenario modeling.</skos:note>
+  </owl:Class>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#SubstitutionSideEffect">
+    <rdfs:label xml:lang="en">Substitution Side Effect</rdfs:label>
+    <rdfs:comment xml:lang="en">A secondary consequence of activating a substitution, which may create new risks or cascade effects.</rdfs:comment>
+    <skos:definition xml:lang="en">Side effects represent unintended consequences of substitution activation. A substitution that appears to reduce risk may simultaneously create new vulnerabilities through shared upstream dependencies (pseudo-diversification), market pressure, or technical performance loss.</skos:definition>
+    <skos:example xml:lang="en">
+# Example: Pseudo-diversification risk from S3 Pharma
+pdlr:se_india_correlated_risk a pdl:SubstitutionSideEffect ;
+    pdl:sideEffectTypeRef pdl:SideEffectType_correlated_risk ;
+    pdl:sideEffectTarget pdlr:entity_india_api_producers ;
+    pdl:sideEffectMagnitude "0.60"^^xsd:decimal ;
+    rdfs:comment "Indien-Sourcing ist Pseudo-Alternative: Indien zu 70% von chinesischen API-Intermediaten abhängig"@de .
+</skos:example>
+  </owl:Class>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#Scenario">
+    <rdfs:label xml:lang="en">Scenario</rdfs:label>
+    <rdfs:comment xml:lang="en">A container for modeling supply chain disruption scenarios. Contains entities, supply chains, events, and cascade effects.</rdfs:comment>
+    <skos:definition xml:lang="en">A scenario represents a complete disruption model including all actors, relationships, potential events, and their cascade effects over time.</skos:definition>
+    <skos:example xml:lang="en">
+pdlr:scenario_example a pdl:Scenario ;
+    dcterms:identifier "soy_feed_disruption" ;
+    rdfs:label "Soy Feed Supply Chain Disruption" ;
+    pdl:sector "agriculture" ;
+    pdl:criticality pdl:Criticality_high ;
+    pdl:pdlVersion "1.1" .
+</skos:example>
+  </owl:Class>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#Severity">
+    <rdfs:label xml:lang="en">Severity Level</rdfs:label>
+    <rdfs:comment xml:lang="en">Enumeration of impact severity levels for events and timeline entries.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#Substitution">
+    <rdfs:label xml:lang="en">Substitution</rdfs:label>
+    <rdfs:comment xml:lang="en">A formally modeled substitution option in a supply chain. Specifies what replaces what, under which conditions, with what coverage and side effects.</rdfs:comment>
+    <skos:definition xml:lang="en">A Substitution captures the transition from an original supply source (entity, route, product, or technology) to an alternative, including quantitative parameters and activation conditions. Derived from empirical analysis of 9 PROVIDER disruption scenarios.</skos:definition>
+    <skos:note xml:lang="en"><![CDATA[Substitutions are the primary resilience mechanism in supply chains. They are often partial (coverage < 1.0), delayed (ramp_up > 0), and may introduce new risks (side effects, dependency_overlap).]]></skos:note>
+    <skos:note xml:lang="en">CoyPu does not have a direct Substitution class. pdl:Substitution extends the supply chain model with explicit resilience options.</skos:note>
+    <rdfs:subClassOf rdf:resource="https://schema.coypu.org/global#SupplyChainObject"/>
+    <skos:mappingRelation rdf:resource="https://schema.coypu.org/global#SupplyChainObject"/>
+    <skos:example xml:lang="en">
+# Example: Protein substitution from S1 Soja
+pdlr:sub_protein_replacement a pdl:Substitution ;
+    dcterms:identifier "sub_protein_replacement" ;
+    rdfs:label "Sojaschrot → Rapsschrot/Sonnenblumenschrot/Erbsenprotein"@de ;
+    pdl:substitutionFor pdlr:entity_eu_oil_mills ;
+    pdl:substitutionBy pdlr:entity_alternative_protein_sources ;
+    pdl:substitutionTypeRef pdl:SubstitutionType_product ;
+    pdl:substitutionDirectionRef pdl:SubstitutionDirection_supply ;
+    pdl:coverage "0.20"^^xsd:decimal ;
+    pdl:qualityDelta "-0.12"^^xsd:decimal ;
+    pdl:costDelta "0.30"^^xsd:decimal ;
+    pdl:rampUp "21d" ;
+    pdl:reversible true ;
+    pdl:hasActivationCondition [
+        a pdl:ActivationCondition ;
+        pdl:activationTrigger "feed_price_spike.active" ;
+        pdl:activationThresholdPriceIncrease "0.25"^^xsd:decimal
+    ] ;
+    pdl:hasSideEffect [
+        a pdl:SubstitutionSideEffect ;
+        pdl:sideEffectTypeRef pdl:SideEffectType_price_pressure ;
+        pdl:sideEffectTarget pdlr:entity_alternative_protein_sources ;
+        pdl:sideEffectMagnitude "0.20"^^xsd:decimal
+    ] ;
+    pdl:hasDependencyOverlap pdlr:entity_fertilizer_supply ;
+    pdl:hasDependencyOverlap pdlr:entity_gas_supply ;
+    dcterms:references "UFOP 2022: Rapsschrot-Substitutionspotenzial ~15-20% bei Sojapreisschocks" .
+</skos:example>
+  </owl:Class>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#ActivationCondition">
+    <rdfs:label xml:lang="en">Activation Condition</rdfs:label>
+    <rdfs:comment xml:lang="en">The conditions under which a substitution is triggered, including event references and quantitative thresholds.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#Criticality">
+    <rdfs:label xml:lang="en">Criticality Level</rdfs:label>
+    <rdfs:comment xml:lang="en">Enumeration of criticality levels for scenarios and dependencies.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#Dependency">
+    <rdfs:label xml:lang="en">Dependency</rdfs:label>
+    <rdfs:comment xml:lang="en">A cross-dependency between entities outside the main supply chain flow.</rdfs:comment>
+    <skos:definition xml:lang="en">Dependencies represent non-supply relationships such as energy requirements, data dependencies, or logistics services that are critical to entity operations.</skos:definition>
+  </owl:Class>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#SubstitutionDirection">
+    <rdfs:label xml:lang="en">Substitution Direction</rdfs:label>
+    <rdfs:comment xml:lang="en">Indicates whether a substitution acts on the supply side or demand side of the market.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#Cascade">
+    <rdfs:label xml:lang="en">Cascade</rdfs:label>
+    <rdfs:comment xml:lang="en">A sequence of events triggered by an origin event, unfolding over time.</rdfs:comment>
+    <skos:definition xml:lang="en">A cascade models the propagation of disruption effects through the supply chain network, with a timeline showing when each subsequent event occurs.</skos:definition>
+    <skos:example xml:lang="en">
+pdlr:cascade_crisis a pdl:Cascade ;
+    rdfs:label "Crisis Cascade" ;
+    pdl:originEvent pdlr:event_drought ;
+    pdl:probability "0.9"^^xsd:decimal ;
+    pdl:validationConfidence "0.85"^^xsd:decimal .
+</skos:example>
+  </owl:Class>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#DependencyType">
+    <rdfs:label xml:lang="en">Dependency Type</rdfs:label>
+    <rdfs:comment xml:lang="en">Classification of dependency relationships between entities.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#Event">
+    <rdfs:label xml:lang="en">Event</rdfs:label>
+    <rdfs:comment xml:lang="en">A disruption event that affects supply chain entities.</rdfs:comment>
+    <rdfs:subClassOf rdf:resource="https://schema.coypu.org/global#Event"/>
+    <skos:definition xml:lang="en">An event is a discrete occurrence that impacts one or more entities, with quantifiable effects on supply, demand, or price.</skos:definition>
+  </owl:Class>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#SupplyChainConnection">
+    <rdfs:label xml:lang="en">Supply Chain Connection</rdfs:label>
+    <rdfs:comment xml:lang="en">A single stage in a supply chain, representing flow from one entity to another.</rdfs:comment>
+    <skos:definition xml:lang="en">A connection is a directed edge in the supply chain graph, with a sequence number indicating its position in the chain.</skos:definition>
+    <skos:example xml:lang="en">
+pdlr:connection_1 a pdl:SupplyChainConnection ;
+    pdl:sequence 1 ;
+    pdl:fromEntity pdlr:entity_brazil_farms ;
+    pdl:toEntity pdlr:entity_santos_port ;
+    pdl:belongsToChain pdlr:chain_soy_main .
+</skos:example>
+  </owl:Class>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#TimelineEntry">
+    <rdfs:label xml:lang="en">Timeline Entry</rdfs:label>
+    <rdfs:comment xml:lang="en">A single point in a cascade timeline, linking an event to a time offset and affected entities.</rdfs:comment>
+    <skos:definition xml:lang="en">A timeline entry specifies when an event occurs relative to the cascade origin, its severity, and which entities are affected at that point.</skos:definition>
+  </owl:Class>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#SideEffectType">
+    <rdfs:label xml:lang="en">Side Effect Type</rdfs:label>
+    <rdfs:comment xml:lang="en">Enumeration of side effect categories observed in PROVIDER scenarios.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="https://provider-project.org/ontology/pdl#SubstitutionType">
+    <rdfs:label xml:lang="en">Substitution Type</rdfs:label>
+    <rdfs:comment xml:lang="en">Enumeration of substitution mechanism categories identified across PROVIDER scenarios.</rdfs:comment>
+  </owl:Class>
+</rdf:RDF>

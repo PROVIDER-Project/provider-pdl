@@ -1,0 +1,1144 @@
+# =============================================================================
+# PDL Szenario: Unterwasserkabel / Internet-Backbone
+# =============================================================================
+# Beschreibung: Kaskadeneffekte physischer Schäden an Untersee-Glasfaserkabeln
+#               auf Finanzmärkte, Zahlungsverkehr, Cloud-Dienste und internationale
+#               Handelsbeziehungen
+# Basiert auf: PROVIDER-Szenarien-Dokumentation.md (erweitert)
+# Historische Referenz: Ostsee-Kabelschäden 2023/2024, Taiwan-Erdbeben 2006,
+#                       Mittelmeer-Ankerschäden 2008, Tonga-Kabelausfall 2022
+# Querverbindungen: S6 (Rechenzentren), S8 (Seefracht)
+# =============================================================================
+
+pdl_version: "1.1"
+
+scenario:
+  id: submarine_cable_disruption
+  name: Unterwasserkabel / Internet-Backbone
+  sector: telecommunications
+  criticality: high
+  description: >
+    Simulation der Kaskadeneffekte physischer Schäden an Untersee-
+    Glasfaserkabeln. 95-99% des interkontinentalen Datenverkehrs laufen
+    über ca. 570 aktive Unterseekabel-Systeme. Kaskade: Kabelschnitt →
+    Bandbreitenreduzierung → Finanzmarkt-Latenz → Zahlungsverkehr →
+    Handelsunterbrechung. Komplementär zu S6 (Rechenzentren): anderer
+    Angriffsvektor (physisch/extern statt Stromversorgung). Die globale
+    Reparaturflotte umfasst nur 63-80 Spezialschiffe, Reparaturen dauern
+    Wochen bis Monate.
+
+# =============================================================================
+# Entities
+# =============================================================================
+entities:
+  # Kabel-Infrastruktur
+  - id: cables_transatlantic
+    type: infrastructure
+    name: Transatlantische Kabel (AEConnect, Marea, Dunant, Grace Hopper)
+    sector: telecommunications
+    location: Atlantic
+    vulnerability: 0.35
+    cable_count: 17
+    total_capacity_tbps: 350
+    note: "~15-20 aktive Kabel Europa-Nordamerika; einzelne Kabel (Marea: 224 Tbps, Dunant: 250 Tbps) mit enormer Kapazität"
+
+  - id: cables_asia_europe
+    type: infrastructure
+    name: Asien-Europa-Kabel (SEA-ME-WE 3/4/5/6, AAE-1, EIG)
+    sector: telecommunications
+    location: Indian Ocean
+    vulnerability: 0.55
+    cable_count: 12
+    note: "SEA-ME-WE-Systeme kritisch; Route durch Rotes Meer und Suez — Engstelle"
+
+  - id: cables_baltic
+    type: infrastructure
+    name: Ostsee-Kabel (C-Lion1, BCS East-West, EE-S1)
+    sector: telecommunications
+    location: Baltic Sea
+    vulnerability: 0.6
+    cable_count: 7
+    note: "Wenig Redundanz, flache Gewässer — anfällig für Ankerriss und Sabotage"
+
+  - id: cable_chokepoints
+    type: infrastructure
+    name: Kabel-Engpässe (Rotes Meer, Malakka, Ärmelkanal, Gibraltar)
+    sector: telecommunications
+    location: Global
+    vulnerability: 0.7
+    note: "Rotes Meer: ~15-16 Kabel (>90% Europa-Asien-Traffic transits Ägypten); Luzon-Straße: ~18 Kabel; Malakka: kritisch; Ärmelkanal: mehrere Dutzend"
+
+  - id: cable_landing_stations_de
+    type: infrastructure
+    name: Kabel-Landestationen Deutschland/Nordeuropa
+    sector: telecommunications
+    location: Germany
+    vulnerability: 0.5
+    note: "Sylt (AC-1 aktiv), Rostock (C-Lion1 aktiv); TAT-14 (Norden) Ende 2020 stillgelegt; IOEMA (Wilhelmshaven) geplant — DE stark abhängig von UK/NL/DK-Landestationen"
+
+  - id: cable_landing_stations_uk
+    type: infrastructure
+    name: Kabel-Landestationen UK (Cornwall, Bude, Lowestoft)
+    sector: telecommunications
+    location: United Kingdom
+    vulnerability: 0.45
+    note: "UK als Transitland für Daten zwischen Europa und Nordamerika, >60 Landestationen"
+
+  # Reparatur und Wartung
+  - id: cable_repair_fleet
+    type: infrastructure
+    name: Kabelreparaturschiffe (global ~60 Schiffe)
+    sector: telecommunications
+    location: Global
+    vulnerability: 0.65
+    fleet_size: 63
+    note: "63-80 Schiffe je nach Definition; größte Flottenbetreiber: Global Marine, Orange Marine, SubCom, ASN — durchschnittliche Reparatur: 2-6 Wochen"
+
+  - id: cable_manufacturers
+    type: manufacturer
+    name: Kabelhersteller und Verleger (SubCom, ASN, NEC, HMN Tech)
+    sector: telecommunications
+    location: Global
+    vulnerability: 0.5
+    note: "Oligopol: SubCom, ASN (80% franz. Staatsbesitz seit 2024), NEC (besitzt keine eigenen Schiffe), HMN Tech — ~98% des Marktes"
+
+  # Digitale Infrastruktur (Querverbindung S6)
+  - id: decix_frankfurt
+    type: infrastructure
+    name: DE-CIX Frankfurt
+    sector: it
+    location: Germany
+    vulnerability: 0.4
+    note: "Weltgrößter Internet-Austauschpunkt: 18,11 Tbps Spitzenverkehr (Nov. 2024), >45 Exabyte/Jahr; Querverbindung S6"
+
+  - id: internet_backbone_de
+    type: infrastructure
+    name: Internet-Backbone Deutschland
+    sector: telecommunications
+    location: Germany
+    vulnerability: 0.45
+    note: "Deutsche Telekom, Vodafone, Cogent — transnationale Backbone-Verbindungen"
+
+  # Dienste
+  - id: financial_trading_systems
+    type: service
+    name: Hochfrequenzhandel und Finanzmarkt-Systeme
+    sector: finance
+    location: Global
+    vulnerability: 0.8
+    note: "HFT-Latenz: Nanosekunden-Bereich; Hibernia Express für ~6ms Einsparung NY-London für >300 Mio. USD gebaut"
+
+  - id: swift_payment_network
+    type: service
+    name: SWIFT / Internationaler Zahlungsverkehr
+    sector: finance
+    location: Global
+    vulnerability: 0.55
+    note: "~11.000 Finanzinstitute in >200 Ländern, >45 Mio. Nachrichten/Tag"
+
+  - id: cloud_services_international
+    type: service
+    name: Internationale Cloud-Dienste (AWS, Azure, Google Cloud)
+    sector: it
+    location: Global
+    vulnerability: 0.4
+    note: "Multi-Region-Architektur, aber transatlantische Synchronisation latenzabhängig"
+
+  - id: dns_root_infrastructure
+    type: service
+    name: DNS Root-Server und Anycast-Infrastruktur
+    sector: it
+    location: Global
+    vulnerability: 0.25
+    note: "13 Root-Server mit >1.600 Anycast-Instanzen weltweit — hochredundant"
+
+  - id: vpn_corporate_networks
+    type: service
+    name: VPN / Internationale Unternehmensnetze
+    sector: it
+    location: Germany
+    vulnerability: 0.55
+    note: "Deutsche Konzerne abhängig von sicherer internationaler Konnektivität"
+
+  # Resilienz
+  - id: satellite_backup
+    type: infrastructure
+    name: Satellitenverbindungen (Starlink, SES, Eutelsat)
+    sector: telecommunications
+    location: Global
+    vulnerability: 0.3
+    note: "Starlink-Gesamtkonstellation ~600 Tbps (Ende 2025) ≈ 2-3 einzelne moderne Kabel; kann <1% der globalen Kabelkapazität ersetzen"
+
+  - id: terrestrial_routes
+    type: infrastructure
+    name: Terrestrische Alternativrouten
+    sector: telecommunications
+    location: Eurasia
+    vulnerability: 0.5
+    note: "Landrouten China-Europa via Russland/Kasachstan, politisch problematisch"
+
+  # Betroffene Sektoren
+  - id: financial_sector_de
+    type: region
+    name: Finanzplatz Deutschland (Frankfurt, München)
+    sector: finance
+    location: Germany
+    vulnerability: 0.6
+
+  - id: export_industry_de
+    type: region
+    name: Exportwirtschaft Deutschland
+    sector: manufacturing
+    location: Germany
+    vulnerability: 0.5
+    note: "Just-in-Time-Lieferketten abhängig von Echtzeit-Datenaustausch mit asiatischen Zulieferern"
+
+  - id: digital_economy_de
+    type: region
+    name: Digitale Wirtschaft Deutschland
+    sector: it
+    location: Germany
+    vulnerability: 0.45
+
+# =============================================================================
+# Supply Chains
+# =============================================================================
+supply_chains:
+  # Kabel-Infrastruktur → Backbone → Dienste
+  - id: cable_backbone_chain
+    name: Kabel-Backbone-Kette
+    stages:
+      - [cables_transatlantic, cable_landing_stations_uk]
+      - [cables_transatlantic, cable_landing_stations_de]
+      - [cables_asia_europe, cable_chokepoints]
+      - [cable_chokepoints, cable_landing_stations_uk]
+      - [cables_baltic, cable_landing_stations_de]
+      - [cable_landing_stations_uk, internet_backbone_de]
+      - [cable_landing_stations_de, internet_backbone_de]
+      - [internet_backbone_de, decix_frankfurt]
+    dependencies:
+      - from: internet_backbone_de
+        to: cables_transatlantic
+        type: data
+        criticality: high
+      - from: internet_backbone_de
+        to: cables_asia_europe
+        type: data
+        criticality: high
+      - from: internet_backbone_de
+        to: cables_baltic
+        type: data
+        criticality: medium
+      - from: cables_asia_europe
+        to: cable_chokepoints
+        type: data
+        criticality: high
+        note: "Rotes Meer/Suez als Nadelöhr — betrifft auch S8 (Seefracht)"
+
+  # Finanzmarkt-Kette
+  - id: financial_data_chain
+    name: Finanzmarkt-Datenkette
+    stages:
+      - [decix_frankfurt, financial_trading_systems]
+      - [decix_frankfurt, swift_payment_network]
+      - [financial_trading_systems, financial_sector_de]
+      - [swift_payment_network, financial_sector_de]
+      - [swift_payment_network, export_industry_de]
+    dependencies:
+      - from: financial_trading_systems
+        to: cables_transatlantic
+        type: data
+        criticality: high
+        note: "HFT zwischen Frankfurt und New York/London über dedizierte Kabelkapazität"
+      - from: swift_payment_network
+        to: internet_backbone_de
+        type: data
+        criticality: high
+
+  # Cloud- und Unternehmens-Kette
+  - id: cloud_enterprise_chain
+    name: Cloud- und Unternehmens-Kette
+    stages:
+      - [decix_frankfurt, cloud_services_international]
+      - [decix_frankfurt, vpn_corporate_networks]
+      - [cloud_services_international, digital_economy_de]
+      - [vpn_corporate_networks, export_industry_de]
+    dependencies:
+      - from: cloud_services_international
+        to: cables_transatlantic
+        type: data
+        criticality: high
+        note: "AWS us-east-1 / Azure East US — transatlantische Synchronisation"
+      - from: vpn_corporate_networks
+        to: cables_asia_europe
+        type: data
+        criticality: high
+        note: "Lieferketten-Kommunikation mit asiatischen Zulieferern"
+
+  # Reparatur-Kette
+  - id: cable_repair_chain
+    name: Kabelreparatur-Kette
+    stages:
+      - [cable_manufacturers, cable_repair_fleet]
+      - [cable_repair_fleet, cables_transatlantic]
+      - [cable_repair_fleet, cables_asia_europe]
+      - [cable_repair_fleet, cables_baltic]
+    dependencies:
+      - from: cable_repair_fleet
+        to: cable_manufacturers
+        type: input
+        criticality: high
+        note: "Ersatzkabel-Produktion dauert Wochen, Lagerbestände begrenzt"
+      - from: cable_repair_fleet
+        to: swift_payment_network
+        type: input
+        criticality: medium
+        note: "Reparaturverträge erfordern funktionierenden Zahlungsverkehr"
+
+  # Resilienz- und Feedback-Kette
+  - id: resilience_feedback_chain
+    name: Resilienz- und Feedback-Kette
+    stages:
+      - [satellite_backup, internet_backbone_de]
+      - [terrestrial_routes, internet_backbone_de]
+      - [dns_root_infrastructure, internet_backbone_de]
+      - [financial_sector_de, cable_repair_fleet]
+      - [export_industry_de, cable_repair_fleet]
+    dependencies:
+      - from: internet_backbone_de
+        to: satellite_backup
+        type: substitution
+        substitution_ref: sub_satellite_backup
+        criticality: low
+        note: "Satelliten können <1% der Kabelkapazität ersetzen"
+      - from: internet_backbone_de
+        to: terrestrial_routes
+        type: substitution
+        substitution_ref: sub_terrestrial_rerouting
+        criticality: medium
+        note: "Landrouten via Russland geopolitisch riskant"
+      - from: internet_backbone_de
+        to: dns_root_infrastructure
+        type: substitution
+        substitution_ref: sub_dns_anycast_resilience
+        criticality: low
+        note: "DNS-Anycast hochredundant; Puffer für lokale Auflösung — schützt nicht vor Bandbreitenverlust"
+      - from: cable_repair_fleet
+        to: financial_sector_de
+        type: input
+        criticality: medium
+        note: "Feedback: Finanzstörung behindert Reparaturfinanzierung"
+
+# =============================================================================
+# Substitutions
+# =============================================================================
+substitutions:
+
+  # 1. Mediumsubstitution: Unterwasserkabel → Satellit (Starlink/SES/Eutelsat)
+  - id: sub_satellite_backup
+    from: cables_transatlantic
+    to: satellite_backup
+    type: mode
+
+    coverage: 0.01
+    quality_delta: -0.50
+    cost_delta: 2.0
+    ramp_up: 0d
+
+    activation:
+      trigger: "satellite_failover_activated.active"
+
+    reversible: true
+
+    side_effects:
+      - type: capacity_loss
+        target: internet_backbone_de
+        description: "Satellit ersetzt maximal 2-3 moderne Kabel, nicht ganze Routen; Gesamtkapazität Starlink ~600 Tbps entspricht <1% der globalen Unterseekabelkapazität"
+      - type: latency_increase
+        target: financial_trading_systems
+        description: "LEO-Satellitenlatenz 25-50ms vs. <10ms Glasfaser; HFT-Arbitrage nicht mehr wirtschaftlich"
+
+    dependency_overlap:
+      - internet_backbone_de
+
+    reference: "Starlink-Gesamtkonstellation ~600 Tbps (Ende 2025) ≈ 2-3 einzelne moderne Kabel; Marea allein 224 Tbps; globale Unterseekabelkapazität mehrere 100 Petabit/s"
+
+  # 2. Routensubstitution: Unterwasserkabel → Terrestrische Routen (via Russland/Kasachstan)
+  - id: sub_terrestrial_rerouting
+    from: cables_asia_europe
+    to: terrestrial_routes
+    type: route
+
+    coverage: 0.40
+    quality_delta: -0.30
+    cost_delta: 0.50
+    ramp_up: 7d
+
+    activation:
+      trigger: "terrestrial_rerouting_attempted.active"
+
+    reversible: true
+
+    side_effects:
+      - type: correlated_risk
+        target: terrestrial_routes
+        description: "Landrouten via Russland/Kasachstan bei geopolitischen Konflikten ebenfalls gefährdet; politischer Zugang kann jederzeit gesperrt werden"
+      - type: latency_increase
+        target: internet_backbone_de
+        description: "Terrestrische Umleitung erhöht Latenz Europa-Asien um 30-50ms; VPN-Tunnel instabil bei >500ms"
+
+    dependency_overlap:
+      - cable_chokepoints
+      - internet_backbone_de
+
+    reference: "Terrestrische Kapazität Europa-Asien begrenzt; Latenz +30-50ms; politische Abhängigkeit von Transitstaaten; Rerouting-Konfiguration erfordert ~7 Tage"
+
+  # 3. Puffersubstitution: DNS-Redundanz (Anycast-Infrastruktur)
+  - id: sub_dns_anycast_resilience
+    from: internet_backbone_de
+    to: dns_root_infrastructure
+    type: buffer
+
+    coverage: 0.95
+    quality_delta: 0.0
+    cost_delta: 0.0
+    ramp_up: 0d
+
+    activation:
+      trigger: "dns_resilience_holds.active"
+
+    reversible: true
+
+    side_effects: []
+
+    dependency_overlap:
+      - internet_backbone_de
+
+    reference: "13 Root-Server mit >1.600 Anycast-Instanzen weltweit; lokale Resolver-Caches in DE; DNS selbst ist nicht das Problem — Bandbreite und physische Kabelkapazität sind das Problem"
+
+# =============================================================================
+# Events
+# =============================================================================
+events:
+  # Primäre Auslöser
+  - id: baltic_cable_sabotage
+    name: Ostsee-Kabel durch Sabotage/Ankerriss beschädigt
+    type: geopolitical
+    trigger:
+      target: cables_baltic
+      probability: 0.15
+    impact:
+      supply: "-80%"
+      duration: 42d
+    causes:
+      - bandwidth_reduction_europe
+      - cable_repair_mobilized
+    reference: "C-Lion1 (Helsinki-Rostock) und BCS East-West beschädigt Nov. 2024 (Verdacht Yi Peng 3); Eagle S beschädigte EstLink-2/C-Lion1 Dez. 2024"
+
+  - id: chokepoint_cable_damage
+    name: Kabelschäden an Engstellen (Rotes Meer / Jemen)
+    type: geopolitical
+    trigger:
+      target: cable_chokepoints
+      probability: 0.12
+    impact:
+      supply: "-60%"
+      duration: 56d
+    causes:
+      - bandwidth_reduction_europe
+      - asia_europe_latency_spike
+      - cable_repair_mobilized
+    reference: "Houthi-Krise 2024: Rubymar-Wrack beschädigte AAE-1, EIG, Seacom; 25-70% Europa-Asien-Traffic betroffen; Reparaturzugang erst nach Monaten"
+
+  - id: earthquake_cable_damage
+    name: Untersee-Erdbeben mit Kabelschäden (Mittelmeer/Atlantik)
+    type: natural_disaster
+    trigger:
+      target: cables_transatlantic
+      probability: 0.05
+    impact:
+      supply: "-40%"
+      duration: 35d
+    causes:
+      - bandwidth_reduction_europe
+      - cable_repair_mobilized
+    reference: "Taiwan-Erdbeben Dez. 2006: 22 Glasfaserverbindungen/11 Kabel zerstört, ~2 Monate bis Vollreparatur; Tonga 2022: 5 Wochen (int.) / 18 Monate (Inlandskabel)"
+
+  # Bandbreite und Latenz
+  - id: bandwidth_reduction_europe
+    name: Bandbreitenreduzierung Europa (-30% bis -60%)
+    type: infrastructure_failure
+    trigger:
+      target: internet_backbone_de
+      condition: "baltic_cable_sabotage.active OR chokepoint_cable_damage.active OR earthquake_cable_damage.active"
+    impact:
+      supply: "-40%"
+      duration: 42d
+    causes:
+      - latency_spike_financial
+      - cloud_service_degradation
+      - vpn_tunnel_failures
+      - satellite_failover_activated
+      - terrestrial_rerouting_attempted
+    reference: "Verbleibende Kabel überlastet, Routing über Alternativpfade erhöht Latenz"
+
+  - id: asia_europe_latency_spike
+    name: Latenzanstieg Asien-Europa (Umleitung über Kap)
+    type: infrastructure_failure
+    trigger:
+      target: cables_asia_europe
+      condition: "chokepoint_cable_damage.active"
+    impact:
+      supply: "-50%"
+      duration: 56d
+    causes:
+      - vpn_tunnel_failures
+      - cloud_service_degradation
+    reference: "Rotes-Meer-Umleitung: Latenz Singapur-Marseille von ~120ms auf ~200ms (+67%)"
+
+  - id: latency_spike_financial
+    name: Latenzanstieg Finanztransaktionen
+    type: infrastructure_failure
+    trigger:
+      target: financial_trading_systems
+      condition: "bandwidth_reduction_europe.active"
+    impact:
+      supply: "-60%"
+      duration: 35d
+    causes:
+      - hft_trading_halt
+      - swift_delays
+    reference: "HFT >50% des Aktienmarkt-Volumens; bereits 1-5ms Zusatzlatenz Frankfurt-London/NY eliminiert Arbitrage-Margen"
+
+  - id: hft_trading_halt
+    name: Hochfrequenzhandel ausgesetzt
+    type: market_shock
+    trigger:
+      target: financial_trading_systems
+      condition: "latency_spike_financial.active"
+    impact:
+      supply: "-90%"
+      duration: 28d
+    causes:
+      - market_volatility
+    reference: "HFT-Firmen stoppen Handel bei unkontrollierten Latenzschwankungen (Flash-Crash-Risiko)"
+
+  - id: swift_delays
+    name: SWIFT-Zahlungsverzögerungen
+    type: infrastructure_failure
+    trigger:
+      target: swift_payment_network
+      condition: "latency_spike_financial.active"
+    impact:
+      supply: "-30%"
+      duration: 42d
+    causes:
+      - international_trade_disruption
+      - repair_funding_disruption
+    reference: "SWIFT: 3 Datenzentren (US, NL, CH) mit Zonen-Architektur; trotz Redundanz erhöht Kabelschaden Latenzen und Time-outs"
+
+  - id: market_volatility
+    name: Marktvolatilität durch Liquiditätsverlust
+    type: market_shock
+    trigger:
+      target: financial_sector_de
+      condition: "hft_trading_halt.active"
+    impact:
+      price: "+40%"
+      duration: 14d
+    reference: "HFT stellt >50% der Aktienmarkt-Liquidität; Ausfall erhöht Spreads und Volatilität; >10 Bio. USD/Tag an Transaktionen über Kabel"
+
+  # Cloud und Unternehmen
+  - id: cloud_service_degradation
+    name: Cloud-Dienste degradiert (Synchronisations-Fehler)
+    type: infrastructure_failure
+    trigger:
+      target: cloud_services_international
+      condition: "bandwidth_reduction_europe.active OR asia_europe_latency_spike.active"
+    impact:
+      supply: "-25%"
+      duration: 35d
+    causes:
+      - data_sovereignty_rerouting
+    reference: "Cross-Region-Replikation AWS/Azure erfordert konsistente Latenz; Timeout-basierte Failover"
+
+  - id: vpn_tunnel_failures
+    name: VPN-Tunnel-Ausfälle (Unternehmensnetze)
+    type: infrastructure_failure
+    trigger:
+      target: vpn_corporate_networks
+      condition: "bandwidth_reduction_europe.active OR asia_europe_latency_spike.active"
+    impact:
+      supply: "-40%"
+      duration: 28d
+    causes:
+      - supply_chain_communication_breakdown
+    reference: "IPsec/SSL-VPN-Tunnel brechen bei >500ms Latenz oder >5% Paketverlust zusammen"
+
+  - id: supply_chain_communication_breakdown
+    name: Lieferketten-Kommunikation unterbrochen
+    type: infrastructure_failure
+    trigger:
+      target: export_industry_de
+      condition: "vpn_tunnel_failures.active"
+    impact:
+      supply: "-20%"
+      duration: 35d
+    causes:
+      - international_trade_disruption
+    reference: "JIT-Lieferketten (Auto, Halbleiter) erfordern Echtzeit-Datenaustausch mit asiatischen Zulieferern"
+
+  - id: international_trade_disruption
+    name: Internationaler Handelsverkehr gestört
+    type: market_shock
+    trigger:
+      target: export_industry_de
+      condition: "swift_delays.active OR supply_chain_communication_breakdown.active"
+    impact:
+      supply: "-15%"
+      duration: 42d
+    reference: "Exportwirtschaft DE: >1.500 Mrd. EUR/Jahr; jährliche grenzüberschreitende Zahlungsströme >150 Bio. USD global"
+
+  - id: data_sovereignty_rerouting
+    name: Daten-Souveränitäts-Probleme durch Umleitung
+    type: regulatory
+    trigger:
+      target: cloud_services_international
+      condition: "cloud_service_degradation.active"
+    impact:
+      supply: "-10%"
+      duration: 56d
+    reference: "Traffic-Umleitung über Drittstaaten (US, Russland) kann DSGVO/Schrems-II-Konformität verletzen"
+
+  # Reparatur
+  - id: cable_repair_mobilized
+    name: Kabelreparatur mobilisiert
+    type: infrastructure_failure
+    trigger:
+      target: cable_repair_fleet
+      condition: "baltic_cable_sabotage.active OR chokepoint_cable_damage.active OR earthquake_cable_damage.active"
+    impact:
+      supply: "-50%"
+      duration: 42d
+    causes:
+      - repair_bottleneck
+    reference: "63-80 Schiffe weltweit, Mobilisierung 1-2 Wochen, Reparatur 2-6 Wochen; SubCom erwägt Rückzug aus Wartungsmarkt"
+
+  - id: repair_bottleneck
+    name: Reparatur-Engpass (zu wenige Schiffe)
+    type: infrastructure_failure
+    trigger:
+      target: cable_repair_fleet
+      condition: "cable_repair_mobilized.active"
+    impact:
+      supply: "-70%"
+      duration: 56d
+    reference: "Bei Mehrfachschäden reichen 63-80 Schiffe nicht; 150-200 Kabelfehler/Jahr (ICPC); Afrika hatte 2024 nur ein Reparaturschiff"
+
+  - id: repair_funding_disruption
+    name: Reparaturfinanzierung durch Zahlungsstörung behindert
+    type: market_shock
+    trigger:
+      target: cable_repair_fleet
+      condition: "swift_delays.active"
+    impact:
+      supply: "-20%"
+      duration: 28d
+    reference: "Feedback: Kabelschaden → Zahlungsverzögerung → Reparaturverträge nicht bedienbar"
+
+  # Resilienz-Events
+  - id: satellite_failover_activated
+    name: Satellitenkapazität aktiviert (marginal)
+    type: infrastructure_failure
+    substitution_ref: sub_satellite_backup
+    trigger:
+      target: satellite_backup
+      condition: "bandwidth_reduction_europe.active"
+    impact:
+      supply: "-85%"
+      duration: 42d
+    reference: "Starlink ~600 Tbps Gesamtkapazität ≈ 2-3 moderne Kabel (Marea allein: 224 Tbps); Latenz 25-50ms vs. <10ms Kabel"
+
+  - id: terrestrial_rerouting_attempted
+    name: Terrestrische Umleitung versucht
+    type: infrastructure_failure
+    substitution_ref: sub_terrestrial_rerouting
+    trigger:
+      target: terrestrial_routes
+      condition: "bandwidth_reduction_europe.active"
+    impact:
+      supply: "-60%"
+      duration: 42d
+    causes:
+      - data_sovereignty_rerouting
+    reference: "Landrouten via Russland/Zentralasien: politisch unsicher, Kapazität begrenzt, Latenz +30-50ms"
+
+  - id: dns_resilience_holds
+    name: DNS-Infrastruktur bleibt stabil
+    type: infrastructure_failure
+    substitution_ref: sub_dns_anycast_resilience
+    trigger:
+      target: dns_root_infrastructure
+      condition: "bandwidth_reduction_europe.active"
+    impact:
+      supply: "-5%"
+      duration: 7d
+    reference: "13 Root-Server, >1.600 Anycast-Instanzen, lokale Kopien in DE — hohe Resilienz"
+
+  # Feedback-Events
+  - id: shipping_disrupts_repair
+    name: Seerouten-Störung blockiert Reparaturschiff-Zugang
+    type: infrastructure_failure
+    trigger:
+      target: cable_repair_fleet
+      condition: "chokepoint_cable_damage.active"
+      probability: 0.3
+    impact:
+      supply: "-30%"
+      duration: 42d
+    reference: "Feedback/Querverbindung S8: Houthi-Angriffe blockieren sowohl Schifffahrt als auch Kabelreparatur im Roten Meer"
+
+  - id: digital_economy_contraction
+    name: Digitale Wirtschaft kontrahiert
+    type: market_shock
+    trigger:
+      target: digital_economy_de
+      condition: "cloud_service_degradation.active AND vpn_tunnel_failures.active"
+    impact:
+      supply: "-15%"
+      duration: 56d
+    reference: "Digitalwirtschaft DE: ~220 Mrd. EUR Wertschöpfung, abhängig von internationaler Konnektivität"
+
+# =============================================================================
+# Cascades
+# =============================================================================
+cascades:
+  # Ostsee-Sabotage-Kaskade (aktuellstes Szenario)
+  - id: baltic_sabotage_cascade
+    name: Ostsee-Kabel-Sabotage-Kaskade
+    origin: baltic_cable_sabotage
+    probability: 0.7
+    validation:
+      reference: "C-Lion1/BCS-Kabelschäden Nov. 2024, Yi-Peng-3-Vorfall"
+      confidence: 0.8
+    timeline:
+      - at: 0d
+        event: baltic_cable_sabotage
+        impact:
+          sector: telecommunications
+          severity: high
+        affects:
+          - cables_baltic
+      - at: 0d
+        event: cable_repair_mobilized
+        impact:
+          sector: telecommunications
+          severity: medium
+        affects:
+          - cable_repair_fleet
+      - at: 1d
+        event: bandwidth_reduction_europe
+        impact:
+          sector: telecommunications
+          severity: high
+        affects:
+          - internet_backbone_de
+      - at: 1d
+        event: dns_resilience_holds
+        impact:
+          sector: it
+          severity: low
+        affects:
+          - dns_root_infrastructure
+      - at: 1d
+        event: satellite_failover_activated
+        impact:
+          sector: telecommunications
+          severity: low
+        affects:
+          - satellite_backup
+      - at: 2d
+        event: latency_spike_financial
+        impact:
+          sector: finance
+          severity: high
+        affects:
+          - financial_trading_systems
+      - at: 2d
+        event: cloud_service_degradation
+        impact:
+          sector: it
+          severity: medium
+        affects:
+          - cloud_services_international
+      - at: 2d
+        event: vpn_tunnel_failures
+        impact:
+          sector: it
+          severity: medium
+        affects:
+          - vpn_corporate_networks
+      - at: 3d
+        event: hft_trading_halt
+        impact:
+          sector: finance
+          severity: critical
+        affects:
+          - financial_trading_systems
+      - at: 3d
+        event: swift_delays
+        impact:
+          sector: finance
+          severity: high
+        affects:
+          - swift_payment_network
+      - at: 5d
+        event: supply_chain_communication_breakdown
+        impact:
+          sector: manufacturing
+          severity: medium
+        affects:
+          - export_industry_de
+      - at: 5d
+        event: market_volatility
+        impact:
+          sector: finance
+          severity: high
+        affects:
+          - financial_sector_de
+      - at: 7d
+        event: international_trade_disruption
+        impact:
+          sector: manufacturing
+          severity: medium
+        affects:
+          - export_industry_de
+      - at: 7d
+        event: data_sovereignty_rerouting
+        impact:
+          sector: it
+          severity: low
+        affects:
+          - cloud_services_international
+      - at: 7d
+        event: repair_bottleneck
+        impact:
+          sector: telecommunications
+          severity: high
+        affects:
+          - cable_repair_fleet
+      - at: 10d
+        event: repair_funding_disruption
+        impact:
+          sector: finance
+          severity: medium
+        affects:
+          - cable_repair_fleet
+      - at: 14d
+        event: digital_economy_contraction
+        impact:
+          sector: it
+          severity: medium
+        affects:
+          - digital_economy_de
+
+  # Rotes-Meer-Kabelschaden-Kaskade (Querverbindung S8)
+  - id: red_sea_cable_cascade
+    name: Rotes-Meer-Kabelschaden-Kaskade
+    origin: chokepoint_cable_damage
+    probability: 0.65
+    validation:
+      reference: "Houthi-Krise 2024, 3 Kabel beschädigt, Reparatur erst nach Monaten möglich"
+      confidence: 0.75
+    timeline:
+      - at: 0d
+        event: chokepoint_cable_damage
+        impact:
+          sector: telecommunications
+          severity: critical
+        affects:
+          - cable_chokepoints
+          - cables_asia_europe
+      - at: 0d
+        event: cable_repair_mobilized
+        impact:
+          sector: telecommunications
+          severity: medium
+        affects:
+          - cable_repair_fleet
+      - at: 1d
+        event: bandwidth_reduction_europe
+        impact:
+          sector: telecommunications
+          severity: high
+        affects:
+          - internet_backbone_de
+      - at: 1d
+        event: asia_europe_latency_spike
+        impact:
+          sector: telecommunications
+          severity: critical
+        affects:
+          - cables_asia_europe
+      - at: 1d
+        event: satellite_failover_activated
+        impact:
+          sector: telecommunications
+          severity: low
+        affects:
+          - satellite_backup
+      - at: 1d
+        event: terrestrial_rerouting_attempted
+        impact:
+          sector: telecommunications
+          severity: medium
+        affects:
+          - terrestrial_routes
+      - at: 2d
+        event: latency_spike_financial
+        impact:
+          sector: finance
+          severity: high
+        affects:
+          - financial_trading_systems
+      - at: 2d
+        event: vpn_tunnel_failures
+        impact:
+          sector: it
+          severity: high
+        affects:
+          - vpn_corporate_networks
+      - at: 2d
+        event: cloud_service_degradation
+        impact:
+          sector: it
+          severity: high
+        affects:
+          - cloud_services_international
+      - at: 3d
+        event: hft_trading_halt
+        impact:
+          sector: finance
+          severity: critical
+        affects:
+          - financial_trading_systems
+      - at: 3d
+        event: swift_delays
+        impact:
+          sector: finance
+          severity: high
+        affects:
+          - swift_payment_network
+      - at: 3d
+        event: shipping_disrupts_repair
+        impact:
+          sector: telecommunications
+          severity: high
+        affects:
+          - cable_repair_fleet
+      - at: 5d
+        event: supply_chain_communication_breakdown
+        impact:
+          sector: manufacturing
+          severity: high
+        affects:
+          - export_industry_de
+      - at: 5d
+        event: market_volatility
+        impact:
+          sector: finance
+          severity: high
+        affects:
+          - financial_sector_de
+      - at: 7d
+        event: international_trade_disruption
+        impact:
+          sector: manufacturing
+          severity: high
+        affects:
+          - export_industry_de
+      - at: 7d
+        event: data_sovereignty_rerouting
+        impact:
+          sector: it
+          severity: medium
+        affects:
+          - cloud_services_international
+      - at: 10d
+        event: repair_bottleneck
+        impact:
+          sector: telecommunications
+          severity: critical
+        affects:
+          - cable_repair_fleet
+      - at: 14d
+        event: repair_funding_disruption
+        impact:
+          sector: finance
+          severity: medium
+        affects:
+          - cable_repair_fleet
+      - at: 21d
+        event: digital_economy_contraction
+        impact:
+          sector: it
+          severity: high
+        affects:
+          - digital_economy_de
+
+  # Worst-Case: Mehrfachschaden (Erdbeben + Sabotage)
+  - id: compound_cable_crisis
+    name: Kombinierte Kabelkrise (Mehrfachschäden)
+    origin: earthquake_cable_damage
+    probability: 0.1
+    validation:
+      reference: "Hypothetisch: Naturkatastrophe + geopolitischer Angriff gleichzeitig"
+      confidence: 0.35
+    timeline:
+      - at: 0d
+        event: earthquake_cable_damage
+        impact:
+          sector: telecommunications
+          severity: critical
+        affects:
+          - cables_transatlantic
+      - at: 0d
+        event: chokepoint_cable_damage
+        impact:
+          sector: telecommunications
+          severity: critical
+        affects:
+          - cable_chokepoints
+      - at: 0d
+        event: cable_repair_mobilized
+        impact:
+          sector: telecommunications
+          severity: high
+        affects:
+          - cable_repair_fleet
+      - at: 1d
+        event: bandwidth_reduction_europe
+        impact:
+          sector: telecommunications
+          severity: critical
+        affects:
+          - internet_backbone_de
+      - at: 1d
+        event: asia_europe_latency_spike
+        impact:
+          sector: telecommunications
+          severity: critical
+        affects:
+          - cables_asia_europe
+      - at: 1d
+        event: satellite_failover_activated
+        impact:
+          sector: telecommunications
+          severity: low
+        affects:
+          - satellite_backup
+      - at: 1d
+        event: terrestrial_rerouting_attempted
+        impact:
+          sector: telecommunications
+          severity: medium
+        affects:
+          - terrestrial_routes
+      - at: 1d
+        event: dns_resilience_holds
+        impact:
+          sector: it
+          severity: low
+        affects:
+          - dns_root_infrastructure
+      - at: 2d
+        event: latency_spike_financial
+        impact:
+          sector: finance
+          severity: critical
+        affects:
+          - financial_trading_systems
+      - at: 2d
+        event: vpn_tunnel_failures
+        impact:
+          sector: it
+          severity: critical
+        affects:
+          - vpn_corporate_networks
+      - at: 2d
+        event: cloud_service_degradation
+        impact:
+          sector: it
+          severity: critical
+        affects:
+          - cloud_services_international
+      - at: 3d
+        event: hft_trading_halt
+        impact:
+          sector: finance
+          severity: critical
+        affects:
+          - financial_trading_systems
+      - at: 3d
+        event: swift_delays
+        impact:
+          sector: finance
+          severity: critical
+        affects:
+          - swift_payment_network
+      - at: 3d
+        event: shipping_disrupts_repair
+        impact:
+          sector: telecommunications
+          severity: high
+        affects:
+          - cable_repair_fleet
+      - at: 5d
+        event: supply_chain_communication_breakdown
+        impact:
+          sector: manufacturing
+          severity: critical
+        affects:
+          - export_industry_de
+      - at: 5d
+        event: market_volatility
+        impact:
+          sector: finance
+          severity: critical
+        affects:
+          - financial_sector_de
+      - at: 7d
+        event: repair_bottleneck
+        impact:
+          sector: telecommunications
+          severity: critical
+        affects:
+          - cable_repair_fleet
+      - at: 7d
+        event: international_trade_disruption
+        impact:
+          sector: manufacturing
+          severity: critical
+        affects:
+          - export_industry_de
+      - at: 7d
+        event: data_sovereignty_rerouting
+        impact:
+          sector: it
+          severity: high
+        affects:
+          - cloud_services_international
+      - at: 10d
+        event: repair_funding_disruption
+        impact:
+          sector: finance
+          severity: high
+        affects:
+          - cable_repair_fleet
+      - at: 14d
+        event: digital_economy_contraction
+        impact:
+          sector: it
+          severity: critical
+        affects:
+          - digital_economy_de

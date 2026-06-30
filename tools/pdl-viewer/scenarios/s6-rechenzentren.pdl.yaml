@@ -1,0 +1,1233 @@
+# =============================================================================
+# PDL Szenario: Rechenzentren und digitale Verwaltung
+# =============================================================================
+# Beschreibung: Kaskadeneffekte eines regionalen Stromausfalls auf
+#               Rechenzentren und die davon abhängigen digitalen Dienste
+#               (Verwaltung, Finanzen, Gesundheit, Logistik, Kommunikation)
+# Basiert auf: PROVIDER-Szenarien-Dokumentation.md, Szenario 6
+# Region: Frankfurt Rhein-Main (DE-CIX Standort, 40% dt. Internetverkehr)
+# =============================================================================
+
+pdl_version: "1.1"
+
+scenario:
+  id: datacenter_disruption
+  name: Rechenzentren und digitale Verwaltung
+  sector: it
+  criticality: high
+  description: >
+    Simulation der Kaskadeneffekte eines regionalen Stromausfalls auf
+    Rechenzentren in der Frankfurt Rhein-Main Region. Rechenzentren haben
+    USV-Autonomie von 10-30 Minuten und Diesel-Notstrom für 24-72 Stunden.
+    DE-CIX Frankfurt wickelt ca. 40% des deutschen Internetverkehrs ab.
+    Betroffen: Öffentliche Verwaltung, Finanzsektor, Gesundheitswesen,
+    Logistik und Kommunikation.
+
+# =============================================================================
+# Entities
+# =============================================================================
+entities:
+  # Energieversorgung
+  - id: power_grid_frankfurt
+    type: infrastructure
+    name: Stromnetz Frankfurt Rhein-Main
+    sector: energy
+    location: Germany
+    vulnerability: 0.4
+
+  - id: diesel_supply
+    type: commodity
+    name: Diesel-Kraftstoff
+    sector: energy
+    vulnerability: 0.6
+
+  # Rechenzentren
+  - id: decix_frankfurt
+    type: infrastructure
+    name: DE-CIX Frankfurt
+    sector: it
+    location: Germany
+    vulnerability: 0.35
+    tier: 4
+    redundancy: "2N"
+    diesel_reserve_hours: 72
+
+  - id: equinix_frankfurt
+    type: infrastructure
+    name: Equinix FR7 Frankfurt
+    sector: it
+    location: Germany
+    vulnerability: 0.4
+    tier: 4
+    redundancy: "2N"
+    diesel_reserve_hours: 48
+
+  - id: interxion_frankfurt
+    type: infrastructure
+    name: Interxion FRA Frankfurt
+    sector: it
+    location: Germany
+    vulnerability: 0.55
+    tier: 3
+    redundancy: "N+1"
+    diesel_reserve_hours: 36
+
+  - id: tsystems_frankfurt
+    type: infrastructure
+    name: T-Systems Frankfurt
+    sector: it
+    location: Germany
+    vulnerability: 0.6
+    tier: 3
+    redundancy: "N+1"
+    diesel_reserve_hours: 24
+
+  # Resilienz-Mechanismen
+  - id: cloud_hyperscaler
+    type: infrastructure
+    name: Cloud-Hyperscaler (AWS/Azure Multi-Region)
+    sector: it
+    location: Germany
+    vulnerability: 0.25
+    failover_regions: ["AWS eu-west-1 (Irland)", "Azure North Europe (Dublin)"]
+    failover_capability: 0.6
+
+  - id: mobile_basestation_batteries
+    type: infrastructure
+    name: Mobilfunk-Basisstationen Batteriepuffer (4-8h)
+    sector: telecommunications
+    location: Germany
+    vulnerability: 0.4
+    battery_duration_hours: 6
+
+  - id: cdn_edge_cache
+    type: infrastructure
+    name: CDN Edge Caches (Cloudflare, Akamai)
+    sector: it
+    location: Germany
+    vulnerability: 0.3
+    cache_duration_hours: 12
+
+  # USV und Notstrom
+  - id: ups_systems
+    type: infrastructure
+    name: USV-Anlagen (10-30 Min.)
+    sector: it
+    vulnerability: 0.3
+
+  - id: diesel_generators
+    type: infrastructure
+    name: Notstromaggregate (24-72h)
+    sector: it
+    vulnerability: 0.5
+
+  # Kühlung und Netzwerk
+  - id: cooling_systems
+    type: infrastructure
+    name: Kühlsysteme Rechenzentren
+    sector: it
+    vulnerability: 0.7
+
+  - id: network_carriers
+    type: infrastructure
+    name: Netzwerk-Carrier
+    sector: telecommunications
+    location: Germany
+    vulnerability: 0.5
+
+  # Öffentliche Verwaltung
+  - id: ozg_services
+    type: service
+    name: OZG-Dienste (>600 Online-Dienste)
+    sector: government
+    location: Germany
+    vulnerability: 0.7
+
+  - id: meldewesen
+    type: service
+    name: Meldewesen/Einwohnermeldeamt
+    sector: government
+    location: Germany
+    vulnerability: 0.75
+
+  - id: sozialleistungen
+    type: service
+    name: Sozialleistungen (Jobcenter/Rente)
+    sector: government
+    location: Germany
+    vulnerability: 0.7
+
+  - id: steuerverwaltung
+    type: service
+    name: Steuerverwaltung (ELSTER)
+    sector: government
+    location: Germany
+    vulnerability: 0.65
+
+  # Finanzsektor
+  - id: payment_systems
+    type: service
+    name: Zahlungsverkehr (SEPA/Karten)
+    sector: finance
+    location: Germany
+    vulnerability: 0.8
+
+  - id: online_banking
+    type: service
+    name: Online-Banking
+    sector: finance
+    location: Germany
+    vulnerability: 0.75
+
+  - id: stock_exchange
+    type: service
+    name: Börsenhandel
+    sector: finance
+    location: Germany
+    vulnerability: 0.7
+
+  # Gesundheitswesen
+  - id: hospital_it
+    type: service
+    name: Krankenhaus-IT-Systeme
+    sector: health
+    location: Germany
+    vulnerability: 0.85
+
+  - id: epa_systems
+    type: service
+    name: Elektronische Patientenakte
+    sector: health
+    location: Germany
+    vulnerability: 0.7
+
+  - id: emergency_dispatch
+    type: service
+    name: Notrufleitstellen (112)
+    sector: health
+    location: Germany
+    vulnerability: 0.9
+
+  # Logistik
+  - id: logistics_control
+    type: service
+    name: Güterverkehrssteuerung
+    sector: logistics
+    location: Germany
+    vulnerability: 0.7
+
+  - id: parcel_tracking
+    type: service
+    name: Paketdienste/Tracking
+    sector: logistics
+    location: Germany
+    vulnerability: 0.6
+
+  - id: rail_systems
+    type: service
+    name: Deutsche Bahn IT-Systeme
+    sector: logistics
+    location: Germany
+    vulnerability: 0.7
+
+  # Kommunikation
+  - id: email_services
+    type: service
+    name: E-Mail-Dienste
+    sector: telecommunications
+    location: Germany
+    vulnerability: 0.6
+
+  - id: voip_systems
+    type: service
+    name: VoIP/Telefonie
+    sector: telecommunications
+    location: Germany
+    vulnerability: 0.7
+
+  - id: mobile_backend
+    type: service
+    name: Mobilfunk-Backend
+    sector: telecommunications
+    location: Germany
+    vulnerability: 0.65
+
+  # Wirtschaft und Gesellschaft
+  - id: ecommerce
+    type: service
+    name: E-Commerce Plattformen
+    sector: retail
+    location: Germany
+    vulnerability: 0.6
+
+  - id: retail_pos
+    type: infrastructure
+    name: Einzelhandel Kassensysteme
+    sector: retail
+    location: Germany
+    vulnerability: 0.7
+
+  - id: citizens
+    type: region
+    name: Bevölkerung Deutschland
+    sector: society
+    location: Germany
+    vulnerability: 0.5
+
+# =============================================================================
+# Supply Chains
+# =============================================================================
+supply_chains:
+  # Stromversorgung der Rechenzentren
+  - id: datacenter_power_chain
+    name: Rechenzentrum-Stromversorgung
+    stages:
+      - [power_grid_frankfurt, ups_systems]
+      - [ups_systems, diesel_generators]
+      - [diesel_supply, diesel_generators]
+      - [diesel_generators, decix_frankfurt]
+      - [diesel_generators, equinix_frankfurt]
+      - [diesel_generators, interxion_frankfurt]
+      - [diesel_generators, tsystems_frankfurt]
+    dependencies:
+      - from: decix_frankfurt
+        to: power_grid_frankfurt
+        type: energy
+        criticality: high
+      - from: equinix_frankfurt
+        to: power_grid_frankfurt
+        type: energy
+        criticality: high
+      - from: diesel_generators
+        to: diesel_supply
+        type: input
+        criticality: high
+
+  # Kühlung der Rechenzentren
+  - id: datacenter_cooling_chain
+    name: Rechenzentrum-Kühlung
+    stages:
+      - [power_grid_frankfurt, cooling_systems]
+      - [cooling_systems, decix_frankfurt]
+      - [cooling_systems, equinix_frankfurt]
+      - [cooling_systems, interxion_frankfurt]
+    dependencies:
+      - from: cooling_systems
+        to: power_grid_frankfurt
+        type: energy
+        criticality: high
+
+  # Digitale Dienste
+  - id: digital_services_chain
+    name: Digitale Dienste Kette
+    stages:
+      - [decix_frankfurt, network_carriers]
+      - [network_carriers, ozg_services]
+      - [network_carriers, payment_systems]
+      - [network_carriers, hospital_it]
+      - [network_carriers, logistics_control]
+      - [network_carriers, email_services]
+      - [network_carriers, rail_systems]
+      - [network_carriers, voip_systems]
+      - [ozg_services, meldewesen]
+      - [ozg_services, sozialleistungen]
+      - [ozg_services, steuerverwaltung]
+      - [payment_systems, online_banking]
+      - [payment_systems, retail_pos]
+      - [hospital_it, epa_systems]
+      - [hospital_it, emergency_dispatch]
+      - [cloud_hyperscaler, ozg_services]
+      - [cloud_hyperscaler, payment_systems]
+      - [cloud_hyperscaler, ecommerce]
+      - [mobile_basestation_batteries, mobile_backend]
+      - [logistics_control, parcel_tracking]
+      - [payment_systems, stock_exchange]
+      - [cdn_edge_cache, ozg_services]
+      - [cdn_edge_cache, ecommerce]
+    dependencies:
+      - from: payment_systems
+        to: decix_frankfurt
+        type: data
+        criticality: high
+      - from: emergency_dispatch
+        to: voip_systems
+        type: data
+        criticality: high
+      - from: email_services
+        to: network_carriers
+        type: data
+        criticality: medium
+      - from: rail_systems
+        to: network_carriers
+        type: data
+        criticality: high
+      - from: parcel_tracking
+        to: logistics_control
+        type: data
+        criticality: medium
+      - from: stock_exchange
+        to: payment_systems
+        type: data
+        criticality: high
+      - from: cloud_hyperscaler
+        to: power_grid_frankfurt
+        type: substitution
+        substitution_ref: sub_cloud_hyperscaler_failover
+        criticality: medium
+      - from: cdn_edge_cache
+        to: decix_frankfurt
+        type: substitution
+        substitution_ref: sub_cdn_edge_cache
+        criticality: medium
+      - from: mobile_basestation_batteries
+        to: network_carriers
+        type: substitution
+        substitution_ref: sub_mobile_basestation_batteries
+        criticality: medium
+
+  # Endverbraucher
+  - id: consumer_services_chain
+    name: Verbraucher-Dienste
+    stages:
+      - [online_banking, citizens]
+      - [ecommerce, citizens]
+      - [mobile_backend, citizens]
+      - [retail_pos, citizens]
+
+  # Feedback-Schleifen (Rückkopplungseffekte)
+  - id: feedback_loops_chain
+    name: Feedback-Schleifen (Rückkopplungseffekte)
+    stages:
+      - [payment_systems, diesel_supply]
+      - [voip_systems, diesel_generators]
+      - [logistics_control, diesel_generators]
+    dependencies:
+      - from: diesel_supply
+        to: payment_systems
+        type: energy
+        criticality: high
+      - from: diesel_generators
+        to: voip_systems
+        type: energy
+        criticality: high
+
+# =============================================================================
+# Substitutions
+# =============================================================================
+substitutions:
+
+  # Substitution 1: Geografische Substitution -- Lokale RZ → Cloud-Hyperscaler Failover
+  - id: sub_cloud_hyperscaler_failover
+    from: decix_frankfurt
+    to: cloud_hyperscaler
+    type: route
+
+    coverage: 0.60
+    quality_delta: -0.10
+    cost_delta: 0.40
+    ramp_up: 4h
+
+    activation:
+      trigger: "regional_blackout.active"
+
+    reversible: true
+
+    side_effects:
+      - type: latency_increase
+        target: ozg_services
+        description: "Latenz +20-40ms durch Dublin-/Irland-Routing (AWS eu-west-1 / Azure North Europe)"
+      - type: latency_increase
+        target: payment_systems
+        description: "Latenz +20-40ms für SEPA/Kartenzahlungen durch Auslandsrouting"
+
+    dependency_overlap: []
+
+    reference: "AWS eu-west-1 (Irland) und Azure North Europe (Dublin) übernehmen bis zu 60% der Last"
+
+  # Substitution 2: Puffersubstitution -- CDN Edge Caches
+  - id: sub_cdn_edge_cache
+    from: decix_frankfurt
+    to: cdn_edge_cache
+    type: buffer
+
+    coverage: 0.30
+    quality_delta: -0.20
+    cost_delta: 0.0
+    ramp_up: 0d
+    duration_max: 12h
+
+    activation:
+      trigger: "datacenter_shutdown_decix.active"
+
+    reversible: true
+
+    side_effects: []
+
+    dependency_overlap: []
+
+    reference: "Cloudflare/Akamai Edge Caches liefern statische Inhalte (~30% des Traffics) bis zu 12h"
+
+  # Substitution 3: Puffersubstitution -- Mobilfunk-Batteriepuffer
+  - id: sub_mobile_basestation_batteries
+    from: network_carriers
+    to: mobile_basestation_batteries
+    type: buffer
+
+    coverage: 0.20
+    quality_delta: -0.30
+    cost_delta: 0.0
+    ramp_up: 0d
+    duration_max: 6h
+
+    activation:
+      trigger: "regional_blackout.active"
+
+    reversible: false
+
+    side_effects:
+      - type: capacity_loss
+        target: mobile_backend
+        description: "Nach 4-8h Batteriebetrieb fallen Mobilfunkmasten aus; eingeschränkte Bandbreite während Pufferbetrieb"
+
+    dependency_overlap: []
+
+    reference: "Mobilfunk-Basisstationen mit 4-8h Akkupuffer decken ~20% der kritischen Kommunikation"
+
+# =============================================================================
+# Events
+# =============================================================================
+events:
+  # Primärer Auslöser
+  - id: regional_blackout
+    name: Regionaler Stromausfall
+    type: infrastructure_failure
+    trigger:
+      target: power_grid_frankfurt
+      probability: 0.05
+    impact:
+      supply: "-100%"
+      duration: 96h
+    causes:
+      - ups_takeover
+    reference: "Großflächiger Stromausfall durch Extremwetterereignis"
+
+  # USV und Notstrom
+  - id: ups_takeover
+    name: USV übernimmt Stromversorgung
+    type: infrastructure_failure
+    trigger:
+      target: ups_systems
+      condition: "regional_blackout.active"
+    impact:
+      supply: "-0%"
+      duration: 30m
+    causes:
+      - ups_depleted
+    reference: "Automatische USV-Umschaltung in <0.01 Sekunden"
+
+  - id: ups_depleted
+    name: USV-Kapazität erschöpft
+    type: infrastructure_failure
+    trigger:
+      target: ups_systems
+      condition: "ups_takeover.active"
+    impact:
+      supply: "-100%"
+      duration: 96h
+    causes:
+      - diesel_generators_start
+      - generator_start_failure
+    reference: "USV-Autonomie: 10-30 Minuten"
+
+  - id: diesel_generators_start
+    name: Notstromaggregate gestartet
+    type: infrastructure_failure
+    trigger:
+      target: diesel_generators
+      condition: "ups_depleted.active"
+    impact:
+      supply: "-0%"
+      duration: 48h
+    causes:
+      - diesel_shortage
+    reference: "Diesel-Notstrom-Reichweite: 24-72 Stunden"
+
+  - id: diesel_shortage
+    name: Diesel-Nachschub kritisch
+    type: infrastructure_failure
+    trigger:
+      target: diesel_supply
+      condition: "diesel_generators_start.active"
+    impact:
+      supply: "-80%"
+      duration: 72h
+    causes:
+      - datacenter_shutdown_tsystems
+      - datacenter_shutdown_interxion
+    reference: "Tanklaster bei Blackout nicht verfügbar"
+
+  # Rechenzentren fahren herunter (gestaffelt nach Diesel-Vorrat)
+  - id: datacenter_shutdown_tsystems
+    name: T-Systems Frankfurt heruntergefahren
+    type: infrastructure_failure
+    trigger:
+      target: tsystems_frankfurt
+      condition: "diesel_shortage.active"
+    impact:
+      supply: "-100%"
+      duration: 72h
+    causes:
+      - government_services_offline
+    reference: "T-Systems: 24h Diesel-Vorrat"
+
+  - id: datacenter_shutdown_interxion
+    name: Interxion Frankfurt heruntergefahren
+    type: infrastructure_failure
+    trigger:
+      target: interxion_frankfurt
+      condition: "diesel_shortage.active"
+    impact:
+      supply: "-100%"
+      duration: 60h
+    causes:
+      - healthcare_it_offline
+    reference: "Interxion: 36h Diesel-Vorrat"
+
+  - id: datacenter_shutdown_equinix
+    name: Equinix Frankfurt heruntergefahren
+    type: infrastructure_failure
+    trigger:
+      target: equinix_frankfurt
+      condition: "diesel_shortage.active"
+    impact:
+      supply: "-100%"
+      duration: 48h
+    causes:
+      - payment_systems_offline
+    reference: "Equinix: 48h Diesel-Vorrat"
+
+  - id: datacenter_shutdown_decix
+    name: DE-CIX Frankfurt heruntergefahren
+    type: infrastructure_failure
+    trigger:
+      target: decix_frankfurt
+      condition: "diesel_shortage.active"
+    impact:
+      supply: "-100%"
+      duration: 24h
+    causes:
+      - internet_disruption
+    reference: "DE-CIX: 72h Diesel-Vorrat, 40% deutscher Internetverkehr"
+
+  # Kühlung
+  - id: cooling_failure
+    name: Kühlungsausfall
+    type: infrastructure_failure
+    trigger:
+      target: cooling_systems
+      condition: "regional_blackout.active"
+    impact:
+      supply: "-100%"
+      duration: 60m
+    causes:
+      - thermal_shutdown
+    reference: "Ohne Kühlung: kritische Temperatur nach 30-45 Min."
+
+  - id: thermal_shutdown
+    name: Thermische Notabschaltung
+    type: infrastructure_failure
+    trigger:
+      target: decix_frankfurt
+      condition: "cooling_failure.active"
+    impact:
+      supply: "-100%"
+      duration: 48h
+    causes:
+      - internet_disruption
+    reference: "Automatischer Shutdown bei >35°C zum Schutz der Hardware"
+
+  # Dienste-Ausfälle
+  - id: government_services_offline
+    name: OZG-Dienste offline
+    type: infrastructure_failure
+    trigger:
+      target: ozg_services
+      condition: "datacenter_shutdown_tsystems.active"
+    impact:
+      supply: "-70%"
+      duration: 72h
+    causes:
+      - citizen_services_disrupted
+    reference: ">600 Online-Verwaltungsdienste betroffen; CDN-Caches und Cloud-Failover mildern Totalausfall"
+
+  - id: payment_systems_offline
+    name: Zahlungsverkehr gestört
+    type: infrastructure_failure
+    trigger:
+      target: payment_systems
+      condition: "datacenter_shutdown_equinix.active"
+    impact:
+      supply: "-60%"
+      duration: 48h
+    causes:
+      - retail_cash_only
+      - diesel_procurement_blocked
+    reference: "SEPA, Kartenzahlungen, Online-Banking betroffen"
+
+  - id: healthcare_it_offline
+    name: Krankenhaus-IT ausgefallen
+    type: infrastructure_failure
+    trigger:
+      target: hospital_it
+      condition: "datacenter_shutdown_interxion.active"
+    impact:
+      supply: "-70%"
+      duration: 48h
+    causes:
+      - emergency_protocols
+    reference: "Patientensicherheit gefährdet, Papier-Fallback aktiviert"
+
+  - id: internet_disruption
+    name: Internet-Störung national
+    type: infrastructure_failure
+    trigger:
+      target: network_carriers
+      condition: "datacenter_shutdown_decix.active"
+    impact:
+      supply: "-40%"
+      duration: 24h
+    causes:
+      - communication_breakdown
+    reference: "DE-CIX: zentraler Internet-Austauschpunkt"
+
+  # Folgeeffekte
+  - id: retail_cash_only
+    name: Einzelhandel nur Bargeld
+    type: market_shock
+    trigger:
+      target: retail_pos
+      condition: "payment_systems_offline.active"
+    impact:
+      supply: "-50%"
+      duration: 48h
+    causes:
+      - citizen_services_disrupted
+    reference: "Kartenzahlungen nicht möglich"
+
+  - id: emergency_protocols
+    name: Krankenhäuser Notfall-Protokolle
+    type: regulatory
+    trigger:
+      target: emergency_dispatch
+      condition: "healthcare_it_offline.active"
+    impact:
+      supply: "-30%"
+      duration: 72h
+    causes:
+      - citizen_services_disrupted
+    reference: "Papierbasierte Fallback-Verfahren aktiviert"
+
+  - id: communication_breakdown
+    name: Kommunikation eingeschränkt
+    type: infrastructure_failure
+    trigger:
+      target: voip_systems
+      condition: "internet_disruption.active"
+    impact:
+      supply: "-60%"
+      duration: 48h
+    causes:
+      - coordination_failure
+    reference: "VoIP, E-Mail, Mobilfunk-Backend betroffen; Mobilfunk-Batterien nach 6h erschöpft"
+
+  - id: citizen_services_disrupted
+    name: Bürgerdienste unterbrochen
+    type: infrastructure_failure
+    trigger:
+      target: citizens
+      condition: "government_services_offline.active"
+    impact:
+      demand: "+100%"
+      duration: 96h
+    reference: "Identitätsnachweis, Sozialleistungen, Steuern nicht verfügbar"
+
+  - id: logistics_disruption
+    name: Logistik-Systeme gestört
+    type: infrastructure_failure
+    trigger:
+      target: logistics_control
+      condition: "internet_disruption.active"
+    impact:
+      supply: "-50%"
+      duration: 72h
+    causes:
+      - staff_access_blocked
+    reference: "Güterverkehr, Bahn, Paketdienste betroffen"
+
+  # Feedback-Loop Events
+  - id: diesel_procurement_blocked
+    name: Diesel-Beschaffung durch Zahlungsausfall blockiert
+    type: infrastructure_failure
+    trigger:
+      target: diesel_supply
+      condition: "payment_systems_offline.active"
+    impact:
+      supply: "-95%"
+      duration: 48h
+    reference: "Tanklaster-Bezahlung, Lieferverträge nicht abwickelbar"
+
+  - id: coordination_failure
+    name: Koordinationsversagen Notstrom-Teams
+    type: infrastructure_failure
+    trigger:
+      target: diesel_generators
+      condition: "communication_breakdown.active"
+    impact:
+      supply: "-30%"
+      duration: 72h
+    reference: "Einsatzteams ohne Kommunikation nicht koordinierbar"
+
+  - id: staff_access_blocked
+    name: Technikerzugang durch Transportausfall blockiert
+    type: infrastructure_failure
+    trigger:
+      target: diesel_generators
+      condition: "logistics_disruption.active"
+    impact:
+      supply: "-20%"
+      duration: 48h
+    reference: "Wartungspersonal kann Rechenzentren nicht erreichen"
+
+  # Resilienz Events
+  - id: cloud_failover_activated
+    name: Cloud-Failover auf Auslandsregionen aktiviert
+    type: infrastructure_failure
+    substitution_ref: sub_cloud_hyperscaler_failover
+    trigger:
+      target: cloud_hyperscaler
+      condition: "regional_blackout.active"
+    impact:
+      supply: "-30%"
+      duration: 96h
+    reference: "AWS eu-west-1 / Azure North Europe übernehmen teilweise"
+
+  - id: generator_start_failure
+    name: Notstromaggregat-Startversager
+    type: infrastructure_failure
+    trigger:
+      target: diesel_generators
+      condition: "ups_depleted.active"
+      probability: 0.1
+    impact:
+      supply: "-10%"
+      duration: 48h
+    causes:
+      - datacenter_shutdown_tsystems
+    reference: "Ca. 10% der Aggregate starten nicht beim ersten Versuch"
+
+  - id: basestation_batteries_depleted
+    name: Mobilfunk-Batterien erschöpft
+    type: infrastructure_failure
+    substitution_ref: sub_mobile_basestation_batteries
+    trigger:
+      target: mobile_basestation_batteries
+      condition: "regional_blackout.active"
+    impact:
+      supply: "-100%"
+      duration: 72h
+    causes:
+      - communication_breakdown
+    reference: "Basisstationen-Akkus nach 4-8h Blackout leer"
+
+  - id: cdn_cache_expires
+    name: CDN-Caches abgelaufen
+    type: infrastructure_failure
+    substitution_ref: sub_cdn_edge_cache
+    trigger:
+      target: cdn_edge_cache
+      condition: "datacenter_shutdown_decix.active"
+    impact:
+      supply: "-100%"
+      duration: 48h
+    causes:
+      - citizen_services_disrupted
+    reference: "Cache-TTLs abgelaufen, Origin-Server nicht erreichbar"
+
+# =============================================================================
+# Cascades
+# =============================================================================
+cascades:
+  # Hauptkaskade: Stromausfall → Rechenzentren → Dienste
+  - id: blackout_datacenter_cascade
+    name: Blackout-Rechenzentren-Kaskade
+    origin: regional_blackout
+    probability: 0.9
+    validation:
+      reference: "Basiert auf PROVIDER-Szenarien-Dokumentation, Szenario 6"
+      confidence: 0.85
+    timeline:
+      - at: 0h
+        event: regional_blackout
+        impact:
+          sector: energy
+          severity: critical
+        affects:
+          - power_grid_frankfurt
+      - at: 0h
+        event: ups_takeover
+        impact:
+          sector: it
+          severity: medium
+        affects:
+          - ups_systems
+      - at: 0h
+        event: cooling_failure
+        impact:
+          sector: it
+          severity: high
+        affects:
+          - cooling_systems
+      - at: 1h
+        event: ups_depleted
+        impact:
+          sector: it
+          severity: high
+        affects:
+          - ups_systems
+      - at: 1h
+        event: diesel_generators_start
+        impact:
+          sector: it
+          severity: medium
+        affects:
+          - diesel_generators
+      - at: 1h
+        event: cloud_failover_activated
+        impact:
+          sector: it
+          severity: medium
+        affects:
+          - cloud_hyperscaler
+      - at: 1h
+        event: generator_start_failure
+        impact:
+          sector: it
+          severity: low
+        affects:
+          - diesel_generators
+      - at: 4h
+        event: diesel_shortage
+        impact:
+          sector: energy
+          severity: high
+        affects:
+          - diesel_supply
+      - at: 6h
+        event: basestation_batteries_depleted
+        impact:
+          sector: telecommunications
+          severity: high
+        affects:
+          - mobile_basestation_batteries
+      - at: 25h
+        event: datacenter_shutdown_tsystems
+        impact:
+          sector: it
+          severity: critical
+        affects:
+          - tsystems_frankfurt
+      - at: 25h
+        event: government_services_offline
+        impact:
+          sector: government
+          severity: critical
+        affects:
+          - ozg_services
+          - meldewesen
+          - sozialleistungen
+      - at: 37h
+        event: datacenter_shutdown_interxion
+        impact:
+          sector: it
+          severity: critical
+        affects:
+          - interxion_frankfurt
+      - at: 37h
+        event: healthcare_it_offline
+        impact:
+          sector: health
+          severity: critical
+        affects:
+          - hospital_it
+          - epa_systems
+      - at: 49h
+        event: datacenter_shutdown_equinix
+        impact:
+          sector: it
+          severity: critical
+        affects:
+          - equinix_frankfurt
+      - at: 49h
+        event: payment_systems_offline
+        impact:
+          sector: finance
+          severity: critical
+        affects:
+          - payment_systems
+          - online_banking
+      - at: 50h
+        event: retail_cash_only
+        impact:
+          sector: retail
+          severity: high
+        affects:
+          - retail_pos
+      - at: 50h
+        event: diesel_procurement_blocked
+        impact:
+          sector: energy
+          severity: critical
+        affects:
+          - diesel_supply
+      - at: 73h
+        event: datacenter_shutdown_decix
+        impact:
+          sector: it
+          severity: critical
+        affects:
+          - decix_frankfurt
+      - at: 73h
+        event: internet_disruption
+        impact:
+          sector: telecommunications
+          severity: critical
+        affects:
+          - network_carriers
+      - at: 74h
+        event: communication_breakdown
+        impact:
+          sector: telecommunications
+          severity: high
+        affects:
+          - voip_systems
+          - mobile_backend
+      - at: 74h
+        event: logistics_disruption
+        impact:
+          sector: logistics
+          severity: high
+        affects:
+          - logistics_control
+          - parcel_tracking
+      - at: 75h
+        event: coordination_failure
+        impact:
+          sector: it
+          severity: high
+        affects:
+          - diesel_generators
+      - at: 76h
+        event: staff_access_blocked
+        impact:
+          sector: it
+          severity: medium
+        affects:
+          - diesel_generators
+      - at: 85h
+        event: cdn_cache_expires
+        impact:
+          sector: it
+          severity: high
+        affects:
+          - cdn_edge_cache
+
+  # Kühlungs-Kaskade (schneller Ausfall)
+  - id: cooling_cascade
+    name: Kühlungsausfall-Kaskade
+    origin: cooling_failure
+    probability: 0.7
+    validation:
+      reference: "Thermische Notabschaltung nach 45-60 Minuten"
+      confidence: 0.9
+    timeline:
+      - at: 0h
+        event: cooling_failure
+        impact:
+          sector: it
+          severity: critical
+        affects:
+          - cooling_systems
+      - at: 1h
+        event: thermal_shutdown
+        impact:
+          sector: it
+          severity: critical
+        affects:
+          - decix_frankfurt
+          - equinix_frankfurt
+          - interxion_frankfurt
+      - at: 2h
+        event: internet_disruption
+        impact:
+          sector: telecommunications
+          severity: critical
+      - at: 2h
+        event: payment_systems_offline
+        impact:
+          sector: finance
+          severity: critical
+      - at: 3h
+        event: healthcare_it_offline
+        impact:
+          sector: health
+          severity: critical
+
+  # Finanz-Kaskade
+  - id: finance_cascade
+    name: Finanzsektor-Kaskade
+    origin: payment_systems_offline
+    probability: 0.85
+    validation:
+      reference: "Koordination mit Bundesbank für Notfallverfahren"
+      confidence: 0.8
+    timeline:
+      - at: 0h
+        event: payment_systems_offline
+        impact:
+          sector: finance
+          severity: critical
+        affects:
+          - payment_systems
+      - at: 1h
+        event: retail_cash_only
+        impact:
+          sector: retail
+          severity: high
+        affects:
+          - retail_pos
+      - at: 2h
+        event: citizen_services_disrupted
+        impact:
+          sector: society
+          severity: high
+        affects:
+          - citizens
+      - at: 3h
+        event: diesel_procurement_blocked
+        impact:
+          sector: energy
+          severity: high
+        affects:
+          - diesel_supply
+
+  # Worst-Case: Alle Systeme
+  - id: total_digital_collapse
+    name: Totaler digitaler Zusammenbruch
+    origin: regional_blackout
+    probability: 0.3
+    validation:
+      reference: "Hypothetisches Worst-Case über 96+ Stunden"
+      confidence: 0.6
+    timeline:
+      - at: 0h
+        event: regional_blackout
+        impact:
+          sector: energy
+          severity: critical
+      - at: 1h
+        event: cooling_failure
+        impact:
+          sector: it
+          severity: critical
+      - at: 1h
+        event: thermal_shutdown
+        impact:
+          sector: it
+          severity: critical
+        affects:
+          - decix_frankfurt
+          - equinix_frankfurt
+      - at: 1h
+        event: cloud_failover_activated
+        impact:
+          sector: it
+          severity: medium
+        affects:
+          - cloud_hyperscaler
+      - at: 1h
+        event: generator_start_failure
+        impact:
+          sector: it
+          severity: low
+        affects:
+          - diesel_generators
+      - at: 2h
+        event: internet_disruption
+        impact:
+          sector: telecommunications
+          severity: critical
+      - at: 2h
+        event: payment_systems_offline
+        impact:
+          sector: finance
+          severity: critical
+      - at: 2h
+        event: government_services_offline
+        impact:
+          sector: government
+          severity: critical
+      - at: 3h
+        event: healthcare_it_offline
+        impact:
+          sector: health
+          severity: critical
+      - at: 3h
+        event: emergency_protocols
+        impact:
+          sector: health
+          severity: high
+        affects:
+          - emergency_dispatch
+      - at: 4h
+        event: communication_breakdown
+        impact:
+          sector: telecommunications
+          severity: critical
+      - at: 4h
+        event: logistics_disruption
+        impact:
+          sector: logistics
+          severity: critical
+      - at: 5h
+        event: diesel_procurement_blocked
+        impact:
+          sector: energy
+          severity: critical
+        affects:
+          - diesel_supply
+      - at: 5h
+        event: coordination_failure
+        impact:
+          sector: it
+          severity: high
+        affects:
+          - diesel_generators
+      - at: 6h
+        event: basestation_batteries_depleted
+        impact:
+          sector: telecommunications
+          severity: high
+        affects:
+          - mobile_basestation_batteries
+      - at: 6h
+        event: retail_cash_only
+        impact:
+          sector: retail
+          severity: high
+      - at: 12h
+        event: citizen_services_disrupted
+        impact:
+          sector: society
+          severity: critical
+        affects:
+          - citizens

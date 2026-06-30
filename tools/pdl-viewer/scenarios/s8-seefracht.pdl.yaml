@@ -1,0 +1,1066 @@
+# =============================================================================
+# PDL Szenario: Globale Seefracht-/Containerrouten
+# =============================================================================
+# Beschreibung: "Horizontales" Szenario — Kaskadeneffekte einer Blockade
+#               globaler Seefracht-Chokepoints (Suez, Panama, Malakka) auf
+#               alle importabhängigen Sektoren gleichzeitig. Einzigartig,
+#               weil es alle anderen Szenarien (S1-S7) gleichzeitig verschärft.
+# Basiert auf: PROVIDER-Szenarien-Dokumentation.md (erweitert)
+# Historische Referenz: Ever Given Blockade 2021, Houthi-Krise Rotes Meer
+#                       2024, Panamakanal-Dürre 2023-2024
+# =============================================================================
+
+pdl_version: "1.1"
+
+scenario:
+  id: global_shipping_disruption
+  name: Globale Seefracht- und Containerrouten-Krise
+  sector: logistics
+  criticality: high
+  description: >
+    Simulation der Kaskadeneffekte einer Unterbrechung globaler Seefracht-
+    Chokepoints. Der Suezkanal transportiert ~12% des Welthandels (~30%
+    des Containerverkehrs), die Straße von Malakka ~25% des Welthandels.
+    Dieses "horizontale" Szenario ist einzigartig, da es alle import-
+    abhängigen Sektoren gleichzeitig trifft: Nahrungsmittel (S1), Halb-
+    leiter (S2), Pharma (S3), Düngemittel (S4), Chemikalien (S5),
+    Seltene Erden (S7). Feedback-Schleifen zwischen Versicherungsprämien,
+    Treibstoffverbrauch und Hafenüberlastung verstärken die Krise.
+
+# =============================================================================
+# Entities
+# =============================================================================
+entities:
+  # Chokepoints
+  - id: suez_canal
+    type: infrastructure
+    name: Suezkanal
+    sector: logistics
+    location: Egypt
+    vulnerability: 0.7
+    annual_transits: 26000
+    note: "~12-15% des Welthandels, ~30% des globalen Containerverkehrs, ~26.000 Durchfahrten/Jahr (2023)"
+
+  - id: panama_canal
+    type: infrastructure
+    name: Panamakanal
+    sector: logistics
+    location: Panama
+    vulnerability: 0.6
+    annual_transits: 14000
+    note: "~5% des Welthandels, ~40% des US-Containerverkehrs, abhängig von Gatun-See-Wasserstand"
+
+  - id: strait_of_malacca
+    type: infrastructure
+    name: Straße von Malakka
+    sector: logistics
+    location: Singapore
+    vulnerability: 0.5
+    note: "~25% des Welthandels, engste Stelle nur 2,8 km, ~94.000 Schiffe/Jahr"
+
+  # Alternative Routen
+  - id: cape_good_hope_route
+    type: infrastructure
+    name: Kap der Guten Hoffnung (Alternativroute)
+    sector: logistics
+    location: South Africa
+    vulnerability: 0.3
+    note: "Suez-Umleitung: +10-14 Tage Transit, +30-40% Treibstoffverbrauch"
+
+  # Schifffahrt und Container
+  - id: global_container_fleet
+    type: infrastructure
+    name: Globale Containerflotte
+    sector: logistics
+    location: Global
+    vulnerability: 0.5
+    fleet_teu_capacity: 30000000
+    note: "~6.900 Containerschiffe, >30 Mio. TEU Kapazität (2024), Rekordzulieferungen"
+
+  - id: container_availability
+    type: commodity
+    name: Container-Verfügbarkeit (TEU)
+    sector: logistics
+    vulnerability: 0.65
+    note: "Längere Routen binden Container länger — bei +14 Tagen Transit fehlen ~15% der Kapazität"
+
+  - id: bunker_fuel_supply
+    type: commodity
+    name: Bunkertreibstoff (VLSFO, LNG)
+    sector: energy
+    vulnerability: 0.5
+    note: "Treibstoff = ~50-60% der Voyage-Kosten, VLSFO-Preis ~500-600 USD/t (2024)"
+
+  - id: marine_insurance
+    type: service
+    name: Marine-Versicherung (War Risk Premium)
+    sector: finance
+    vulnerability: 0.6
+    note: "War Risk Premium Rotes Meer: von 0,05% auf 0,5-1,0% des Schiffswerts (Houthi-Krise)"
+
+  # Europäische Häfen
+  - id: rotterdam_port
+    type: infrastructure
+    name: Hafen Rotterdam
+    sector: logistics
+    location: Netherlands
+    vulnerability: 0.45
+    annual_teu: 14000000
+    note: "Größter Hafen Europas, ~14 Mio. TEU/Jahr"
+
+  - id: hamburg_port
+    type: infrastructure
+    name: Hafen Hamburg
+    sector: logistics
+    location: Germany
+    vulnerability: 0.55
+    annual_teu: 7800000
+    note: "Drittgrößter Hafen Europas, ~7,8 Mio. TEU/Jahr (2024), wichtigster deutscher Seehafen"
+
+  # Deutsche Wirtschaftssektoren (Querschnitt)
+  - id: german_food_imports
+    type: service
+    name: Deutsche Nahrungsmittelimporte
+    sector: agriculture
+    location: Germany
+    vulnerability: 0.55
+    note: "Soja, Getreide, Futtermittel, Südfrüchte — überwiegend per Schiff (Bezug zu S1)"
+
+  - id: german_industrial_imports
+    type: service
+    name: Deutsche Industrieimporte
+    sector: industry
+    location: Germany
+    vulnerability: 0.65
+    note: "Halbleiter, Seltene Erden, Vorprodukte — kritisch für Automotive, Maschinenbau (Bezug zu S2, S7)"
+
+  - id: german_chemical_imports
+    type: service
+    name: Deutsche Chemie-/Pharma-Importe
+    sector: chemistry
+    location: Germany
+    vulnerability: 0.6
+    note: "APIs, Intermediate, Spezialchemikalien — 3. größter Chemieimporteur weltweit (Bezug zu S3, S4, S5)"
+
+  - id: german_energy_imports
+    type: service
+    name: Deutsche Energieimporte (LNG, Öl)
+    sector: energy
+    location: Germany
+    vulnerability: 0.5
+    note: "LNG-Terminals Wilhelmshaven, Brunsbüttel — zunehmend seefrachtabhängig"
+
+  - id: automotive_jit_supply
+    type: manufacturer
+    name: Automotive Just-in-Time-Versorgung
+    sector: automotive
+    location: Germany
+    vulnerability: 0.8
+    note: "JIT-Lagerhaltung: 1,5h am Band bis max. 1 Tag im Werk (BMW Rosslyn: 1,5h), extrem störungsanfällig"
+
+  - id: german_consumers
+    type: region
+    name: Deutsche Verbraucher
+    sector: retail
+    location: Germany
+    vulnerability: 0.4
+
+  - id: port_logistics_workers
+    type: service
+    name: Hafenlogistik-Personal
+    sector: logistics
+    location: Germany
+    vulnerability: 0.5
+    note: "Überstunden bei Congestion → Streikrisiko (ver.di Warnstreiks 2023)"
+
+  # Resilienz-Mechanismen
+  - id: china_europe_rail
+    type: infrastructure
+    name: China-Europa Bahnfracht (Neue Seidenstraße)
+    sector: logistics
+    location: Global
+    vulnerability: 0.4
+    annual_teu: 2070000
+    note: "~2,07 Mio. TEU/Jahr (2024, 19.000 Züge), ~8,5% des China-EU-Handelswertes, Transit 12-18 Tage"
+
+  - id: air_freight_capacity
+    type: infrastructure
+    name: Luftfracht-Kapazität
+    sector: logistics
+    location: Global
+    vulnerability: 0.35
+    note: "~5x teurer als Seefracht, aber 30x schneller — nur für hochwertige Güter wirtschaftlich"
+
+  - id: nearshoring_initiatives
+    type: infrastructure
+    name: Nearshoring/Friendshoring-Initiativen
+    sector: industry
+    location: EU
+    vulnerability: 0.25
+    note: "Verlagerung von Lieferketten nach Osteuropa, Türkei, Nordafrika — dauert Jahre"
+
+# =============================================================================
+# Supply Chains
+# =============================================================================
+supply_chains:
+  # Hauptkette: Chokepoint → Hafen → Deutsche Wirtschaft
+  - id: maritime_main_chain
+    name: Maritime Hauptlieferkette
+    stages:
+      - [suez_canal, rotterdam_port]
+      - [suez_canal, hamburg_port]
+      - [panama_canal, rotterdam_port]
+      - [strait_of_malacca, suez_canal]
+      - [rotterdam_port, german_food_imports]
+      - [rotterdam_port, german_chemical_imports]
+      - [hamburg_port, german_industrial_imports]
+      - [hamburg_port, german_food_imports]
+    dependencies:
+      - from: rotterdam_port
+        to: suez_canal
+        type: logistics
+        criticality: high
+      - from: hamburg_port
+        to: suez_canal
+        type: logistics
+        criticality: high
+      - from: suez_canal
+        to: strait_of_malacca
+        type: logistics
+        criticality: high
+        note: "Asien-Europa-Route: Malakka → Suez → Mittelmeer → Nordeuropa"
+
+  # Container- und Kostenlogistik
+  - id: shipping_cost_chain
+    name: Fracht- und Kostenkette
+    stages:
+      - [global_container_fleet, container_availability]
+      - [bunker_fuel_supply, global_container_fleet]
+      - [marine_insurance, global_container_fleet]
+      - [container_availability, hamburg_port]
+      - [container_availability, rotterdam_port]
+    dependencies:
+      - from: global_container_fleet
+        to: bunker_fuel_supply
+        type: energy
+        criticality: high
+      - from: global_container_fleet
+        to: marine_insurance
+        type: input
+        criticality: medium
+
+  # Sektorale Verteilung Deutschland
+  - id: german_import_distribution
+    name: Deutsche Import-Verteilung
+    stages:
+      - [german_food_imports, german_consumers]
+      - [german_industrial_imports, automotive_jit_supply]
+      - [german_chemical_imports, german_consumers]
+      - [german_energy_imports, german_consumers]
+    dependencies:
+      - from: automotive_jit_supply
+        to: german_industrial_imports
+        type: input
+        criticality: high
+
+  # Feedback-Kette
+  - id: feedback_amplification_chain
+    name: Feedback-Verstärkungskette
+    stages:
+      - [cape_good_hope_route, bunker_fuel_supply]
+      - [bunker_fuel_supply, marine_insurance]
+      - [port_logistics_workers, hamburg_port]
+    dependencies:
+      - from: bunker_fuel_supply
+        to: cape_good_hope_route
+        type: substitution
+        substitution_ref: sub_cape_reroute
+        criticality: high
+        note: "Umleitung erhöht Treibstoffverbrauch um 30-40%"
+      - from: marine_insurance
+        to: cape_good_hope_route
+        type: input
+        criticality: medium
+        note: "War Risk Prämie macht Suez-Route unwirtschaftlich"
+
+  # Resilienz-Kette
+  - id: resilience_alternatives_chain
+    name: Resilienz- und Alternativrouten
+    stages:
+      - [china_europe_rail, german_industrial_imports]
+      - [air_freight_capacity, german_industrial_imports]
+      - [air_freight_capacity, german_chemical_imports]
+      - [nearshoring_initiatives, german_industrial_imports]
+    dependencies:
+      - from: german_industrial_imports
+        to: china_europe_rail
+        type: substitution
+        substitution_ref: sub_rail_mode
+        criticality: low
+        note: "Bahnfracht deckt ~8,5% des China-EU-Handelswertes (2024), wachsend"
+      - from: german_industrial_imports
+        to: air_freight_capacity
+        type: substitution
+        substitution_ref: sub_air_mode
+        criticality: low
+        note: "Luftfracht nur für hochwertige Güter, ~2% des Volumens"
+      - from: german_industrial_imports
+        to: nearshoring_initiatives
+        type: substitution
+        substitution_ref: sub_nearshoring
+        criticality: low
+        note: "Nearshoring langfristig (+3 Jahre), kurzfristig ~3% Entlastung"
+
+# =============================================================================
+# Substitutions
+# =============================================================================
+substitutions:
+
+  - id: sub_cape_reroute
+    from: suez_canal
+    to: cape_good_hope_route
+    type: route
+    coverage: 1.0
+    quality_delta: 0.0
+    cost_delta: 0.40
+    ramp_up: 14d
+    activation:
+      trigger: "suez_blockage.active OR red_sea_attacks.active"
+    reversible: true
+    side_effects:
+      - type: capacity_loss
+        target: container_availability
+        description: "Längere Route bindet ~15% mehr Containerkapazität global"
+      - type: price_pressure
+        target: bunker_fuel_supply
+        description: "+40% Treibstoffverbrauch pro Voyage durch Kap-Umleitung"
+    reference: "Houthi-Krise 2024: >90% der Containerschiffe umgeleitet, +10-14 Tage Transit, +30-40% Treibstoff"
+
+  - id: sub_rail_mode
+    from: global_container_fleet
+    to: china_europe_rail
+    type: mode
+    coverage: 0.085
+    quality_delta: -0.05
+    cost_delta: 0.40
+    ramp_up: 7d
+    activation:
+      trigger: "industrial_supply_delay.active"
+    reversible: true
+    side_effects: []
+    dependency_overlap: []
+    reference: "~2,07 Mio. TEU/Jahr (2024, 19.000 Züge), ~8,5% des China-EU-Handelswertes, Transit 12-18 Tage; Russland-Transit bei Sanktionen riskant"
+
+  - id: sub_air_mode
+    from: global_container_fleet
+    to: air_freight_capacity
+    type: mode
+    coverage: 0.02
+    quality_delta: 0.0
+    cost_delta: 5.0
+    ramp_up: 3d
+    activation:
+      trigger: "industrial_supply_delay.active"
+    reversible: true
+    side_effects: []
+    reference: "Nur für hochwertige Güter (Chips, Pharma) wirtschaftlich; ~5x teurer als Seefracht, 30x schneller"
+
+  - id: sub_nearshoring
+    from: global_container_fleet
+    to: nearshoring_initiatives
+    type: supplier
+    coverage: 0.03
+    quality_delta: 0.0
+    cost_delta: 0.20
+    ramp_up: 1095d
+    activation:
+      trigger: "freight_rate_explosion.active AND freight_rate_explosion.duration > 90d"
+    reversible: false
+    side_effects: []
+    reference: "Verlagerung von Lieferketten nach Osteuropa, Türkei, Nordafrika — kurzfristig +3%, langfristig mehr; dauert 3 Jahre"
+
+# =============================================================================
+# Events
+# =============================================================================
+events:
+  # Primäre Auslöser
+  - id: suez_blockage
+    name: Suezkanal-Blockade
+    type: infrastructure_failure
+    trigger:
+      target: suez_canal
+      probability: 0.08
+    impact:
+      supply: "-100%"
+      duration: 14d
+    causes:
+      - cape_rerouting
+      - freight_rate_explosion
+      - insurance_premium_surge
+    reference: "Ever Given 2021: 6 Tage Blockade, 422 Schiffe gestaut, ~10 Mrd. USD/Tag Handelsausfall"
+
+  - id: red_sea_attacks
+    name: Angriffe auf Schifffahrt im Roten Meer
+    type: geopolitical
+    trigger:
+      target: suez_canal
+      probability: 0.3
+    impact:
+      supply: "-65%"
+      duration: 180d
+    causes:
+      - cape_rerouting
+      - insurance_premium_surge
+      - freight_rate_explosion
+    reference: "Houthi-Krise 2024: Suez-Transitverkehr -50 bis -70%, Containerfracht -66%"
+
+  - id: panama_drought
+    name: Panamakanal-Dürre-Restriktionen
+    type: natural_disaster
+    trigger:
+      target: panama_canal
+      probability: 0.25
+    impact:
+      supply: "-40%"
+      duration: 120d
+    causes:
+      - transit_time_increase
+      - freight_rate_explosion
+    reference: "2023-2024: Durchfahrten von ~38 auf 18/Tag (Tiefststand Feb 2024), Slot-Auktionen bis $4 Mio."
+
+  - id: malacca_strait_crisis
+    name: Krise Straße von Malakka
+    type: geopolitical
+    trigger:
+      target: strait_of_malacca
+      probability: 0.03
+    impact:
+      supply: "-80%"
+      duration: 90d
+    causes:
+      - transit_time_increase
+      - freight_rate_explosion
+      - energy_supply_disruption
+    reference: "Hypothetisch: Blockade würde ~25% des Welthandels und ~80% der ostasiatischen Ölimporte treffen"
+
+  # Routing und Transit
+  - id: cape_rerouting
+    name: Umleitung über Kap der Guten Hoffnung
+    type: infrastructure_failure
+    substitution_ref: sub_cape_reroute
+    trigger:
+      target: cape_good_hope_route
+      condition: "suez_blockage.active OR red_sea_attacks.active"
+    impact:
+      supply: "-15%"
+      duration: 180d
+    causes:
+      - transit_time_increase
+      - container_shortage
+      - bunker_fuel_demand_spike
+    reference: "Houthi-Krise: >90% der Containerschiffe umgeleitet, +10-14 Tage pro Voyage"
+
+  - id: transit_time_increase
+    name: Transitzeiten-Verlängerung
+    type: infrastructure_failure
+    trigger:
+      target: global_container_fleet
+      condition: "cape_rerouting.active OR panama_drought.active OR malacca_strait_crisis.active"
+    impact:
+      supply: "-20%"
+      duration: 180d
+    causes:
+      - container_shortage
+      - port_congestion_europe
+    reference: "Asien-Europa: Normal ~30 Tage, via Kap ~42-45 Tage (+40%)"
+
+  # Kosten und Kapazitätseffekte
+  - id: container_shortage
+    name: Globaler Containermangel
+    type: infrastructure_failure
+    trigger:
+      target: container_availability
+      condition: "transit_time_increase.active"
+    impact:
+      supply: "-25%"
+      duration: 120d
+    causes:
+      - food_supply_delay
+      - industrial_supply_delay
+      - chemical_supply_delay
+    reference: "Längere Routen binden ~15% mehr Container, Leercontainer am falschen Ort"
+
+  - id: freight_rate_explosion
+    name: Frachtraten-Explosion
+    type: market_shock
+    trigger:
+      target: global_container_fleet
+      condition: "suez_blockage.active OR red_sea_attacks.active OR panama_drought.active"
+    impact:
+      price: "+200%"
+      duration: 180d
+    causes:
+      - consumer_price_inflation
+    reference: "Houthi-Krise 2024: Shanghai-Rotterdam Spotrate von ~1.500 auf ~4.500 USD/FEU (+200%); Pandemie-Peak 2021: ~14.000 USD/FEU"
+
+  - id: insurance_premium_surge
+    name: Versicherungsprämien-Anstieg
+    type: market_shock
+    trigger:
+      target: marine_insurance
+      condition: "suez_blockage.active OR red_sea_attacks.active"
+    impact:
+      price: "+900%"
+      duration: 180d
+    causes:
+      - cape_rerouting
+      - freight_rate_explosion
+    reference: "War Risk Premium: 0,05% → 0,5-1,0% des Schiffswerts (10-20-facher Anstieg)"
+
+  - id: bunker_fuel_demand_spike
+    name: Bunkertreibstoff-Nachfrageanstieg
+    type: market_shock
+    trigger:
+      target: bunker_fuel_supply
+      condition: "cape_rerouting.active"
+    impact:
+      price: "+30%"
+      demand: "+15%"
+      duration: 180d
+    causes:
+      - freight_rate_explosion
+    reference: "Umleitung via Kap: +30-40% Treibstoffverbrauch pro Voyage, globaler Bunkermarkt angespannt"
+
+  - id: port_congestion_europe
+    name: Hafenüberlastung Europa
+    type: infrastructure_failure
+    trigger:
+      target: hamburg_port
+      condition: "transit_time_increase.active"
+    impact:
+      supply: "-20%"
+      duration: 90d
+    causes:
+      - automotive_jit_failure
+      - port_labor_stress
+    reference: "Schiffe kommen in Wellen statt gleichmäßig → Überlastung bei Entladung und Landtransport"
+
+  # Sektorale Auswirkungen Deutschland
+  - id: food_supply_delay
+    name: Nahrungsmittel-Importverzögerung
+    type: infrastructure_failure
+    trigger:
+      target: german_food_imports
+      condition: "container_shortage.active"
+    impact:
+      supply: "-15%"
+      price: "+10%"
+      duration: 90d
+    causes:
+      - consumer_price_inflation
+    reference: "Soja, Getreide, Futtermittel, Südfrüchte — verschärft S1 (Soja) und S4 (Düngemittel)"
+
+  - id: industrial_supply_delay
+    name: Industrieimport-Verzögerung
+    type: infrastructure_failure
+    trigger:
+      target: german_industrial_imports
+      condition: "container_shortage.active"
+    impact:
+      supply: "-20%"
+      duration: 120d
+    causes:
+      - automotive_jit_failure
+      - rail_freight_activated
+      - air_freight_surge
+    reference: "Halbleiter, Seltene Erden, Vorprodukte — verschärft S2 (Halbleiter) und S7 (Seltene Erden)"
+
+  - id: chemical_supply_delay
+    name: Chemie-/Pharma-Importverzögerung
+    type: infrastructure_failure
+    trigger:
+      target: german_chemical_imports
+      condition: "container_shortage.active"
+    impact:
+      supply: "-18%"
+      duration: 120d
+    causes:
+      - consumer_price_inflation
+    reference: "APIs, Spezialchemikalien, Wasseraufbereitungsmittel — verschärft S3 (Pharma) und S5 (Wasser)"
+
+  - id: energy_supply_disruption
+    name: Energie-Importstörung (LNG, Öl)
+    type: infrastructure_failure
+    trigger:
+      target: german_energy_imports
+      condition: "malacca_strait_crisis.active OR red_sea_attacks.active"
+    impact:
+      supply: "-10%"
+      price: "+25%"
+      duration: 90d
+    reference: "LNG-Tanker und Öltanker nutzen gleiche Routen, verschärft S6 (Rechenzentren/Strom)"
+
+  - id: automotive_jit_failure
+    name: Automotive Just-in-Time-Zusammenbruch
+    type: infrastructure_failure
+    trigger:
+      target: automotive_jit_supply
+      condition: "port_congestion_europe.active OR industrial_supply_delay.active"
+    impact:
+      supply: "-30%"
+      duration: 60d
+    causes:
+      - consumer_price_inflation
+    reference: "JIT-Puffer nur Stunden bis 1 Tag, Seefrachtverzögerung +14 Tage → Produktionsstopp sofort"
+
+  - id: consumer_price_inflation
+    name: Verbraucherpreis-Inflation
+    type: market_shock
+    trigger:
+      target: german_consumers
+      condition: "food_supply_delay.active OR chemical_supply_delay.active OR automotive_jit_failure.active"
+    impact:
+      price: "+3%"
+      duration: 270d
+    reference: "Seefrachtkosten-Schock → verzögerte Weitergabe an Verbraucher über 6-9 Monate"
+
+  # Feedback-Events
+  - id: port_labor_stress
+    name: Hafenpersonal-Überlastung und Streikrisiko
+    type: market_shock
+    trigger:
+      target: port_logistics_workers
+      condition: "port_congestion_europe.active"
+    impact:
+      supply: "-10%"
+      duration: 30d
+    causes:
+      - port_congestion_europe
+    reference: "Feedback: Congestion → Überstunden → Streik → mehr Congestion (ver.di 2023)"
+
+  - id: fuel_shortage_feedback
+    name: Treibstoff-Verknappungs-Rückkopplung
+    type: market_shock
+    trigger:
+      target: bunker_fuel_supply
+      condition: "bunker_fuel_demand_spike.active AND bunker_fuel_demand_spike.duration > 30d"
+    impact:
+      supply: "-10%"
+      price: "+20%"
+      duration: 120d
+    causes:
+      - freight_rate_explosion
+    reference: "Feedback: Umleitung → mehr Treibstoff → Treibstoffknappheit → höhere Frachtkosten"
+
+  # Resilienz-Events
+  - id: rail_freight_activated
+    name: China-Europa Bahnfracht hochgefahren
+    type: market_shock
+    substitution_ref: sub_rail_mode
+    trigger:
+      target: china_europe_rail
+      condition: "industrial_supply_delay.active"
+    impact:
+      supply: "-5%"
+      price: "+40%"
+      duration: 180d
+    reference: "~2 Mio. TEU/Jahr, ~8,5% des China-EU-Handelswertes, Transit 12-18 Tage"
+
+  - id: air_freight_surge
+    name: Luftfracht-Ausweichverkehr
+    type: market_shock
+    substitution_ref: sub_air_mode
+    trigger:
+      target: air_freight_capacity
+      condition: "industrial_supply_delay.active"
+    impact:
+      supply: "-10%"
+      price: "+100%"
+      duration: 120d
+    reference: "Nur für hochwertige Güter (Chips, Pharma) wirtschaftlich, Kapazität begrenzt"
+
+  - id: nearshoring_acceleration
+    name: Nearshoring-Beschleunigung
+    type: regulatory
+    substitution_ref: sub_nearshoring
+    trigger:
+      target: nearshoring_initiatives
+      condition: "freight_rate_explosion.active AND freight_rate_explosion.duration > 90d"
+    impact:
+      supply: "+3%"
+      duration: 1095d
+    reference: "Verlagerung nach Osteuropa, Türkei, Nordafrika — strategisch, aber dauert Jahre"
+
+# =============================================================================
+# Cascades
+# =============================================================================
+cascades:
+  # Suez-Blockade / Rotes-Meer-Krise — Hauptkaskade
+  - id: suez_crisis_cascade
+    name: Suez/Rotes-Meer-Krise-Kaskade
+    origin: red_sea_attacks
+    probability: 0.85
+    validation:
+      reference: "Houthi-Krise Rotes Meer 2024, Ever Given 2021"
+      confidence: 0.9
+    timeline:
+      - at: 0d
+        event: red_sea_attacks
+        impact:
+          sector: logistics
+          severity: critical
+        affects:
+          - suez_canal
+      - at: 3d
+        event: insurance_premium_surge
+        impact:
+          sector: finance
+          severity: high
+        affects:
+          - marine_insurance
+      - at: 3d
+        event: cape_rerouting
+        impact:
+          sector: logistics
+          severity: high
+        affects:
+          - cape_good_hope_route
+          - global_container_fleet
+      - at: 7d
+        event: freight_rate_explosion
+        impact:
+          sector: logistics
+          severity: critical
+        affects:
+          - global_container_fleet
+      - at: 7d
+        event: bunker_fuel_demand_spike
+        impact:
+          sector: energy
+          severity: medium
+        affects:
+          - bunker_fuel_supply
+      - at: 14d
+        event: transit_time_increase
+        impact:
+          sector: logistics
+          severity: high
+        affects:
+          - global_container_fleet
+      - at: 21d
+        event: container_shortage
+        impact:
+          sector: logistics
+          severity: high
+        affects:
+          - container_availability
+      - at: 28d
+        event: port_congestion_europe
+        impact:
+          sector: logistics
+          severity: high
+        affects:
+          - hamburg_port
+          - rotterdam_port
+      - at: 28d
+        event: energy_supply_disruption
+        impact:
+          sector: energy
+          severity: medium
+        affects:
+          - german_energy_imports
+      - at: 35d
+        event: food_supply_delay
+        impact:
+          sector: agriculture
+          severity: medium
+        affects:
+          - german_food_imports
+      - at: 35d
+        event: industrial_supply_delay
+        impact:
+          sector: industry
+          severity: high
+        affects:
+          - german_industrial_imports
+      - at: 35d
+        event: chemical_supply_delay
+        impact:
+          sector: chemistry
+          severity: high
+        affects:
+          - german_chemical_imports
+      - at: 35d
+        event: rail_freight_activated
+        impact:
+          sector: logistics
+          severity: low
+        affects:
+          - china_europe_rail
+      - at: 35d
+        event: air_freight_surge
+        impact:
+          sector: logistics
+          severity: low
+        affects:
+          - air_freight_capacity
+      - at: 42d
+        event: automotive_jit_failure
+        impact:
+          sector: automotive
+          severity: critical
+        affects:
+          - automotive_jit_supply
+      - at: 42d
+        event: port_labor_stress
+        impact:
+          sector: logistics
+          severity: medium
+        affects:
+          - port_logistics_workers
+      - at: 45d
+        event: fuel_shortage_feedback
+        impact:
+          sector: energy
+          severity: medium
+        affects:
+          - bunker_fuel_supply
+      - at: 60d
+        event: consumer_price_inflation
+        impact:
+          sector: retail
+          severity: medium
+        affects:
+          - german_consumers
+      - at: 120d
+        event: nearshoring_acceleration
+        impact:
+          sector: industry
+          severity: low
+        affects:
+          - nearshoring_initiatives
+
+  # Panamakanal-Dürre-Kaskade (milder, andere Handelsrouten betroffen)
+  - id: panama_drought_cascade
+    name: Panamakanal-Dürre-Kaskade
+    origin: panama_drought
+    probability: 0.75
+    validation:
+      reference: "Panamakanal-Dürre 2023-2024, El Niño-Auswirkungen"
+      confidence: 0.85
+    timeline:
+      - at: 0d
+        event: panama_drought
+        impact:
+          sector: logistics
+          severity: high
+        affects:
+          - panama_canal
+      - at: 7d
+        event: transit_time_increase
+        impact:
+          sector: logistics
+          severity: medium
+        affects:
+          - global_container_fleet
+      - at: 7d
+        event: freight_rate_explosion
+        impact:
+          sector: logistics
+          severity: medium
+        affects:
+          - global_container_fleet
+      - at: 21d
+        event: container_shortage
+        impact:
+          sector: logistics
+          severity: medium
+        affects:
+          - container_availability
+      - at: 35d
+        event: food_supply_delay
+        impact:
+          sector: agriculture
+          severity: medium
+        affects:
+          - german_food_imports
+      - at: 35d
+        event: chemical_supply_delay
+        impact:
+          sector: chemistry
+          severity: medium
+        affects:
+          - german_chemical_imports
+      - at: 42d
+        event: port_congestion_europe
+        impact:
+          sector: logistics
+          severity: medium
+        affects:
+          - hamburg_port
+          - rotterdam_port
+      - at: 60d
+        event: consumer_price_inflation
+        impact:
+          sector: retail
+          severity: low
+        affects:
+          - german_consumers
+
+  # Worst-Case: Suez + Malakka + Panama gleichzeitig
+  - id: compound_shipping_crisis
+    name: Kombinierte globale Seefrachtkrise
+    origin: red_sea_attacks
+    probability: 0.1
+    validation:
+      reference: "Hypothetisch: Suez/Rotes Meer + Malakka-Krise + Panama-Dürre gleichzeitig"
+      confidence: 0.3
+    timeline:
+      - at: 0d
+        event: red_sea_attacks
+        impact:
+          sector: logistics
+          severity: critical
+        affects:
+          - suez_canal
+      - at: 0d
+        event: malacca_strait_crisis
+        impact:
+          sector: logistics
+          severity: critical
+        affects:
+          - strait_of_malacca
+      - at: 0d
+        event: panama_drought
+        impact:
+          sector: logistics
+          severity: high
+        affects:
+          - panama_canal
+      - at: 1d
+        event: insurance_premium_surge
+        impact:
+          sector: finance
+          severity: critical
+        affects:
+          - marine_insurance
+      - at: 1d
+        event: cape_rerouting
+        impact:
+          sector: logistics
+          severity: critical
+        affects:
+          - cape_good_hope_route
+      - at: 3d
+        event: freight_rate_explosion
+        impact:
+          sector: logistics
+          severity: critical
+        affects:
+          - global_container_fleet
+      - at: 3d
+        event: bunker_fuel_demand_spike
+        impact:
+          sector: energy
+          severity: high
+        affects:
+          - bunker_fuel_supply
+      - at: 7d
+        event: transit_time_increase
+        impact:
+          sector: logistics
+          severity: critical
+        affects:
+          - global_container_fleet
+      - at: 7d
+        event: energy_supply_disruption
+        impact:
+          sector: energy
+          severity: critical
+        affects:
+          - german_energy_imports
+      - at: 10d
+        event: container_shortage
+        impact:
+          sector: logistics
+          severity: critical
+        affects:
+          - container_availability
+      - at: 14d
+        event: port_congestion_europe
+        impact:
+          sector: logistics
+          severity: critical
+        affects:
+          - hamburg_port
+          - rotterdam_port
+      - at: 14d
+        event: rail_freight_activated
+        impact:
+          sector: logistics
+          severity: low
+        affects:
+          - china_europe_rail
+      - at: 14d
+        event: air_freight_surge
+        impact:
+          sector: logistics
+          severity: medium
+        affects:
+          - air_freight_capacity
+      - at: 21d
+        event: food_supply_delay
+        impact:
+          sector: agriculture
+          severity: critical
+        affects:
+          - german_food_imports
+      - at: 21d
+        event: industrial_supply_delay
+        impact:
+          sector: industry
+          severity: critical
+        affects:
+          - german_industrial_imports
+      - at: 21d
+        event: chemical_supply_delay
+        impact:
+          sector: chemistry
+          severity: critical
+        affects:
+          - german_chemical_imports
+      - at: 25d
+        event: automotive_jit_failure
+        impact:
+          sector: automotive
+          severity: critical
+        affects:
+          - automotive_jit_supply
+      - at: 25d
+        event: port_labor_stress
+        impact:
+          sector: logistics
+          severity: high
+        affects:
+          - port_logistics_workers
+      - at: 30d
+        event: fuel_shortage_feedback
+        impact:
+          sector: energy
+          severity: high
+        affects:
+          - bunker_fuel_supply
+      - at: 45d
+        event: consumer_price_inflation
+        impact:
+          sector: retail
+          severity: high
+        affects:
+          - german_consumers
+      - at: 90d
+        event: nearshoring_acceleration
+        impact:
+          sector: industry
+          severity: low
+        affects:
+          - nearshoring_initiatives

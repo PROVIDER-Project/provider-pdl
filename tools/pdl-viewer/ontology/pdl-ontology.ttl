@@ -1,0 +1,1160 @@
+# =============================================================================
+# PDL Ontology - PROVIDER Domain Language
+# =============================================================================
+# A semantic model for supply chain disruption scenarios that extends
+# and re-uses the CoyPu ontology (https://schema.coypu.org/global/2.3)
+#
+# Version: 1.1
+# Created: 2026-02-04
+# License: CC BY 4.0
+# =============================================================================
+
+@prefix pdl:     <https://provider-project.org/ontology/pdl#> .
+@prefix pdlr:    <https://provider-project.org/resource/> .
+@prefix coy:     <https://schema.coypu.org/global#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix geo:     <http://www.w3.org/2003/01/geo/wgs84_pos#> .
+@prefix gn:      <http://www.geonames.org/ontology#> .
+
+# =============================================================================
+# Ontology Metadata
+# =============================================================================
+
+<https://provider-project.org/ontology/pdl> a owl:Ontology ;
+    owl:versionInfo "1.2" ;
+    dcterms:title "PROVIDER Domain Language (PDL) Ontology"@en ;
+    dcterms:description "A semantic model for supply chain disruption scenarios. PDL extends the CoyPu ontology to enable modeling of entities, supply chains, disruption events, cascade effects, and substitution mechanisms for simulation and analysis."@en ;
+    dcterms:creator "PROVIDER Project" ;
+    dcterms:created "2026-02-04"^^xsd:date ;
+    dcterms:modified "2026-02-23"^^xsd:date ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    owl:imports <https://schema.coypu.org/global/2.3> ;
+    rdfs:seeAlso <https://schema.coypu.org/global/2.3> ;
+    skos:changeNote "v1.1: Added Substitution module (classes, properties, enumerations) derived from empirical analysis of 9 PROVIDER supply chain scenarios."@en .
+
+
+# =============================================================================
+# PART 1: CLASSES
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 1.1 Scenario (PDL-specific)
+# -----------------------------------------------------------------------------
+
+pdl:Scenario a owl:Class ;
+    rdfs:label "Scenario"@en ;
+    rdfs:comment "A container for modeling supply chain disruption scenarios. Contains entities, supply chains, events, and cascade effects."@en ;
+    skos:definition "A scenario represents a complete disruption model including all actors, relationships, potential events, and their cascade effects over time."@en .
+
+
+# -----------------------------------------------------------------------------
+# 1.2 Entity Types (mapped to CoyPu where possible)
+# -----------------------------------------------------------------------------
+
+pdl:Entity a owl:Class ;
+    rdfs:label "Entity"@en ;
+    rdfs:comment "Base class for all network nodes in a supply chain scenario: actors, resources, and infrastructure."@en ;
+    skos:definition "An entity is any discrete element that participates in a supply chain, can be affected by disruptions, or serves as a dependency for other entities."@en .
+
+# Manufacturer → subclass of CoyPu Company
+pdl:Manufacturer a owl:Class ;
+    rdfs:subClassOf pdl:Entity, coy:Company ;
+    rdfs:label "Manufacturer"@en ;
+    rdfs:comment "A producing entity such as a factory, mill, or farm. Mapped to coy:Company."@en ;
+    owl:equivalentClass [
+        a owl:Restriction ;
+        owl:onProperty pdl:entityType ;
+        owl:hasValue "manufacturer"
+    ] .
+
+# Commodity → subclass of CoyPu Commodity
+pdl:Commodity a owl:Class ;
+    rdfs:subClassOf pdl:Entity, coy:Commodity ;
+    rdfs:label "Commodity"@en ;
+    rdfs:comment "A tradeable resource or raw material. Mapped to coy:Commodity."@en ;
+    owl:equivalentClass [
+        a owl:Restriction ;
+        owl:onProperty pdl:entityType ;
+        owl:hasValue "commodity"
+    ] .
+
+# Infrastructure → subclass of CoyPu Infrastructure
+pdl:Infrastructure a owl:Class ;
+    rdfs:subClassOf pdl:Entity, coy:Infrastructure ;
+    rdfs:label "Infrastructure"@en ;
+    rdfs:comment "Physical infrastructure such as ports, pipelines, or terminals. Mapped to coy:Infrastructure."@en ;
+    owl:equivalentClass [
+        a owl:Restriction ;
+        owl:onProperty pdl:entityType ;
+        owl:hasValue "infrastructure"
+    ] .
+
+# Service → PDL-specific (no direct CoyPu equivalent)
+pdl:Service a owl:Class ;
+    rdfs:subClassOf pdl:Entity ;
+    rdfs:label "Service"@en ;
+    rdfs:comment "A service provider such as logistics, financial services, or data services."@en ;
+    owl:equivalentClass [
+        a owl:Restriction ;
+        owl:onProperty pdl:entityType ;
+        owl:hasValue "service"
+    ] .
+
+# Region → subclass of CoyPu Region
+pdl:Region a owl:Class ;
+    rdfs:subClassOf pdl:Entity, coy:Region ;
+    rdfs:label "Region"@en ;
+    rdfs:comment "A geographic region representing production or consumption areas. Mapped to coy:Region."@en ;
+    owl:equivalentClass [
+        a owl:Restriction ;
+        owl:onProperty pdl:entityType ;
+        owl:hasValue "region"
+    ] .
+
+
+# -----------------------------------------------------------------------------
+# 1.3 Supply Chain Classes (PDL-specific)
+# -----------------------------------------------------------------------------
+
+pdl:SupplyChain a owl:Class ;
+    rdfs:label "Supply Chain"@en ;
+    rdfs:comment "A value chain connecting entities through sequential stages and cross-dependencies."@en ;
+    skos:definition "A supply chain represents the flow of goods or services from source to destination, including all intermediate processing steps and external dependencies."@en ;
+    skos:note "CoyPu models supplier/customer relationships directly via coy:hasSupplier/coy:hasCustomer. PDL adds explicit supply chain objects for scenario modeling."@en .
+
+pdl:SupplyChainConnection a owl:Class ;
+    rdfs:label "Supply Chain Connection"@en ;
+    rdfs:comment "A single stage in a supply chain, representing flow from one entity to another."@en ;
+    skos:definition "A connection is a directed edge in the supply chain graph, with a sequence number indicating its position in the chain."@en .
+
+pdl:Dependency a owl:Class ;
+    rdfs:label "Dependency"@en ;
+    rdfs:comment "A cross-dependency between entities outside the main supply chain flow."@en ;
+    skos:definition "Dependencies represent non-supply relationships such as energy requirements, data dependencies, or logistics services that are critical to entity operations."@en .
+
+
+# -----------------------------------------------------------------------------
+# 1.4 Event Classes (mapped to CoyPu where possible)
+# -----------------------------------------------------------------------------
+
+pdl:Event a owl:Class ;
+    rdfs:label "Event"@en ;
+    rdfs:comment "A disruption event that affects supply chain entities."@en ;
+    rdfs:subClassOf coy:Event ;
+    skos:definition "An event is a discrete occurrence that impacts one or more entities, with quantifiable effects on supply, demand, or price."@en .
+
+# Event type subclasses
+pdl:Event_NaturalDisaster a owl:Class ;
+    rdfs:subClassOf pdl:Event, coy:Disaster ;
+    rdfs:label "Natural Disaster Event"@en ;
+    rdfs:comment "Events caused by natural phenomena: droughts, floods, earthquakes, storms. Mapped to coy:Disaster."@en .
+
+pdl:Event_MarketShock a owl:Class ;
+    rdfs:subClassOf pdl:Event ;
+    rdfs:label "Market Shock Event"@en ;
+    rdfs:comment "Events caused by market dynamics: price spikes, demand surges, supply shortages."@en .
+
+pdl:Event_InfrastructureFailure a owl:Class ;
+    rdfs:subClassOf pdl:Event ;
+    rdfs:label "Infrastructure Failure Event"@en ;
+    rdfs:comment "Events caused by infrastructure problems: equipment failure, capacity issues, maintenance."@en .
+
+pdl:Event_Regulatory a owl:Class ;
+    rdfs:subClassOf pdl:Event ;
+    rdfs:label "Regulatory Event"@en ;
+    rdfs:comment "Events caused by regulatory changes: new laws, trade restrictions, compliance requirements."@en .
+
+pdl:Event_Geopolitical a owl:Class ;
+    rdfs:subClassOf pdl:Event, coy:SocioPoliticalEvent ;
+    rdfs:label "Geopolitical Event"@en ;
+    rdfs:comment "Events caused by political factors: conflicts, sanctions, diplomatic tensions. Mapped to coy:SocioPoliticalEvent."@en .
+
+pdl:Event_Pandemic a owl:Class ;
+    rdfs:subClassOf pdl:Event ;
+    rdfs:label "Pandemic Event"@en ;
+    rdfs:comment "Events caused by disease outbreaks affecting workforce, logistics, or demand."@en .
+
+pdl:Event_CyberAttack a owl:Class ;
+    rdfs:subClassOf pdl:Event ;
+    rdfs:label "Cyber Attack Event"@en ;
+    rdfs:comment "Events caused by cyber security incidents: ransomware, data breaches, system failures."@en .
+
+
+# -----------------------------------------------------------------------------
+# 1.5 Cascade Classes (PDL-specific)
+# -----------------------------------------------------------------------------
+
+pdl:Cascade a owl:Class ;
+    rdfs:label "Cascade"@en ;
+    rdfs:comment "A sequence of events triggered by an origin event, unfolding over time."@en ;
+    skos:definition "A cascade models the propagation of disruption effects through the supply chain network, with a timeline showing when each subsequent event occurs."@en .
+
+pdl:TimelineEntry a owl:Class ;
+    rdfs:label "Timeline Entry"@en ;
+    rdfs:comment "A single point in a cascade timeline, linking an event to a time offset and affected entities."@en ;
+    skos:definition "A timeline entry specifies when an event occurs relative to the cascade origin, its severity, and which entities are affected at that point."@en .
+
+
+# -----------------------------------------------------------------------------
+# 1.6 Enumeration Classes
+# -----------------------------------------------------------------------------
+
+pdl:Criticality a owl:Class ;
+    rdfs:label "Criticality Level"@en ;
+    rdfs:comment "Enumeration of criticality levels for scenarios and dependencies."@en .
+
+pdl:Criticality_high a pdl:Criticality ;
+    rdfs:label "High Criticality"@en .
+
+pdl:Criticality_medium a pdl:Criticality ;
+    rdfs:label "Medium Criticality"@en .
+
+pdl:Criticality_low a pdl:Criticality ;
+    rdfs:label "Low Criticality"@en .
+
+
+pdl:Severity a owl:Class ;
+    rdfs:label "Severity Level"@en ;
+    rdfs:comment "Enumeration of impact severity levels for events and timeline entries."@en .
+
+pdl:Severity_critical a pdl:Severity ;
+    rdfs:label "Critical Severity"@en .
+
+pdl:Severity_high a pdl:Severity ;
+    rdfs:label "High Severity"@en .
+
+pdl:Severity_medium a pdl:Severity ;
+    rdfs:label "Medium Severity"@en .
+
+pdl:Severity_low a pdl:Severity ;
+    rdfs:label "Low Severity"@en .
+
+
+pdl:DependencyType a owl:Class ;
+    rdfs:label "Dependency Type"@en ;
+    rdfs:comment "Classification of dependency relationships between entities."@en .
+
+pdl:DependencyType_energy a pdl:DependencyType ;
+    rdfs:label "Energy Dependency"@en ;
+    rdfs:comment "Dependency on energy supply (electricity, gas, fuel)."@en .
+
+pdl:DependencyType_input a pdl:DependencyType ;
+    rdfs:label "Input Dependency"@en ;
+    rdfs:comment "Dependency on raw materials or intermediate products."@en .
+
+pdl:DependencyType_logistics a pdl:DependencyType ;
+    rdfs:label "Logistics Dependency"@en ;
+    rdfs:comment "Dependency on transportation and logistics services."@en .
+
+pdl:DependencyType_data a pdl:DependencyType ;
+    rdfs:label "Data Dependency"@en ;
+    rdfs:comment "Dependency on data services or IT infrastructure."@en .
+
+pdl:DependencyType_substitution a pdl:DependencyType ;
+    rdfs:label "Substitution Dependency"@en ;
+    rdfs:comment "Dependency representing a substitution relationship: the source can replace the target under defined conditions."@en .
+
+pdl:DependencyType_demand a pdl:DependencyType ;
+    rdfs:label "Demand Dependency"@en ;
+    rdfs:comment "Dependency representing a demand-side relationship (e.g., consumer pulls from retailer)."@en .
+
+
+# -----------------------------------------------------------------------------
+# 1.7 Substitution Classes (PDL v1.1 Extension)
+# -----------------------------------------------------------------------------
+
+pdl:Substitution a owl:Class ;
+    rdfs:label "Substitution"@en ;
+    rdfs:comment "A formally modeled substitution option in a supply chain. Specifies what replaces what, under which conditions, with what coverage and side effects."@en ;
+    skos:definition "A Substitution captures the transition from an original supply source (entity, route, product, or technology) to an alternative, including quantitative parameters and activation conditions. Derived from empirical analysis of 9 PROVIDER disruption scenarios."@en ;
+    skos:note "Substitutions are the primary resilience mechanism in supply chains. They are often partial (coverage < 1.0), delayed (ramp_up > 0), and may introduce new risks (side effects, dependency_overlap)."@en .
+
+pdl:SubstitutionType a owl:Class ;
+    rdfs:label "Substitution Type"@en ;
+    rdfs:comment "Enumeration of substitution mechanism categories identified across PROVIDER scenarios."@en .
+
+pdl:SubstitutionType_product a pdl:SubstitutionType ;
+    rdfs:label "Product Substitution"@en ;
+    rdfs:comment "Replacing one product/commodity with a functionally equivalent alternative (e.g., rapeseed meal for soy meal, ampicillin for amoxicillin)."@en ;
+    skos:example "S1 Soja: Rapsschrot statt Sojaschrot; S3 Pharma: Ampicillin statt Amoxicillin"@de .
+
+pdl:SubstitutionType_supplier a pdl:SubstitutionType ;
+    rdfs:label "Supplier Substitution"@en ;
+    rdfs:comment "Replacing one supplier with an alternative supplier for the same product. Risk of correlated_risk if suppliers share upstream dependencies."@en ;
+    skos:example "S1: Argentinien/USA statt Brasilien; S2: Samsung/UMC statt TSMC; S7: Lynas statt China"@de .
+
+pdl:SubstitutionType_route a pdl:SubstitutionType ;
+    rdfs:label "Route Substitution"@en ;
+    rdfs:comment "Replacing one transport route with an alternative path. Typically involves increased cost and transit time."@en ;
+    skos:example "S1: Paranaguá statt Santos; S8: Kap der Guten Hoffnung statt Suez; S9: Landroute statt Unterwasserkabel"@de .
+
+pdl:SubstitutionType_technology a pdl:SubstitutionType ;
+    rdfs:label "Technology Substitution"@en ;
+    rdfs:comment "Replacing one technology or process with an alternative. Often involves quality_delta (efficiency loss) and long ramp_up."@en ;
+    skos:example "S5: UV/Ozon statt Chlor-Desinfektion; S7: Ferrit-Magnete statt NdFeB-Magnete"@de .
+
+pdl:SubstitutionType_buffer a pdl:SubstitutionType ;
+    rdfs:label "Buffer Substitution"@en ;
+    rdfs:comment "Temporary use of reserves or fallback capacity. Limited by duration_max; non-renewable in the short term."@en ;
+    skos:example "S1: Strategische Futtermittellager (45d); S6: CDN Edge Cache (12h); S7: Recycling-Infrastruktur"@de .
+
+pdl:SubstitutionType_mode a pdl:SubstitutionType ;
+    rdfs:label "Transport Mode Substitution"@en ;
+    rdfs:comment "Switching from one transport mode to another (sea/rail/air/road). Cost and capacity differ significantly."@en ;
+    skos:example "S8: Bahnfracht statt Seefracht (8,5% Volumen, +40% Kosten); S9: Satellit statt Kabel (<1% Kapazität)"@de .
+
+
+pdl:SubstitutionDirection a owl:Class ;
+    rdfs:label "Substitution Direction"@en ;
+    rdfs:comment "Indicates whether a substitution acts on the supply side or demand side of the market."@en .
+
+pdl:SubstitutionDirection_supply a pdl:SubstitutionDirection ;
+    rdfs:label "Supply-side Substitution"@en ;
+    rdfs:comment "The substitution replaces a supply source (default for most substitution types)."@en .
+
+pdl:SubstitutionDirection_demand a pdl:SubstitutionDirection ;
+    rdfs:label "Demand-side Substitution"@en ;
+    rdfs:comment "The substitution acts on the demand side: consumers shift to alternatives, reducing demand for the original product."@en ;
+    skos:example "S1: Verbraucher wechseln zu pflanzlichen Produkten (-8% Fleischnachfrage)"@de .
+
+
+pdl:SubstitutionSideEffect a owl:Class ;
+    rdfs:label "Substitution Side Effect"@en ;
+    rdfs:comment "A secondary consequence of activating a substitution, which may create new risks or cascade effects."@en ;
+    skos:definition "Side effects represent unintended consequences of substitution activation. A substitution that appears to reduce risk may simultaneously create new vulnerabilities through shared upstream dependencies (pseudo-diversification), market pressure, or technical performance loss."@en .
+
+pdl:SideEffectType a owl:Class ;
+    rdfs:label "Side Effect Type"@en ;
+    rdfs:comment "Enumeration of side effect categories observed in PROVIDER scenarios."@en .
+
+pdl:SideEffectType_price_pressure a pdl:SideEffectType ;
+    rdfs:label "Price Pressure"@en ;
+    rdfs:comment "Activation of substitution increases demand for the substitute, driving up its price."@en ;
+    skos:example "S1: Mehrnachfrage nach Rapsschrot treibt dessen Preis (+20%)"@de .
+
+pdl:SideEffectType_quality_loss a pdl:SideEffectType ;
+    rdfs:label "Quality Loss"@en ;
+    rdfs:comment "The substitute provides lower quality or performance than the original."@en ;
+    skos:example "S1: Rapsschrot hat ~12% geringeren Proteingehalt als Sojaschrot"@de .
+
+pdl:SideEffectType_correlated_risk a pdl:SideEffectType ;
+    rdfs:label "Correlated Risk (Pseudo-Diversification)"@en ;
+    rdfs:comment "The substitute shares upstream dependencies with the original, meaning a shock can disable both simultaneously. Key risk: apparent diversification that fails under compound crises."@en ;
+    skos:example "S3: Indien-Sourcing ist Pseudo-Alternative, da Indien zu 70% von chinesischen Intermediaten abhängt; S1: Argentinien bei La-Niña-Dürre gleichzeitig betroffen"@de .
+
+pdl:SideEffectType_depletion a pdl:SideEffectType ;
+    rdfs:label "Depletion"@en ;
+    rdfs:comment "Buffer substitutions are exhausted after duration_max and must be replenished, often at higher cost."@en ;
+    skos:example "S1: Futtermittellager nach 45d erschöpft; S6: Mobilfunk-Akkus nach 6h leer"@de .
+
+pdl:SideEffectType_efficiency_loss a pdl:SideEffectType ;
+    rdfs:label "Efficiency Loss"@en ;
+    rdfs:comment "Technology substitutions involve reduced technical efficiency or output performance."@en ;
+    skos:example "S7: Reluktanzmotoren haben 10-20% geringeren Wirkungsgrad als NdFeB-Magnetmotoren"@de .
+
+pdl:SideEffectType_capacity_loss a pdl:SideEffectType ;
+    rdfs:label "Capacity Loss"@en ;
+    rdfs:comment "During ramp-up or transition, available capacity is reduced below the target coverage level."@en ;
+    skos:example "S2: Während Foundry-Umqualifikation nur ~70% der Zielkapazität erreichbar"@de .
+
+pdl:SideEffectType_latency_increase a pdl:SideEffectType ;
+    rdfs:label "Latency Increase"@en ;
+    rdfs:comment "Route or mode substitutions introduce additional time delays (transit time, processing latency)."@en ;
+    skos:example "S6: Cloud-Failover nach Dublin +20-40ms; S9: Terrestrische Route +30-50ms"@de .
+
+pdl:SideEffectType_resistance_risk a pdl:SideEffectType ;
+    rdfs:label "Resistance Risk"@en ;
+    rdfs:comment "Product substitution in pharmaceuticals may promote antimicrobial resistance through cross-resistance or sub-therapeutic dosing."@en ;
+    skos:example "S3: Substitution Ciprofloxacin → Levofloxacin erhöht Kreuzresistenz-Risiko"@de .
+
+
+pdl:ActivationCondition a owl:Class ;
+    rdfs:label "Activation Condition"@en ;
+    rdfs:comment "The conditions under which a substitution is triggered, including event references and quantitative thresholds."@en .
+
+
+# =============================================================================
+# PART 2: OBJECT PROPERTIES
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 2.1 Scenario Relationships
+# -----------------------------------------------------------------------------
+
+pdl:partOfScenario a owl:ObjectProperty ;
+    rdfs:label "part of scenario"@en ;
+    rdfs:comment "Links an entity, supply chain, event, or cascade to its containing scenario."@en ;
+    rdfs:range pdl:Scenario ;
+    owl:inverseOf pdl:hasScenarioElement .
+
+pdl:hasScenarioElement a owl:ObjectProperty ;
+    rdfs:label "has scenario element"@en ;
+    rdfs:comment "Links a scenario to its contained elements."@en ;
+    rdfs:domain pdl:Scenario .
+
+pdl:hasEntity a owl:ObjectProperty ;
+    rdfs:subPropertyOf pdl:hasScenarioElement ;
+    rdfs:label "has entity"@en ;
+    rdfs:comment "Links a scenario to an entity."@en ;
+    rdfs:domain pdl:Scenario ;
+    rdfs:range pdl:Entity .
+
+pdl:hasSupplyChain a owl:ObjectProperty ;
+    rdfs:subPropertyOf pdl:hasScenarioElement ;
+    rdfs:label "has supply chain"@en ;
+    rdfs:comment "Links a scenario to a supply chain."@en ;
+    rdfs:domain pdl:Scenario ;
+    rdfs:range pdl:SupplyChain .
+
+pdl:hasEvent a owl:ObjectProperty ;
+    rdfs:subPropertyOf pdl:hasScenarioElement ;
+    rdfs:label "has event"@en ;
+    rdfs:comment "Links a scenario to an event."@en ;
+    rdfs:domain pdl:Scenario ;
+    rdfs:range pdl:Event .
+
+pdl:hasCascade a owl:ObjectProperty ;
+    rdfs:subPropertyOf pdl:hasScenarioElement ;
+    rdfs:label "has cascade"@en ;
+    rdfs:comment "Links a scenario to a cascade."@en ;
+    rdfs:domain pdl:Scenario ;
+    rdfs:range pdl:Cascade .
+
+
+# -----------------------------------------------------------------------------
+# 2.2 Supply Chain Relationships
+# -----------------------------------------------------------------------------
+
+pdl:belongsToChain a owl:ObjectProperty ;
+    rdfs:label "belongs to chain"@en ;
+    rdfs:comment "Links a connection or dependency to its supply chain."@en ;
+    rdfs:domain [ owl:unionOf (pdl:SupplyChainConnection pdl:Dependency) ] ;
+    rdfs:range pdl:SupplyChain .
+
+pdl:fromEntity a owl:ObjectProperty ;
+    rdfs:label "from entity"@en ;
+    rdfs:comment "The source entity of a connection or dependency."@en ;
+    rdfs:domain [ owl:unionOf (pdl:SupplyChainConnection pdl:Dependency) ] ;
+    rdfs:range pdl:Entity ;
+    rdfs:subPropertyOf coy:hasSupplier ;
+    skos:note "Maps to CoyPu's supplier relationship for interoperability."@en .
+
+pdl:toEntity a owl:ObjectProperty ;
+    rdfs:label "to entity"@en ;
+    rdfs:comment "The target entity of a connection or dependency."@en ;
+    rdfs:domain [ owl:unionOf (pdl:SupplyChainConnection pdl:Dependency) ] ;
+    rdfs:range pdl:Entity ;
+    rdfs:subPropertyOf coy:hasCustomer ;
+    skos:note "Maps to CoyPu's customer relationship for interoperability."@en .
+
+pdl:hasDependency a owl:ObjectProperty ;
+    rdfs:label "has dependency"@en ;
+    rdfs:comment "Links an entity to a dependency relationship."@en ;
+    rdfs:domain pdl:Entity ;
+    rdfs:range pdl:Dependency .
+
+pdl:dependsOn a owl:ObjectProperty ;
+    rdfs:label "depends on"@en ;
+    rdfs:comment "Direct link from one entity to another it depends on."@en ;
+    rdfs:domain pdl:Entity ;
+    rdfs:range pdl:Entity .
+
+
+# -----------------------------------------------------------------------------
+# 2.3 Event Relationships
+# -----------------------------------------------------------------------------
+
+pdl:triggers a owl:ObjectProperty ;
+    rdfs:label "triggers"@en ;
+    rdfs:comment "Links an event to the entity it directly affects."@en ;
+    rdfs:domain pdl:Event ;
+    rdfs:range pdl:Entity ;
+    rdfs:subPropertyOf coy:hasImpactOn ;
+    skos:note "Uses CoyPu's impact relationship as base."@en .
+
+pdl:triggerTarget a owl:ObjectProperty ;
+    owl:equivalentProperty pdl:triggers ;
+    rdfs:label "trigger target"@en ;
+    rdfs:comment "Alias for triggers, matching PDL YAML syntax."@en .
+
+pdl:causes a owl:ObjectProperty ;
+    rdfs:label "causes"@en ;
+    rdfs:comment "Links an event to other events it triggers (causal chain)."@en ;
+    rdfs:domain pdl:Event ;
+    rdfs:range pdl:Event ;
+    owl:inverseOf pdl:causedBy .
+
+pdl:causedBy a owl:ObjectProperty ;
+    rdfs:label "caused by"@en ;
+    rdfs:comment "Links an event to the event that caused it."@en ;
+    rdfs:domain pdl:Event ;
+    rdfs:range pdl:Event .
+
+pdl:isImpactedBy a owl:ObjectProperty ;
+    rdfs:label "is impacted by"@en ;
+    rdfs:comment "Links an entity to events that affect it."@en ;
+    rdfs:domain pdl:Entity ;
+    rdfs:range pdl:Event ;
+    owl:equivalentProperty coy:isImpactedBy .
+
+
+# -----------------------------------------------------------------------------
+# 2.4 Cascade Relationships
+# -----------------------------------------------------------------------------
+
+pdl:originEvent a owl:ObjectProperty ;
+    rdfs:label "origin event"@en ;
+    rdfs:comment "The event that initiates a cascade."@en ;
+    rdfs:domain pdl:Cascade ;
+    rdfs:range pdl:Event .
+
+pdl:hasTimelineEntry a owl:ObjectProperty ;
+    rdfs:label "has timeline entry"@en ;
+    rdfs:comment "Links a cascade to its timeline entries."@en ;
+    rdfs:domain pdl:Cascade ;
+    rdfs:range pdl:TimelineEntry ;
+    owl:inverseOf pdl:belongsToCascade .
+
+pdl:belongsToCascade a owl:ObjectProperty ;
+    rdfs:label "belongs to cascade"@en ;
+    rdfs:comment "Links a timeline entry to its cascade."@en ;
+    rdfs:domain pdl:TimelineEntry ;
+    rdfs:range pdl:Cascade .
+
+pdl:timelineEvent a owl:ObjectProperty ;
+    rdfs:label "timeline event"@en ;
+    rdfs:comment "Links a timeline entry to its associated event."@en ;
+    rdfs:domain pdl:TimelineEntry ;
+    rdfs:range pdl:Event .
+
+pdl:affects a owl:ObjectProperty ;
+    rdfs:label "affects"@en ;
+    rdfs:comment "Links a timeline entry to entities affected at that point."@en ;
+    rdfs:domain pdl:TimelineEntry ;
+    rdfs:range pdl:Entity ;
+    rdfs:subPropertyOf coy:hasImpactOn .
+
+
+# -----------------------------------------------------------------------------
+# 2.5 Location Relationships (re-using CoyPu)
+# -----------------------------------------------------------------------------
+
+pdl:hasLocation a owl:ObjectProperty ;
+    rdfs:label "has location"@en ;
+    rdfs:comment "Links an entity to its geographic location."@en ;
+    rdfs:domain pdl:Entity ;
+    rdfs:range coy:Location ;
+    owl:equivalentProperty coy:hasLocation .
+
+pdl:hasCountryLocation a owl:ObjectProperty ;
+    rdfs:subPropertyOf pdl:hasLocation ;
+    rdfs:label "has country location"@en ;
+    rdfs:comment "Links an entity to its country."@en ;
+    rdfs:domain pdl:Entity ;
+    rdfs:range coy:Country ;
+    owl:equivalentProperty coy:hasCountryLocation .
+
+
+# -----------------------------------------------------------------------------
+# 2.6 Criticality and Severity
+# -----------------------------------------------------------------------------
+
+pdl:criticality a owl:ObjectProperty ;
+    rdfs:label "criticality"@en ;
+    rdfs:comment "The criticality level of a scenario, dependency, or entity."@en ;
+    rdfs:range pdl:Criticality .
+
+pdl:impactSeverity a owl:ObjectProperty ;
+    rdfs:label "impact severity"@en ;
+    rdfs:comment "The severity level of an impact or timeline entry."@en ;
+    rdfs:domain pdl:TimelineEntry ;
+    rdfs:range pdl:Severity .
+
+pdl:dependencyTypeRef a owl:ObjectProperty ;
+    rdfs:label "dependency type reference"@en ;
+    rdfs:comment "Links a dependency to its type classification."@en ;
+    rdfs:domain pdl:Dependency ;
+    rdfs:range pdl:DependencyType .
+
+
+# =============================================================================
+# PART 3: DATATYPE PROPERTIES
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 3.1 Identifiers (re-using dcterms where appropriate)
+# -----------------------------------------------------------------------------
+
+pdl:pdlVersion a owl:DatatypeProperty ;
+    rdfs:label "PDL version"@en ;
+    rdfs:comment "The PDL specification version used for this scenario."@en ;
+    rdfs:domain pdl:Scenario ;
+    rdfs:range xsd:string .
+
+pdl:entityType a owl:DatatypeProperty ;
+    rdfs:label "entity type"@en ;
+    rdfs:comment "The type classification of an entity (manufacturer, commodity, infrastructure, service, region)."@en ;
+    rdfs:domain pdl:Entity ;
+    rdfs:range xsd:string .
+
+pdl:eventType a owl:DatatypeProperty ;
+    rdfs:label "event type"@en ;
+    rdfs:comment "The type classification of an event (natural_disaster, market_shock, etc.)."@en ;
+    rdfs:domain pdl:Event ;
+    rdfs:range xsd:string .
+
+
+# -----------------------------------------------------------------------------
+# 3.2 Quantitative Measures
+# -----------------------------------------------------------------------------
+
+pdl:vulnerability a owl:DatatypeProperty ;
+    rdfs:label "vulnerability"@en ;
+    rdfs:comment "Vulnerability score of an entity (0.0 = resilient, 1.0 = highly vulnerable)."@en ;
+    rdfs:domain pdl:Entity ;
+    rdfs:range xsd:decimal ;
+    skos:note "Similar to CoyPu's risk properties (hasVulnerability, hasSusceptibility) but specific to supply chain simulation."@en .
+
+pdl:probability a owl:DatatypeProperty ;
+    rdfs:label "probability"@en ;
+    rdfs:comment "Probability of occurrence (0.0 to 1.0)."@en ;
+    rdfs:range xsd:decimal .
+
+pdl:triggerProbability a owl:DatatypeProperty ;
+    rdfs:subPropertyOf pdl:probability ;
+    rdfs:label "trigger probability"@en ;
+    rdfs:comment "Probability of an event being triggered (0.0 to 1.0)."@en ;
+    rdfs:domain pdl:Event ;
+    rdfs:range xsd:decimal .
+
+pdl:validationConfidence a owl:DatatypeProperty ;
+    rdfs:subPropertyOf pdl:probability ;
+    rdfs:label "validation confidence"@en ;
+    rdfs:comment "Confidence level in cascade validation (0.0 to 1.0)."@en ;
+    rdfs:domain pdl:Cascade ;
+    rdfs:range xsd:decimal .
+
+
+# -----------------------------------------------------------------------------
+# 3.3 Impact Quantification (PDL-specific)
+# -----------------------------------------------------------------------------
+
+pdl:impactSupply a owl:DatatypeProperty ;
+    rdfs:label "supply impact"@en ;
+    rdfs:comment "Impact on supply as percentage (e.g., '-40%' for 40% reduction)."@en ;
+    rdfs:domain pdl:Event ;
+    rdfs:range xsd:string ;
+    skos:note "Stored as string to preserve sign and percentage format from PDL YAML."@en .
+
+pdl:impactDemand a owl:DatatypeProperty ;
+    rdfs:label "demand impact"@en ;
+    rdfs:comment "Impact on demand as percentage (e.g., '+40%' for 40% increase)."@en ;
+    rdfs:domain pdl:Event ;
+    rdfs:range xsd:string .
+
+pdl:impactPrice a owl:DatatypeProperty ;
+    rdfs:label "price impact"@en ;
+    rdfs:comment "Impact on price as percentage (e.g., '+60%' for 60% price increase)."@en ;
+    rdfs:domain pdl:Event ;
+    rdfs:range xsd:string .
+
+pdl:impactDuration a owl:DatatypeProperty ;
+    rdfs:label "impact duration"@en ;
+    rdfs:comment "Duration of impact (e.g., '90d' for 90 days, '6m' for 6 months)."@en ;
+    rdfs:domain pdl:Event ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf coy:hasTimespan ;
+    skos:note "Uses PDL duration format: number + unit (d=days, h=hours, w=weeks, m=months, y=years)."@en .
+
+
+# -----------------------------------------------------------------------------
+# 3.4 Temporal Properties
+# -----------------------------------------------------------------------------
+
+pdl:atTime a owl:DatatypeProperty ;
+    rdfs:label "at time"@en ;
+    rdfs:comment "Time offset from cascade origin for a timeline entry (e.g., '14d')."@en ;
+    rdfs:domain pdl:TimelineEntry ;
+    rdfs:range xsd:string .
+
+pdl:sequence a owl:DatatypeProperty ;
+    rdfs:label "sequence"@en ;
+    rdfs:comment "Sequence number indicating order in a chain or timeline."@en ;
+    rdfs:domain [ owl:unionOf (pdl:SupplyChainConnection pdl:TimelineEntry) ] ;
+    rdfs:range xsd:integer .
+
+
+# -----------------------------------------------------------------------------
+# 3.5 Sector and Location (string-based)
+# -----------------------------------------------------------------------------
+
+pdl:sector a owl:DatatypeProperty ;
+    rdfs:label "sector"@en ;
+    rdfs:comment "Business or industry sector (e.g., 'agriculture', 'logistics', 'energy')."@en ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf coy:hasIndustry ;
+    skos:note "String-based for flexibility; can be linked to coy:Industry instances."@en .
+
+pdl:impactSector a owl:DatatypeProperty ;
+    rdfs:subPropertyOf pdl:sector ;
+    rdfs:label "impact sector"@en ;
+    rdfs:comment "The sector affected by a timeline entry."@en ;
+    rdfs:domain pdl:TimelineEntry ;
+    rdfs:range xsd:string .
+
+pdl:location a owl:DatatypeProperty ;
+    rdfs:label "location"@en ;
+    rdfs:comment "Geographic location as string (e.g., 'Brazil', 'EU', 'Germany')."@en ;
+    rdfs:domain pdl:Entity ;
+    rdfs:range xsd:string ;
+    skos:note "String-based for flexibility; use pdl:hasLocation for typed location references."@en .
+
+
+# -----------------------------------------------------------------------------
+# 3.6 Dependency Properties
+# -----------------------------------------------------------------------------
+
+pdl:dependencyType a owl:DatatypeProperty ;
+    rdfs:label "dependency type"@en ;
+    rdfs:comment "Type of dependency relationship (energy, input, logistics, data, substitution, demand)."@en ;
+    rdfs:domain pdl:Dependency ;
+    rdfs:range xsd:string .
+
+
+# -----------------------------------------------------------------------------
+# 3.7 Event Trigger Conditions
+# -----------------------------------------------------------------------------
+
+pdl:triggerCondition a owl:DatatypeProperty ;
+    rdfs:label "trigger condition"@en ;
+    rdfs:comment "Conditional expression for event triggering (e.g., 'brazil_drought.active')."@en ;
+    rdfs:domain pdl:Event ;
+    rdfs:range xsd:string .
+
+
+# =============================================================================
+# PART 3b: SUBSTITUTION PROPERTIES (PDL v1.1 Extension)
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 3b.1 Substitution Object Properties
+# -----------------------------------------------------------------------------
+
+pdl:hasSubstitution a owl:ObjectProperty ;
+    rdfs:subPropertyOf pdl:hasScenarioElement ;
+    rdfs:label "has substitution"@en ;
+    rdfs:comment "Links a scenario to a substitution definition."@en ;
+    rdfs:domain pdl:Scenario ;
+    rdfs:range pdl:Substitution .
+
+pdl:substitutionFor a owl:ObjectProperty ;
+    rdfs:label "substitution for"@en ;
+    rdfs:comment "The original entity (product, supplier, route, technology) that this substitution replaces."@en ;
+    rdfs:domain pdl:Substitution ;
+    rdfs:range pdl:Entity ;
+    skos:note "Analogous to coy:hasSupplier from the perspective of the alternative chain."@en .
+
+pdl:substitutionBy a owl:ObjectProperty ;
+    rdfs:label "substitution by"@en ;
+    rdfs:comment "The substitute entity that takes over from the original."@en ;
+    rdfs:domain pdl:Substitution ;
+    rdfs:range pdl:Entity .
+
+pdl:substitutionTypeRef a owl:ObjectProperty ;
+    rdfs:label "substitution type"@en ;
+    rdfs:comment "Links a substitution to its type classification."@en ;
+    rdfs:domain pdl:Substitution ;
+    rdfs:range pdl:SubstitutionType .
+
+pdl:substitutionDirectionRef a owl:ObjectProperty ;
+    rdfs:label "substitution direction"@en ;
+    rdfs:comment "Indicates whether this substitution acts on supply side (default) or demand side."@en ;
+    rdfs:domain pdl:Substitution ;
+    rdfs:range pdl:SubstitutionDirection .
+
+pdl:hasActivationCondition a owl:ObjectProperty ;
+    rdfs:label "has activation condition"@en ;
+    rdfs:comment "Links a substitution to its activation condition, specifying when it is triggered."@en ;
+    rdfs:domain pdl:Substitution ;
+    rdfs:range pdl:ActivationCondition .
+
+pdl:activationEvent a owl:ObjectProperty ;
+    rdfs:label "activation event"@en ;
+    rdfs:comment "The event whose activation triggers this substitution."@en ;
+    rdfs:domain pdl:ActivationCondition ;
+    rdfs:range pdl:Event .
+
+pdl:hasSideEffect a owl:ObjectProperty ;
+    rdfs:label "has side effect"@en ;
+    rdfs:comment "Links a substitution to its secondary consequences."@en ;
+    rdfs:domain pdl:Substitution ;
+    rdfs:range pdl:SubstitutionSideEffect .
+
+pdl:sideEffectTypeRef a owl:ObjectProperty ;
+    rdfs:label "side effect type"@en ;
+    rdfs:comment "Classification of this side effect."@en ;
+    rdfs:domain pdl:SubstitutionSideEffect ;
+    rdfs:range pdl:SideEffectType .
+
+pdl:sideEffectTarget a owl:ObjectProperty ;
+    rdfs:label "side effect target"@en ;
+    rdfs:comment "The entity that bears the side effect (may differ from the substitution target)."@en ;
+    rdfs:domain pdl:SubstitutionSideEffect ;
+    rdfs:range pdl:Entity .
+
+pdl:hasDependencyOverlap a owl:ObjectProperty ;
+    rdfs:label "has dependency overlap"@en ;
+    rdfs:comment "Shared upstream dependency between original and substitute. Indicates pseudo-diversification: a shock to this shared entity disables both simultaneously."@en ;
+    rdfs:domain pdl:Substitution ;
+    rdfs:range pdl:Entity ;
+    skos:note "Critical for compound crisis analysis. Example: both soy and rapeseed depend on fertilizer_supply → drought + fertilizer shock eliminates both supply options."@en .
+
+pdl:substitutionRef a owl:ObjectProperty ;
+    rdfs:label "substitution reference"@en ;
+    rdfs:comment "Bidirectional link from an Event or Dependency to the Substitution it activates or implements."@en ;
+    rdfs:domain [ owl:unionOf (pdl:Event pdl:Dependency) ] ;
+    rdfs:range pdl:Substitution ;
+    owl:inverseOf pdl:substitutionActivatedBy .
+
+pdl:substitutionActivatedBy a owl:ObjectProperty ;
+    rdfs:label "substitution activated by"@en ;
+    rdfs:comment "Links a substitution to the event or dependency that activates it."@en ;
+    rdfs:domain pdl:Substitution ;
+    rdfs:range [ owl:unionOf (pdl:Event pdl:Dependency) ] .
+
+
+# -----------------------------------------------------------------------------
+# 3b.2 Substitution Datatype Properties
+# -----------------------------------------------------------------------------
+
+pdl:coverage a owl:DatatypeProperty ;
+    rdfs:label "coverage"@en ;
+    rdfs:comment "Maximum share of original supply/demand that the substitute can cover (0.0 to 1.0). Reflects structural capacity limits, not just short-term availability."@en ;
+    rdfs:domain pdl:Substitution ;
+    rdfs:range xsd:decimal ;
+    skos:example "0.20 (Rapsschrot ersetzt max. 20% des Sojaschrot-Bedarfs); 0.01 (Satellit ersetzt <1% der Kabelkapazität)"@de .
+
+pdl:qualityDelta a owl:DatatypeProperty ;
+    rdfs:label "quality delta"@en ;
+    rdfs:comment "Relative change in quality or performance of the substitute compared to the original. Negative values indicate degradation (e.g., -0.15 = 15% performance loss)."@en ;
+    rdfs:domain pdl:Substitution ;
+    rdfs:range xsd:decimal ;
+    skos:example "-0.15 (Reluktanzmotor 15% weniger effizient); -0.50 (Satellit-Internetqualität stark eingeschränkt)"@de .
+
+pdl:costDelta a owl:DatatypeProperty ;
+    rdfs:label "cost delta"@en ;
+    rdfs:comment "Relative cost increase of the substitute compared to the original (e.g., 0.40 = 40% more expensive)."@en ;
+    rdfs:domain pdl:Substitution ;
+    rdfs:range xsd:decimal ;
+    skos:example "5.0 (Luftfracht 500% teurer als Seefracht); 0.08 (Paranaguá nur marginal teurer als Santos)"@de .
+
+pdl:rampUp a owl:DatatypeProperty ;
+    rdfs:label "ramp-up duration"@en ;
+    rdfs:comment "Time until the substitution reaches its full coverage. Uses PDL duration format (e.g., '30d', '540d', '0d'). During ramp-up, effective coverage scales from 0 to the target value."@en ;
+    rdfs:domain pdl:Substitution ;
+    rdfs:range xsd:string ;
+    rdfs:subPropertyOf coy:hasTimespan ;
+    skos:example "'540d' (Foundry-Umqualifikation 6-18 Monate); '730d' (Magnetmotor-Umrüstung 2 Jahre); '0d' (CDN-Cache sofort aktiv)"@de .
+
+pdl:durationMax a owl:DatatypeProperty ;
+    rdfs:label "maximum duration"@en ;
+    rdfs:comment "For buffer substitutions: the maximum duration before the buffer is exhausted. After this period, the substitution is no longer available without replenishment."@en ;
+    rdfs:domain pdl:Substitution ;
+    rdfs:range xsd:string ;
+    skos:example "'45d' (Futtermittellager 30-45 Tage); '12h' (CDN Edge Cache); '6h' (Akkupuffer Mobilfunkmast)"@de .
+
+pdl:reversible a owl:DatatypeProperty ;
+    rdfs:label "reversible"@en ;
+    rdfs:comment "Whether the substitution can be reversed after activation (e.g., returning to original supplier when disruption ends)."@en ;
+    rdfs:domain pdl:Substitution ;
+    rdfs:range xsd:boolean ;
+    skos:note "False indicates structural commitment: once activated, switching back is not feasible in the short term (e.g., EU-Produktionsaufbau, Foundry-Qualifikation)."@en .
+
+pdl:activationTrigger a owl:DatatypeProperty ;
+    rdfs:label "activation trigger"@en ;
+    rdfs:comment "Event condition expression that triggers substitution activation (PDL condition syntax, e.g., 'feed_price_spike.active')."@en ;
+    rdfs:domain pdl:ActivationCondition ;
+    rdfs:range xsd:string .
+
+pdl:activationThresholdPriceIncrease a owl:DatatypeProperty ;
+    rdfs:label "activation threshold: price increase"@en ;
+    rdfs:comment "Minimum relative price increase required to activate the substitution (e.g., 0.25 = substitution activates when price rises >25%)."@en ;
+    rdfs:domain pdl:ActivationCondition ;
+    rdfs:range xsd:decimal .
+
+pdl:activationThresholdSupplyDrop a owl:DatatypeProperty ;
+    rdfs:label "activation threshold: supply drop"@en ;
+    rdfs:comment "Minimum relative supply reduction required to activate the substitution (e.g., 0.50 = activates when supply drops >50%)."@en ;
+    rdfs:domain pdl:ActivationCondition ;
+    rdfs:range xsd:decimal .
+
+pdl:activationThresholdDurationMin a owl:DatatypeProperty ;
+    rdfs:label "activation threshold: minimum duration"@en ;
+    rdfs:comment "Minimum duration of the triggering event before substitution activates (e.g., '30d' = only activates if disruption persists >30 days)."@en ;
+    rdfs:domain pdl:ActivationCondition ;
+    rdfs:range xsd:string .
+
+pdl:sideEffectMagnitude a owl:DatatypeProperty ;
+    rdfs:label "side effect magnitude"@en ;
+    rdfs:comment "Relative strength of the side effect (e.g., 0.20 = 20% price increase in the target entity)."@en ;
+    rdfs:domain pdl:SubstitutionSideEffect ;
+    rdfs:range xsd:decimal .
+
+pdl:substitutionPotential a owl:DatatypeProperty ;
+    rdfs:label "substitution potential"@en ;
+    rdfs:comment "Shorthand scalar on an Entity indicating its overall substitutability (0.0 = not substitutable, 1.0 = fully substitutable). Use pdl:Substitution for detailed modeling."@en ;
+    rdfs:domain pdl:Entity ;
+    rdfs:range xsd:decimal ;
+    skos:note "Corresponds to the YAML field 'substitution_potential' on entity level. Kept for backwards compatibility; detailed modeling uses the pdl:Substitution class."@en .
+
+
+# =============================================================================
+# PART 4: ALIGNMENT WITH COYPU
+# =============================================================================
+# This section documents the semantic mappings between PDL and CoyPu concepts.
+
+# -----------------------------------------------------------------------------
+# 4.1 Class Alignments
+# -----------------------------------------------------------------------------
+
+pdl:Manufacturer owl:equivalentClass [
+    a owl:Class ;
+    owl:intersectionOf (
+        coy:Company
+        [ a owl:Restriction ; owl:onProperty pdl:entityType ; owl:hasValue "manufacturer" ]
+    )
+] .
+
+pdl:Infrastructure rdfs:subClassOf coy:Infrastructure ;
+    skos:mappingRelation coy:Infrastructure ;
+    skos:note "CoyPu Infrastructure includes: Airport, Factory, Mine, Pipeline, Port, Powerplant, RailwaySegment, Terminal, TrainStation."@en .
+
+pdl:Region rdfs:subClassOf coy:Region ;
+    skos:mappingRelation coy:Region ;
+    skos:note "CoyPu Region includes: AdministrativeRegion. Parent Location includes: City, Continent, Country, River."@en .
+
+pdl:Event_NaturalDisaster rdfs:subClassOf coy:Disaster ;
+    skos:mappingRelation coy:Disaster ;
+    skos:note "CoyPu imports EM-DAT disaster ontology for detailed disaster classification."@en .
+
+pdl:Event_Geopolitical rdfs:subClassOf coy:SocioPoliticalEvent ;
+    skos:mappingRelation coy:SocioPoliticalEvent ;
+    skos:note "CoyPu has detailed conflict hierarchy: Demonstration, Protest, Riot, Battle, etc."@en .
+
+
+# -----------------------------------------------------------------------------
+# 4.2 Property Alignments
+# -----------------------------------------------------------------------------
+
+pdl:fromEntity rdfs:subPropertyOf coy:hasSupplier .
+pdl:toEntity rdfs:subPropertyOf coy:hasCustomer .
+pdl:triggers rdfs:subPropertyOf coy:hasImpactOn .
+pdl:isImpactedBy owl:equivalentProperty coy:isImpactedBy .
+pdl:hasLocation owl:equivalentProperty coy:hasLocation .
+pdl:hasCountryLocation owl:equivalentProperty coy:hasCountryLocation .
+
+
+# -----------------------------------------------------------------------------
+# 4.3 Substitution Alignments to CoyPu (v1.1)
+# -----------------------------------------------------------------------------
+
+# Substitution overall relates to supply chain resilience in CoyPu
+pdl:Substitution rdfs:subClassOf coy:SupplyChainObject ;
+    skos:mappingRelation coy:SupplyChainObject ;
+    skos:note "CoyPu does not have a direct Substitution class. pdl:Substitution extends the supply chain model with explicit resilience options."@en .
+
+# Supplier substitution: from/to map to CoyPu supplier relationship
+pdl:substitutionFor rdfs:subPropertyOf coy:hasSupplier ;
+    skos:note "For supplier substitutions, pdl:substitutionFor points to the original supplier entity, mapping to CoyPu's supply relationship."@en .
+
+pdl:substitutionBy rdfs:subPropertyOf coy:hasSupplier ;
+    skos:note "For supplier substitutions, pdl:substitutionBy points to the alternative supplier, also mapping to CoyPu's supply relationship."@en .
+
+# Coverage relates to CoyPu's trade flow quantities
+pdl:coverage rdfs:subPropertyOf coy:hasQuantity ;
+    skos:note "Coverage as a share (0-1) maps to CoyPu's quantity properties for trade flow modeling."@en .
+
+# Side effects map to CoyPu impact properties
+pdl:hasSideEffect rdfs:subPropertyOf coy:hasImpactOn ;
+    skos:note "Side effects are a form of impact relationship, extending CoyPu's impact model with substitution-specific consequences."@en .
+
+# Dependency overlap relates to CoyPu's shared supplier risk
+pdl:hasDependencyOverlap rdfs:subPropertyOf coy:hasSupplier ;
+    skos:note "Shared upstream dependencies map to CoyPu's supplier network; overlap indicates correlated risk in the supply graph."@en .
+
+
+# =============================================================================
+# PART 5: USAGE EXAMPLES (as SKOS notes)
+# =============================================================================
+
+pdl:Scenario skos:example """
+pdlr:scenario_example a pdl:Scenario ;
+    dcterms:identifier "soy_feed_disruption" ;
+    rdfs:label "Soy Feed Supply Chain Disruption" ;
+    pdl:sector "agriculture" ;
+    pdl:criticality pdl:Criticality_high ;
+    pdl:pdlVersion "1.1" .
+"""@en .
+
+pdl:SupplyChainConnection skos:example """
+pdlr:connection_1 a pdl:SupplyChainConnection ;
+    pdl:sequence 1 ;
+    pdl:fromEntity pdlr:entity_brazil_farms ;
+    pdl:toEntity pdlr:entity_santos_port ;
+    pdl:belongsToChain pdlr:chain_soy_main .
+"""@en .
+
+pdl:Cascade skos:example """
+pdlr:cascade_crisis a pdl:Cascade ;
+    rdfs:label "Crisis Cascade" ;
+    pdl:originEvent pdlr:event_drought ;
+    pdl:probability "0.9"^^xsd:decimal ;
+    pdl:validationConfidence "0.85"^^xsd:decimal .
+"""@en .
+
+pdl:Substitution skos:example """
+# Example: Protein substitution from S1 Soja
+pdlr:sub_protein_replacement a pdl:Substitution ;
+    dcterms:identifier "sub_protein_replacement" ;
+    rdfs:label "Sojaschrot → Rapsschrot/Sonnenblumenschrot/Erbsenprotein"@de ;
+    pdl:substitutionFor pdlr:entity_eu_oil_mills ;
+    pdl:substitutionBy pdlr:entity_alternative_protein_sources ;
+    pdl:substitutionTypeRef pdl:SubstitutionType_product ;
+    pdl:substitutionDirectionRef pdl:SubstitutionDirection_supply ;
+    pdl:coverage "0.20"^^xsd:decimal ;
+    pdl:qualityDelta "-0.12"^^xsd:decimal ;
+    pdl:costDelta "0.30"^^xsd:decimal ;
+    pdl:rampUp "21d" ;
+    pdl:reversible true ;
+    pdl:hasActivationCondition [
+        a pdl:ActivationCondition ;
+        pdl:activationTrigger "feed_price_spike.active" ;
+        pdl:activationThresholdPriceIncrease "0.25"^^xsd:decimal
+    ] ;
+    pdl:hasSideEffect [
+        a pdl:SubstitutionSideEffect ;
+        pdl:sideEffectTypeRef pdl:SideEffectType_price_pressure ;
+        pdl:sideEffectTarget pdlr:entity_alternative_protein_sources ;
+        pdl:sideEffectMagnitude "0.20"^^xsd:decimal
+    ] ;
+    pdl:hasDependencyOverlap pdlr:entity_fertilizer_supply ;
+    pdl:hasDependencyOverlap pdlr:entity_gas_supply ;
+    dcterms:references "UFOP 2022: Rapsschrot-Substitutionspotenzial ~15-20% bei Sojapreisschocks" .
+"""@en .
+
+pdl:SubstitutionSideEffect skos:example """
+# Example: Pseudo-diversification risk from S3 Pharma
+pdlr:se_india_correlated_risk a pdl:SubstitutionSideEffect ;
+    pdl:sideEffectTypeRef pdl:SideEffectType_correlated_risk ;
+    pdl:sideEffectTarget pdlr:entity_india_api_producers ;
+    pdl:sideEffectMagnitude "0.60"^^xsd:decimal ;
+    rdfs:comment "Indien-Sourcing ist Pseudo-Alternative: Indien zu 70% von chinesischen API-Intermediaten abhängig"@de .
+"""@en .
+
+
+# =============================================================================
+# PART 6: SCENARIO COVERAGE NOTES (v1.1)
+# =============================================================================
+# Documentation of substitution patterns identified in 9 PROVIDER scenarios.
+
+pdl:SubstitutionType_product skos:scopeNote """
+Scenarios: S1 (Rapsschrot/Erbsenprotein, Fleischsubstitution), S3 (Antibiotika-Äquivalente),
+S4 (biogenes CO2), S5 (UV/Ozon-Desinfektion).
+Key insight: product substitution often involves quality_delta < 0 and
+activates endogenously via price thresholds.
+"""@en .
+
+pdl:SubstitutionType_supplier skos:scopeNote """
+Scenarios: S1 (AR/USA statt BR), S2 (Samsung/UMC statt TSMC), S3 (Indien statt China),
+S4 (Ammoniak-Importe), S5 (Chlor-Importe NL/BE/FR), S7 (Lynas/MP Materials statt China), S8 (Nearshoring).
+Key insight: dependency_overlap is critical -- S3 Indien and S7 Lynas show pseudo-diversification
+where substitute shares same upstream (China intermediates, China processing).
+"""@en .
+
+pdl:SubstitutionType_route skos:scopeNote """
+Scenarios: S1 (Paranaguá statt Santos), S5 (Chlor-Importe), S8 (Kap der Guten Hoffnung), S9 (Landrouten).
+Key insight: route substitution often has coverage = 1.0 (all cargo can be rerouted)
+but significant cost_delta and side_effect capacity_loss (longer routes bind more capacity).
+"""@en .
+
+pdl:SubstitutionType_technology skos:scopeNote """
+Scenarios: S5 (UV/Ozon statt Chlor, nur Großversorger), S7 (Ferrit/Reluktanzmotoren statt NdFeB).
+Key insight: technology substitution is typically irreversible (capital investment) with
+long ramp_up and efficiency_loss. Coverage varies strongly by actor size (S5: 40% large utilities vs. 0% small).
+"""@en .
+
+pdl:SubstitutionType_buffer skos:scopeNote """
+Scenarios: S1 (Futtermittellager 45d), S5 (THW Notversorgung 30d), S6 (CDN Cache 12h, Akkus 6h),
+S7 (Recycling).
+Key insight: buffer substitution is strictly time-limited (duration_max) and non-reversible
+in the sense that replenishment requires additional time/cost. Buffer depletion is itself a cascade trigger.
+"""@en .
+
+pdl:SubstitutionType_mode skos:scopeNote """
+Scenarios: S8 (Bahn 8,5% Volumen/+40%, Luftfracht 2%/+500%), S9 (Satellit <1%/+200%).
+Key insight: mode substitution shows extreme cost/coverage tradeoffs.
+Coverage is structurally limited by infrastructure capacity, not just availability.
+"""@en .
+
+pdl:SideEffectType_correlated_risk skos:scopeNote """
+Most critical side effect type for compound crisis scenarios. Identified in:
+- S1: Argentinien/Brasilien both affected by La Niña (climate correlation)
+- S3: Indien/China share API intermediates (supply chain correlation)
+- S4: All EU ammonia producers affected by same gas price shock (energy correlation)
+- S7: Lynas oxides still processed in China (geographic concentration)
+- S9: Terrestrial routes via Russia (geopolitical correlation)
+SPARQL query recommendation: always check hasDependencyOverlap when evaluating substitution resilience.
+"""@en .
+
+
+# =============================================================================
+# END OF ONTOLOGY (v1.2)
+# =============================================================================
+
+# =============================================================================
+# v1.2 Additions: Dual-Encoding, Condition-Graph, Provenance
+# =============================================================================
+
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+# --- Dual-Encoding: normalisierte Zahlwerte neben den Rohstrings -------------
+pdl:impactSupplyDecimal a owl:DatatypeProperty ;
+    rdfs:label "impact supply (decimal)"@en ;
+    rdfs:comment "Normalisierter Wert von pdl:impactSupply: '-40%' -> -0.4"@de ;
+    rdfs:domain pdl:Event ; rdfs:range xsd:decimal .
+
+pdl:impactDemandDecimal a owl:DatatypeProperty ;
+    rdfs:label "impact demand (decimal)"@en ;
+    rdfs:domain pdl:Event ; rdfs:range xsd:decimal ;
+    rdfs:comment "Normalisierter Wert von pdl:impactDemand"@de .
+
+pdl:impactPriceDecimal a owl:DatatypeProperty ;
+    rdfs:label "impact price (decimal)"@en ;
+    rdfs:domain pdl:Event ; rdfs:range xsd:decimal ;
+    rdfs:comment "Normalisierter Wert von pdl:impactPrice: '+45%' -> 0.45"@de .
+
+pdl:impactDurationDays a owl:DatatypeProperty ;
+    rdfs:domain pdl:Event ; rdfs:range xsd:decimal ;
+    rdfs:comment "Normalisierter Wert von pdl:impactDuration: '90d' -> 90, '3w' -> 21"@de .
+
+pdl:rampUpDays a owl:DatatypeProperty ;
+    rdfs:domain pdl:Substitution ; rdfs:range xsd:decimal ;
+    rdfs:comment "Normalisierter Wert von pdl:rampUp"@de .
+
+# --- Condition-Graph: Trigger-Abhaengigkeiten SPARQL-traversierbar -----------
+pdl:conditionDependsOnEvent a owl:ObjectProperty ;
+    rdfs:label "condition depends on event"@en ;
+    rdfs:comment "Flaches Tripel je in pdl:triggerCondition referenziertem Event. Macht den Event-Abhaengigkeitsgraph abfragbar (AP5: N-Schritt-Abhaengigkeitsgraph), ohne den AST zu reifizieren."@de ;
+    rdfs:domain pdl:Event ; rdfs:range pdl:Event .
+
+# --- Provenance: _kg_source -> prov: -----------------------------------------
+pdl:kgSourceQuery a owl:DatatypeProperty ;
+    rdfs:domain owl:Thing ; rdfs:range xsd:string ;
+    rdfs:comment "Query/Formel aus dem _kg_source-Block der PDL-YAML"@de .
+# Zusaetzlich nutzt der Export: prov:wasDerivedFrom (URI der Quelle),
+# dcterms:source (Freitext-Quellangabe).
