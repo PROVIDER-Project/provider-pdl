@@ -68,6 +68,23 @@ palaestrai experiment-start output/minimal.arl.dummy.yaml
 - `--environment-uid` (Default `provider_env`)
 - `--experiment-uid-prefix` (Default `provider`)
 - `--profile` (`dummy` oder `ppo`)
+- `--sim-controller` (Default `palaestrai.simulation:VanillaSimulationController`)
+
+## palaestrAI-Version
+
+Der Default für `--sim-controller` zielt auf palaestrAI 3.5.x. Seit 3.5.8 hängt
+palaestrAI das Suffix `SimulationController` an den konfigurierten Klassennamen an,
+wenn dieser nicht bereits darauf endet. Der früher erzeugte Pfad
+`palaestrai.simulation.vanilla_sim_controller:VanillaSimController` endet auf
+`SimController` und wurde deshalb zu `VanillaSimControllerSimulationController`
+aufgelöst, was mit einem `AttributeError` abbrach.
+
+Für palaestrAI 3.4.x den alten Pfad explizit setzen:
+
+```bash
+pdl2palaestrai convert examples/minimal.pdl.yaml \
+  --sim-controller palaestrai.simulation.vanilla_sim_controller:VanillaSimController
+```
 
 ## Hinweise
 

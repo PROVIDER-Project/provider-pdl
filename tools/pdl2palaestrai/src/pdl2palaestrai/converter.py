@@ -11,6 +11,19 @@ class PdlValidationError(Exception):
     """Raised when input PDL is missing required structure."""
 
 
+# palaestrAI >= 3.5.8 appends the suffix "SimulationController" to the configured
+# class name when it does not already end with it. "VanillaSimController" ends with
+# "SimController", so the old path resolves to the non-existent
+# "VanillaSimControllerSimulationController". The alias below ends with the expected
+# suffix and works on palaestrAI 3.5.x.
+SIM_CONTROLLER_PALAESTRAI_35 = "palaestrai.simulation:VanillaSimulationController"
+
+# Path for palaestrAI 3.4.x, where the alias above does not exist.
+SIM_CONTROLLER_PALAESTRAI_34 = (
+    "palaestrai.simulation.vanilla_sim_controller:VanillaSimController"
+)
+
+
 @dataclass
 class ConvertOptions:
     max_ticks: int = 365
@@ -21,6 +34,7 @@ class ConvertOptions:
     profile: str = "dummy"
     attacker_budget: float = 0.8
     defender_budget: float = 0.4
+    sim_controller: str = SIM_CONTROLLER_PALAESTRAI_35
 
 
 def load_pdl_file(path: Path) -> dict[str, Any]:
@@ -269,7 +283,7 @@ def build_experiment_config(
                         },
                     ],
                     "simulation": {
-                        "name": "palaestrai.simulation.vanilla_sim_controller:VanillaSimController",
+                        "name": options.sim_controller,
                         "conditions": [
                             {
                                 "name": "palaestrai.simulation.vanilla_simcontroller_termination_condition:VanillaSimControllerTerminationCondition",
