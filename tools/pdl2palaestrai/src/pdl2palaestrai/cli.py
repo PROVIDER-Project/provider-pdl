@@ -5,6 +5,8 @@ import sys
 from pathlib import Path
 
 from .converter import (
+    SIM_CONTROLLER_PALAESTRAI_34,
+    SIM_CONTROLLER_PALAESTRAI_35,
     ConvertOptions,
     PdlValidationError,
     convert_directory,
@@ -26,6 +28,15 @@ def _shared_options(parser: argparse.ArgumentParser) -> None:
         default="dummy",
         help="Agent profile for generated config",
     )
+    parser.add_argument(
+        "--sim-controller",
+        default=SIM_CONTROLLER_PALAESTRAI_35,
+        help=(
+            "Simulation controller written into the config. Default works with "
+            "palaestrAI 3.5.x. For palaestrAI 3.4.x use "
+            f"{SIM_CONTROLLER_PALAESTRAI_34}"
+        ),
+    )
 
 
 def _to_options(args: argparse.Namespace) -> ConvertOptions:
@@ -36,6 +47,7 @@ def _to_options(args: argparse.Namespace) -> ConvertOptions:
         environment_uid=args.environment_uid,
         experiment_uid_prefix=args.experiment_uid_prefix,
         profile=args.profile,
+        sim_controller=args.sim_controller,
     )
 
 
